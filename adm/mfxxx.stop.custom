@@ -1,0 +1,28 @@
+{% extends "mfxxx.stop" %}
+
+{% block custom %}
+
+function circus_status() {
+    timeout 10s _circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} status $1 2>&1
+}
+
+_circus.status >/dev/null 2>&1
+if test $? -eq 0; then
+    _circus_schedule_stop_watcher.sh conf_monitor
+    _circus_schedule_stop_watcher.sh directory_observer
+    _circus_schedule_stop_watcher.sh plugin:autorestart
+    _circus_schedule_stop_watcher.sh plugin:autostart
+    _circus_wait_watcher_stopped.sh conf_monitor
+    _circus_wait_watcher_stopped.sh directory_observer
+    _circus_wait_watcher_stopped.sh plugin:autorestart
+    _circus_wait_watcher_stopped.sh plugin:autostart
+    STEPS=$(timeout 10s _circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status 2>/dev/null |grep "^step\..*: active" |awk -F ':' '{print $1;}')
+    for STEP in ${STEPS}; do
+        _circus_schedule_stop_watcher.sh "${STEP}"
+    done
+    for STEP in ${STEPS}; do
+        _circus_wait_watcher_stopped.sh "${STEP}"
+    done
+fi
+
+{% endblock %}

@@ -1,0 +1,11 @@
+{
+    "name": "name_of_your_plugin",
+    "version": "{% raw %}{{MODULE_VERSION}}{% endraw %}",
+    "one_line_summary": "",
+    "url": "http://yourpluginhomepage",
+    "maintainer": "Firstname FAMILYNAME <email>",
+    "vendor": "MetWork",
+    "directory": "",
+    "switch_logical_condition": "False"
+}
+

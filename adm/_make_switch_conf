@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+
+import os
+import glob
+import envtpl
+from configparser_extended import ExtendedConfigParser
+
+MFDATA_PLUGIN_HOME = os.path.join(os.environ["MODULE_RUNTIME_HOME"],
+                                  "var", "plugins")
+CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
+
+
+def make_switch_conf(plugin_configuration_file):
+    output = []
+    parser = ExtendedConfigParser(config=CONFIG, strict=False,
+                                  inheritance='im', interpolation=None)
+    plugin_name = os.path.basename(os.path.dirname(plugin_configuration_file))
+    parser.read(plugin_configuration_file)
+    steps = [x.replace("step_", "", 1).split(':')[0] for x in parser.sections()
+             if x.startswith("step_")]
+    for step in steps:
+        section = "step_%s" % step
+        if not parser.has_option(section, "switch_logical_condition"):
+            continue
+        use_hardlink = False
+        if parser.has_option(section, "switch_use_hardlink"):
+            use_hardlink = parser.getboolean(section, "switch_use_hardlink")
+        condition = parser.get(section, "switch_logical_condition").strip()
+        if condition.lower() in ('none', 'null'):
+            continue
+        output.append("")
+        output.append("[step_%s_%s]" % (plugin_name, step))
+        mdid = os.environ['MFDATA_DATA_IN_DIR']
+        output.append("plugin_name=%s" % plugin_name)
+        output.append("directory=%s/step.%s.%s" % (mdid, plugin_name, step))
+        output.append("condition=%s" % condition)
+        output.append("use_hardlink=%s" % use_hardlink)
+        magic_file = "%s/%s/magic" % (MFDATA_PLUGIN_HOME, plugin_name)
+        if os.path.exists(magic_file):
+            output.append("magic_file=%s" % magic_file)
+        else:
+            output.append("magic_file=null")
+    return "\n".join(output)
+
+
+content = ""
+for config_file in glob.glob(MFDATA_PLUGIN_HOME + "/*/config.ini"):
+    content = content + make_switch_conf(config_file)
+
+print(envtpl.render_string(content))

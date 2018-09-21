@@ -1,0 +1,5 @@
+# keep files 1 day
+0 3 * * * {{MFDATA_HOME}}/bin/cronwrap.sh --lock --low "find {{MODULE_RUNTIME_HOME}}/var/debug/ -type f -mtime +1 -exec rm -f {} \;" >/dev/null 2>&1
+
+# remove empty directories
+0 4 * * * {{MFDATA_HOME}}/bin/cronwrap.sh --lock --low "find {{MODULE_RUNTIME_HOME}}/var/debug/ -type d -exec rmdir {} \;" >/dev/null 2>&1

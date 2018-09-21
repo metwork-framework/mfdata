@@ -1,0 +1,20 @@
+{
+    "name": "name_of_your_plugin",
+    "version": "{% raw %}{{MODULE_VERSION}}{% endraw %}",
+    "one_line_summary": "",
+    "url": "http://yourpluginhomepage",
+    "maintainer": "Firstname FAMILYNAME <email>",
+    "vendor": "MetWork",
+    "machine": "",
+    "user": "",
+    "passwd": "",
+    "directory": ".",
+    "suffix": ".t",
+    "max_number": "100",
+    "max_wait": "10",
+    "keep_original_basenames": ["yes", "no"],
+    "reinject_delay": "60",
+    "reinject_attempts": "5",
+    "switch_logical_condition": "False"
+}
+

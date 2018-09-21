@@ -1,0 +1,8 @@
+{% extends "mfxxx.start" %}
+
+{% block custom %}
+
+# For create directory and change unix rights
+before_start_step.switch.main
+
+{% endblock %}

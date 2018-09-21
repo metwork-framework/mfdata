@@ -1,0 +1,39 @@
+{% extends "telegraf.conf" %}
+
+{% block custom %}
+{% raw %}
+{% if MFDATA_NGINX_FLAG == "1" %}
+[[inputs.nginx]]
+#   # An array of Nginx stub_status URI to gather stats.
+  urls = ["http://127.0.0.1:{{MFDATA_NGINX_PORT}}/status"]
+#
+#   # TLS/SSL configuration
+#   ssl_ca = "/etc/telegraf/ca.pem"
+#   ssl_cert = "/etc/telegraf/cert.cer"
+#   ssl_key = "/etc/telegraf/key.key"
+#   insecure_skip_verify = false
+#
+#   # HTTP response timeout (default: 5s)
+#   response_timeout = "5s"
+{% endif %}
+
+[[inputs.redis]]
+  servers = ["unix://{{MODULE_RUNTIME_HOME}}/var/redis.socket"]
+
+[[inputs.procstat]]
+  pattern = "python.*circus.*plugins.*{{MODULE_RUNTIME_HOME}}/var/circus.socket.*CircusAutostart"
+  user = "{{MODULE_RUNTIME_USER}}"
+  process_name = "circus_plugin_autostart"
+
+[[inputs.procstat]]
+  pattern = "python.*circus.*plugins.*{{MODULE_RUNTIME_HOME}}/var/circus.socket.*CircusAutorestart"
+  user = "{{MODULE_RUNTIME_USER}}"
+  process_name = "circus_plugin_autorestart"
+
+[[inputs.procstat]]
+  pattern = "redis-server.*{{MODULE_RUNTIME_HOME}}/tmp/config_auto/redis.conf"
+  user = "{{MODULE_RUNTIME_USER}}"
+  process_name = "redis"
+
+{% endraw %}
+{% endblock %}

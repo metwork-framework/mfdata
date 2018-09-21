@@ -1,0 +1,13 @@
+{
+    "python_version": ["python3", "python2"],
+    "name": "name_of_your_plugin",
+    "version": "{% raw %}{{MODULE_VERSION}}{% endraw %}",
+    "one_line_summary": "",
+    "crontab_support": ["no", "yes"],
+    "virtualenv_support": ["no", "yes"],
+    "license": ["Proprietary", "BSD", "MIT", "GPL", "Specific"],
+    "url": "http://yourpluginhomepage",
+    "maintainer": "Firstname FAMILYNAME <email>",
+    "vendor": "MetWork",
+    "switch_logical_condition": "False"
+}

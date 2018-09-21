@@ -1,0 +1,4 @@
+#!/bin/bash
+
+_make_switch_gen
+_make_switch_conf >"${MODULE_RUNTIME_HOME}/tmp/config_auto/switch.ini"
