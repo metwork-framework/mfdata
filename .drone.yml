@@ -5,10 +5,13 @@ bootstrap_common: &bootstrap_common
     - mkdir -p /opt/metwork-mfdata-${DRONE_BRANCH}
     - ./bootstrap.sh /opt/metwork-mfdata-${DRONE_BRANCH} /opt/metwork-mfcom-$${MFCOM_BRANCH}
     - cat adm/root.mk
+    - CACHE_HASH=`/opt/metwork-mfext-$${MFCOM_BRANCH}/bin/_build_cache_hash.sh .`
+    - if ! test -f /buildcache/build_mfdata_${DRONE_BRANCH}_$${CACHE_HASH}; then echo $${CACHE_HASH} >.drone_cache; fi
 
 build_common: &build_common
   commands:
     - if test "$${FORCED_OS_VERSION}" != ""; then if test "$${FORCED_OS_VERSION}" != "${OS_VERSION}"; then echo "step bypass"; exit 0; fi; fi
+    - if ! test -f .drone_cache; then echo "step bypass"; exit 0; fi
     - mkdir -p /opt/metwork-mfdata-${DRONE_BRANCH}
     - make
     - make doc
@@ -21,32 +24,46 @@ build_common: &build_common
 publish_ci_common: &publish_ci_common
   commands:
     - if test "$${FORCED_OS_VERSION}" != ""; then if test "$${FORCED_OS_VERSION}" != "${OS_VERSION}"; then echo "step bypass"; exit 0; fi; fi
+    - if ! test -f .drone_cache; then echo "step bypass"; exit 0; fi
     - mkdir -p /pub/metwork/continuous_integration/rpms/${DRONE_BRANCH}/${OS_VERSION}/
     - cp *.rpm /pub/metwork/continuous_integration/rpms/${DRONE_BRANCH}/${OS_VERSION}/
     - yum -y install createrepo
     - createrepo --update /pub/metwork/continuous_integration/rpms/${DRONE_BRANCH}/${OS_VERSION}
     - if test "${OS_VERSION}" = "centos6"; then rm -Rf /pub/metwork/continuous_integration/docs/${DRONE_BRANCH}/mfdata; mkdir -p /pub/metwork/continuous_integration/docs/${DRONE_BRANCH}/mfdata ; cp -Rf html_doc/* /pub/metwork/continuous_integration/docs/${DRONE_BRANCH}/mfdata/ ; fi
+    - touch /buildcache/build_mfdata_${DRONE_BRANCH}_`cat .drone_cache`
   volumes:
     - /pub:/pub
+    - /buildcache:/buildcache
 
 pipeline:
-  bootstrap_integration:
+  bootstrap_integration_push:
+    image: metwork/mfxxx-${OS_VERSION}-buildimage:integration
+    environment:
+      - MFCOM_BRANCH=integration
+    <<: *bootstrap_common
+    volumes:
+      - /buildcache:/buildcache
+    when:
+      event: push
+      branch: integration
+  bootstrap_integration_pr:
     image: metwork/mfxxx-${OS_VERSION}-buildimage:integration
     environment:
       - MFCOM_BRANCH=integration
     <<: *bootstrap_common
     when:
-      event: [push, pull_request]
+      event: pull_request
       branch: integration
   bootstrap:
     image: metwork/mfxxx-${OS_VERSION}-buildimage:master
     environment:
       - MFCOM_BRANCH=master
     <<: *bootstrap_common
+    volumes:
+      - /buildcache:/buildcache
     when:
-      event: [push, pull_request]
-      branch:
-        exclude: [ integration ]
+      event: push
+      branch: [ master, ci_*, pci_* ]
   build_integration:
     <<: *build_common
     image: metwork/mfxxx-${OS_VERSION}-buildimage:integration
@@ -57,24 +74,24 @@ pipeline:
     <<: *build_common
     image: metwork/mfxxx-${OS_VERSION}-buildimage:master
     when:
-      event: [push, pull_request]
-      branch:
-        exclude: [ integration ]
+      event: push
+      branch: [ master, ci_*, pci_* ]
   publish_ci_integration:
     <<: *publish_ci_common
     image: metwork/mfxxx-${OS_VERSION}-buildimage:integration
     when:
-      event: [push]
+      event: push
       branch: integration
   publish_ci:
     <<: *publish_ci_common
     image: metwork/mfxxx-${OS_VERSION}-buildimage:master
     when:
-      event: [push]
-      branch:
-        exclude: [ integration ]
+      event: push
+      branch: [ master, pci_*]
 
 matrix:
   OS_VERSION:
     - centos6
     - centos7
+
+branches: [ master, integration, ci_*, pci_* ]
