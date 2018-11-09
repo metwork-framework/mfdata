@@ -62,7 +62,7 @@ while test "${RUN}" -eq 1; do
             test_status_or_exit
             log INFO "circus conf changed => reload"
             mv -f "${NEW_CIRCUS_CONF}" "${OLD_CIRCUS_CONF}" >/dev/null 2>&1
-            layer_wrapper --layers=python3_circus@mfext -- circusctl --endpoint "${MFDATA_CIRCUS_ENDPOINT}" --timeout=30 restart  || echo foo >/dev/null
+            timeout 30s layer_wrapper --layers=python3_circus@mfext -- circusctl --endpoint "${MFDATA_CIRCUS_ENDPOINT}" restart >/dev/null 2>&1 || true
             sleep 3
             log INFO "exiting"
             exit 0
@@ -84,7 +84,7 @@ while test "${RUN}" -eq 1; do
         if test "${OLD_DIRECTORY_OBSERVER_MD5}" != "${NEW_DIRECTORY_OBSERVER_MD5}"; then
             test_status_or_exit
             log INFO "directory observer conf changed => reload"
-            layer_wrapper --layers=python3_circus@mfext -- circusctl --endpoint "${MFDATA_CIRCUS_ENDPOINT}" --timeout=30 restart directory_observer --waiting >/dev/null 2>&1 || echo foo >/dev/null
+            timeout 10s layer_wrapper --layers=python3_circus@mfext -- circusctl --endpoint "${MFDATA_CIRCUS_ENDPOINT}" restart directory_observer >/dev/null 2>&1 || true
         else
             log DEBUG "directory_observer conf didn't changed"
         fi
@@ -103,7 +103,7 @@ while test "${RUN}" -eq 1; do
         if test "${OLD_SWITCH_MD5}" != "${NEW_SWITCH_MD5}"; then
             test_status_or_exit
             log INFO "switch conf changed => reload"
-            layer_wrapper --layers=python3_circus@mfext -- circusctl --endpoint "${MFDATA_CIRCUS_ENDPOINT}" --timeout=30 restart step.switch.main --waiting >/dev/null 2>&1 || echo foo >/dev/null
+            timeout 10s layer_wrapper --layers=python3_circus@mfext -- circusctl --endpoint "${MFDATA_CIRCUS_ENDPOINT}" restart step.switch.main >/dev/null 2>&1 || true
         else
             log DEBUG "switch conf didn't changed"
         fi
