@@ -6,7 +6,6 @@
 
 
 bootstrap_common: &bootstrap_common
-  pull: true
   commands:
     - if test "$${FORCED_OS_VERSION}" != ""; then if test "$${FORCED_OS_VERSION}" != "${OS_VERSION}"; then echo "step bypass"; exit 0; fi; fi
     - mkdir -p /opt/metwork-mfdata-$${TARGET_DIR}
@@ -120,6 +119,7 @@ pipeline:
     when:
       event: push
       branch: [ master, pci_* ]
+
 
 
 
