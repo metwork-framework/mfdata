@@ -1,6 +1,0 @@
-[metwork_stable]
-name=Metwork Stable Branch
-baseurl=ftp://synapse.meteo.fr/pub/metwork/releases/rpms/continuous_integration/centos$releasever/master
-gpgcheck=0
-enabled=1
-metadata_expire=0
