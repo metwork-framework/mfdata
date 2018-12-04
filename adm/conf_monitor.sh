@@ -35,6 +35,16 @@ function test_status_or_exit() {
         log WARNING "${MODULE_RUNTIME_HOME}/var/status is not RUNNING => exit"
         exit 0
     fi
+    N=$(pgrep -u "${MODULE_RUNTIME_USER}" -f "plugins\\.install" |wc -l)
+    if test "${N}" -gt 0; then
+        log WARNING "plugin installation in progress => exit"
+        exit 0
+    fi
+    N=$(pgrep -u "${MODULE_RUNTIME_USER}" -f "plugins\\.uninstall" |wc -l)
+    if test "${N}" -gt 0; then
+        log WARNING "plugin uninstallation in progress => exit"
+        exit 0
+    fi
 }
 
 log INFO "started"
@@ -66,8 +76,6 @@ while test "${RUN}" -eq 1; do
             sleep 3
             log INFO "exiting"
             exit 0
-        else
-            log DEBUG "circus conf didn't changed"
         fi
         rm -f "${NEW_CIRCUS_CONF}"
     fi
@@ -85,8 +93,6 @@ while test "${RUN}" -eq 1; do
             test_status_or_exit
             log INFO "directory observer conf changed => reload"
             timeout 10s layer_wrapper --layers=python3_circus@mfext -- circusctl --endpoint "${MFDATA_CIRCUS_ENDPOINT}" restart directory_observer >/dev/null 2>&1 || true
-        else
-            log DEBUG "directory_observer conf didn't changed"
         fi
         rm -f "${NEW_DIRECTORY_OBSERVER_CONF}"
     fi
@@ -104,8 +110,6 @@ while test "${RUN}" -eq 1; do
             test_status_or_exit
             log INFO "switch conf changed => reload"
             timeout 10s layer_wrapper --layers=python3_circus@mfext -- circusctl --endpoint "${MFDATA_CIRCUS_ENDPOINT}" restart step.switch.main >/dev/null 2>&1 || true
-        else
-            log DEBUG "switch conf didn't changed"
         fi
         rm -f "${NEW_SWITCH_CONF}"
     fi
@@ -125,13 +129,10 @@ while test "${RUN}" -eq 1; do
             mv -f "${NEW_CRONTAB_CONF}" "${OLD_CRONTAB_CONF}" >/dev/null 2>&1
             _uninstall_crontab.sh
             deploycron_file "${OLD_CRONTAB_CONF}"
-        else
-            log DEBUG "crontab conf didn't changed"
         fi
         rm -f "${NEW_CRONTAB_CONF}"
     fi
     if test "${RUN}" -eq 1; then
-        log DEBUG "sleeping 5 seconds..."
         sleep 5
         test_status_or_exit
     fi
