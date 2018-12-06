@@ -383,6 +383,7 @@ class XattrFile(object):
         self._write_tags()
         old_hash_md5 = self._redis_key
         old_filepath = self.filepath
+        os.rename(old_filepath, new_filepath)
         self.__set_filepath(new_filepath)
         # Rename the xattr Redis hash only if it exists
         # (If a file has no xattr, there is no Redis entry corresponding
@@ -395,7 +396,6 @@ class XattrFile(object):
                 pipe.execute()
             else:
                 self.get_redis_callable().rename(old_hash_md5, self._redis_key)
-        os.rename(old_filepath, new_filepath)
         self.logger.debug("%s moved to %s" % (old_filepath, new_filepath))
 
     def delete(self):
@@ -496,6 +496,7 @@ class XattrFile(object):
             try:
                 if hardlink_mode:
                     self.hard_link(new_filepath)
+                    self.delete()
                 else:
                     self.rename(new_filepath)
                 return (True, True)
@@ -504,6 +505,7 @@ class XattrFile(object):
         try:
             self.copy(new_filepath, tmp_suffix=tmp_suffix,
                       chmod_mode_int=chmod_mode_int)
+            self.delete()
             return (True, False)
         except Exception:
             if hardlink_mode:
