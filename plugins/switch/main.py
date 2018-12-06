@@ -9,6 +9,7 @@ from configparser_extended import ExtendedConfigParser
 import hashlib
 from magic import Magic
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
+from acquisition.utils import _get_or_make_trash_dir
 
 MAGIC_OBJECTS_CACHE = {}
 CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
@@ -122,8 +123,10 @@ class AcquisitionSwitchStep(AcquisitionStep):
     def _no_match(self, xaf):
         self.info("No condition matched for %s" % xaf.filepath)
         if self.no_match_policy == "trash":
-            new_filepath = os.path.join(self._get_or_make_trash_dir(),
-                                        xaf.basename())
+            new_filepath = \
+                os.path.join(_get_or_make_trash_dir(self.plugin_name,
+                                                    self.step_name),
+                             xaf.basename())
             xaf.move_or_copy(new_filepath)
         elif self.no_match_policy == "move":
             new_filepath = \
