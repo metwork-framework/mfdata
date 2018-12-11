@@ -57,11 +57,10 @@ def make_watcher_conf(plugin_configuration_file):
             rlimit_fsize = parser.getint(section, "rlimit_fsize")
         output.append("")
         output.append("[watcher:step.%s.%s]" % (plugin_name, step))
-        output.append("cmd = layer_wrapper")
-        output.append("args = --layers=plugin_%s@mfdata "
-                      "--prepend-env=PYTHONPATH,%s "
-                      "--extra-env-prefix=MFDATA_CURRENT_PLUGIN -- %s %s" %
-                      (plugin_name, plugin_dir,
+        output.append("cmd = plugin_wrapper")
+        output.append("args = %s "
+                      "-- %s %s" %
+                      (plugin_name,
                        envtpl.render_string(cmd), envtpl.render_string(args)))
         output.append("numprocesses = %i" % numprocesses)
         output.append("graceful_timeout = %i" % graceful_timeout)
