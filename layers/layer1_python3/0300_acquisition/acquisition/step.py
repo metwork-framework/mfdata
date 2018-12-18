@@ -357,8 +357,9 @@ class AcquisitionStep(object):
                             'daemon mode')
         return parser
 
-    def get_stats_client(self):
-        return get_stats_client(self.plugin_name, self.step_name)
+    def get_stats_client(self, extra_tags={}):
+        return get_stats_client(self.plugin_name, self.step_name,
+                                extra_tags)
 
     @property
     def step_name(self):
