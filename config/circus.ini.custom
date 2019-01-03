@@ -5,7 +5,7 @@
 use = circus_autostart.CircusAutostart
 
 [plugin:autorestart]
-use = circus_autorestart.CircusAutorestart
+use = circus_autorestart_plugin.CircusAutorestartPlugin
 
 [watcher:redis]
 cmd=redis-server
