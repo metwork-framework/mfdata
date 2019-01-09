@@ -1,5 +1,10 @@
 <a name=""></a>
-# (unreleased)
+# [](https://github.com/metwork-framework/mfdata/compare/v0.4.0...v) (2019-01-09)
+
+
+
+<a name="0.4.0"></a>
+# [0.4.0](https://github.com/metwork-framework/mfdata/compare/cb93f70...v0.4.0) (2019-01-08)
 
 
 *  feat: change default configuration ([ea46f8b](https://github.com/metwork-framework/mfdata/commit/ea46f8b)), closes [#22](https://github.com/metwork-framework/mfdata/issues/22)
