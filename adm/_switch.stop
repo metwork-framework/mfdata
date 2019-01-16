@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+
+import psutil
+import os
+import argparse
+import signal
+
+from mflog import getLogger
+
+LOG = getLogger('switch.stop')
+USER = os.environ.get('MODULE_RUNTIME_USER', None)
+MODULE_RUNTIME_HOME = os.environ.get('MODULE_RUNTIME_HOME', None)
+
+
+def get_switch_master_pids():
+    pids = []
+    for proc in psutil.process_iter():
+        try:
+            if proc.username() != USER:
+                continue
+            cmdline = " ".join(proc.cmdline())
+            if 'switch/main.py' not in cmdline:
+                continue
+            cwd = proc.cwd()
+            if not cwd.startswith(MODULE_RUNTIME_HOME):
+                continue
+            pids.append(proc.pid)
+        except Exception:
+            LOG.debug("exception catched")
+    return pids
+
+
+argparser = argparse.ArgumentParser(description="stop switch "
+                                    "for the current user/module")
+args = argparser.parse_args()
+
+pids = get_switch_master_pids()
+for pid in pids:
+    try:
+        LOG.info("Sending SIGTERM to process #%i" % pid)
+        p = psutil.Process(pid)
+        p.send_signal(signal.SIGTERM)
+    except Exception:
+        pass
