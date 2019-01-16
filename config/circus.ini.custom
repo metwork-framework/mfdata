@@ -1,11 +1,45 @@
 {% extends "circus.ini" %}
+
 {% block custom %}
 {% raw %}
 [plugin:autostart]
 use = circus_autostart.CircusAutostart
 
-[plugin:autorestart]
+[plugin:autorestart]                                                            
 use = circus_autorestart_plugin.CircusAutorestartPlugin
+stop_signal = 9
+stop_children = True
+
+{% if MFDATA_NGINX_FLAG == "1" %}
+[watcher:nginx]
+cmd={{MFEXT_HOME}}/opt/openresty/nginx/sbin/nginx
+args=-p {{MODULE_RUNTIME_HOME}}/tmp/nginx_tmp_prefix -c {{MODULE_RUNTIME_HOME}}/tmp/config_auto/nginx.conf
+numprocesses=1
+stdout_stream.class = FileStream
+stdout_stream.filename = {{MODULE_RUNTIME_HOME}}/log/nginx.log
+stderr_stream.class = FileStream
+stderr_stream.filename = {{MODULE_RUNTIME_HOME}}/log/nginx.log
+copy_env = True
+autostart = True
+respawn = True
+hooks.before_start=circus_hooks.before_start_shell
+hooks.after_stop=circus_hooks.after_stop_shell
+working_dir = {{MODULE_RUNTIME_HOME}}/tmp
+{% endif %}
+
+[watcher:conf_monitor]                                                          
+cmd={{MODULE_HOME}}/bin/mfdata_conf_monitor.py                                         
+args=                                                                           
+numprocesses = 1                                                                
+stdout_stream.class = FileStream                                                
+stdout_stream.filename = {{MODULE_RUNTIME_HOME}}/log/conf_monitor.stdout        
+stderr_stream.class = FileStream                                                
+stderr_stream.filename = {{MODULE_RUNTIME_HOME}}/log/conf_monitor.stderr        
+copy_env = True                                                                 
+autostart = True                                                                
+respawn = True           
+working_dir = {{MODULE_RUNTIME_HOME}}/tmp
+stop_signal = 9
 
 [watcher:redis]
 cmd=redis-server
@@ -34,38 +68,6 @@ autostart = True
 respawn = True
 hooks.before_start=circus_hooks.before_start_shell
 working_dir = {{MODULE_RUNTIME_HOME}}/tmp
-
-[watcher:conf_monitor]
-cmd={{MODULE_HOME}}/bin/conf_monitor.sh
-args=
-numprocesses = 1
-stdout_stream.class = FileStream
-stdout_stream.filename = {{MODULE_RUNTIME_HOME}}/log/conf_monitor.stdout
-stderr_stream.class = FileStream
-stderr_stream.filename = {{MODULE_RUNTIME_HOME}}/log/conf_monitor.stderr
-copy_env = True
-autostart = True
-respawn = True
-working_dir = {{MODULE_RUNTIME_HOME}}/tmp
-stop_signal = KILL
-stop_children = True
-
-{% if MFDATA_NGINX_FLAG == "1" %}
-[watcher:nginx]
-cmd={{MFEXT_HOME}}/opt/openresty/nginx/sbin/nginx
-args=-p {{MODULE_RUNTIME_HOME}}/tmp/nginx_tmp_prefix -c {{MODULE_RUNTIME_HOME}}/tmp/config_auto/nginx.conf
-numprocesses=1
-stdout_stream.class = FileStream
-stdout_stream.filename = {{MODULE_RUNTIME_HOME}}/log/nginx.log
-stderr_stream.class = FileStream
-stderr_stream.filename = {{MODULE_RUNTIME_HOME}}/log/nginx.log
-copy_env = True
-autostart = True
-respawn = True
-hooks.before_start=circus_hooks.before_start_shell
-hooks.after_stop=circus_hooks.after_stop_shell
-working_dir = {{MODULE_RUNTIME_HOME}}/tmp
-{% endif %}
 
 {% if MFDATA_ADMIN_HOSTNAME != "null" %}
 [watcher:telegraf_collector_var_in_files_count]
