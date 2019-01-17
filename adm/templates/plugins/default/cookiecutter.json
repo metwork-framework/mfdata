@@ -2,7 +2,7 @@
     "python_version": ["python3", "python2"],
     "name": "name_of_your_plugin",
     "version": "{% raw %}{{MODULE_VERSION}}{% endraw %}",
-    "one_line_summary": "",
+    "one_line_summary": "one line summary about your plugin",
     "crontab_support": ["no", "yes"],
     "virtualenv_support": ["no", "yes"],
     "license": ["Proprietary", "BSD", "MIT", "GPL", "Specific"],
