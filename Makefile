@@ -7,8 +7,6 @@ MODULE_LOWERCASE=mfdata
 DIRS=config bin opt/python2/lib/python$(PYTHON2_SHORT_VERSION)/site-packages opt/python3/lib/python$(PYTHON3_SHORT_VERSION)/site-packages share
 
 all:: directories
-	echo "root@mfcom" >$(MFDATA_HOME)/.layerapi2_dependencies
-	echo "openresty@mfext" >>$(MFDATA_HOME)/.layerapi2_dependencies
 	cd adm && $(MAKE)
 	cd config && $(MAKE)
 	cd layers && $(MAKE)
