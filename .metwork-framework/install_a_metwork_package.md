@@ -47,7 +47,7 @@ yum install metwork-mfext-python2
 
 
 
-### mfdata addons
+### mfdata addons
 
 ```
 # To install python2 support
