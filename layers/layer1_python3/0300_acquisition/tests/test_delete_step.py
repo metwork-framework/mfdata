@@ -4,7 +4,6 @@ import os
 from unittest import TestCase
 from acquisition import AcquisitionDeleteStep
 from xattrfile import XattrFile
-from testfixtures import LogCapture
 
 
 class AcquisitionDeleteTestStep(AcquisitionDeleteStep):
@@ -46,13 +45,3 @@ class AcquisitionDeleteStepTestCase(TestCase):
         # Remove xaf file before trying the deleteing process
         os.remove(xaf.filepath)
         self.assertFalse(self.x.process(xaf))
-
-    def test_process_OSError_warning(self):
-        xaf = make_tmp_xattrfile()
-        message = "Can't delete " + xaf.filepath
-        # Remove xaf file before trying the deleteing process
-        os.remove(xaf.filepath)
-        with LogCapture() as log:
-            self.x.process(xaf)
-        log.check(
-            ('mfdata.test_plugin_name.test', 'WARNING', message))
