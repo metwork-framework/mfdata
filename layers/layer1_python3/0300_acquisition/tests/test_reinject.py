@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import os
 # from argparse import ArgumentParser
 from unittest import TestCase
 from acquisition import AcquisitionReinjectStep
 from xattrfile import XattrFile
-from testfixtures import LogCapture
 from time import sleep
 
 
@@ -84,44 +82,6 @@ class AcquisitionReinjectTestCase(TestCase):
         xaf = make_tmp_xattrfile()
         xaf.set_filepath = "/tmp/IDontExist"
         self.assertEqual(False, self.x._before(xaf))
-
-    def test_reinject_log(self):
-        xaf = make_tmp_xattrfile()
-        reinject_delay = 1
-        reinject_attempts = 3
-        reinject_dir = self.x.get_tmp_filepath() + "/reinject/"
-        self.x.unit_tests_args = [
-            "--reinject-delay=%s" % reinject_delay,
-            "--reinject-attempts=%s" % reinject_attempts,
-            "--reinject-dir=%s" % reinject_dir,
-            "DUMMY_QUEUE"
-        ]
-        self.x._init()
-
-        # Create the new directory if it's not already there
-        try:
-            os.mkdir(self.x.args.reinject_dir)
-        except OSError:
-            pass
-
-        new_path = self.x.args.reinject_dir + "/" + xaf.basename()
-        message = "reinjecting " + xaf.filepath + " into " + \
-                  reinject_dir + "/... attempt 4"
-        with LogCapture(level=logging.INFO) as log:
-            self.x.reinject(xaf, 3)
-        log.check(
-            ('mfdata.test_plugin_name.test', 'INFO', message))
-
-        # Clean up
-        try:
-            os.remove(new_path)
-        except OSError:
-            pass
-
-        try:
-            os.rmdir(self.x.args.reinject_dir)
-        except OSError:
-            pass
 
     def test_give_up(self):
         xaf = make_tmp_xattrfile()

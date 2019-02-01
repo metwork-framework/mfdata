@@ -11,7 +11,6 @@ from unittest import TestCase
 from acquisition import AcquisitionStep
 from acquisition.utils import _get_or_make_trash_dir
 from xattrfile import XattrFile
-from testfixtures import LogCapture
 import redis
 from mockredis import mock_redis_client
 
@@ -100,17 +99,6 @@ class MiscTestCase(TestCase):
             AcquisitionTestStepWrongName()
         self.assertEqual(cm.exception.code, 2)
 
-    def test_contstructor_wrong_name_logging(self):
-        os._exit = dummy_exit
-        with LogCapture() as log:
-            try:
-                AcquisitionTestStepWrongName()
-            finally:
-                pass
-        log.check(
-            ('mfdata.test_plugin_name.&#?!@', 'ERROR', 'step_name: &#?!@ must'
-             ' match with ^[A-Za-z0-9_]+$'),)
-
     # get_plugin_name() not overridden
     def test_constructor_get_plugin_name_not_overridden(self):
         self.assertRaises(NotImplementedError, lambda: AcquisitionStep())
@@ -121,17 +109,6 @@ class MiscTestCase(TestCase):
         with self.assertRaises(SystemExit) as cm:
             AcquisitionTestStepWrongPluginName()
         self.assertEqual(cm.exception.code, 2)
-
-    def test_contstructor_wrong_plugin_name_logging(self):
-        os._exit = dummy_exit
-        with LogCapture() as log:
-            try:
-                AcquisitionTestStepWrongPluginName()
-            finally:
-                pass
-        log.check(
-            ('mfdata.&#?!@_plugin.test', 'ERROR',
-             'plugin_name: &#?!@_plugin must match with ^[A-Za-z0-9_]+$'),)
 
     @redirect_stderr_on_stdout()
     def test_exception_during_process(self):
@@ -180,31 +157,6 @@ class BasicTestCase(TestCase):
 
     def test_ping(self):
         self.assertEqual(None, self.x.ping())
-
-    def test_warning(self):
-        with LogCapture() as log:
-            self.x.warning("warn")
-        log.check(
-            ('mfdata.test_plugin_name.test', 'WARNING', 'warn'))
-
-    def test_critical(self):
-        with LogCapture() as log:
-            self.x.critical("crit")
-        log.check(
-            ('mfdata.test_plugin_name.test', 'CRITICAL', 'crit'))
-
-    def test_error_and_die_log(self):
-        os._exit = dummy_exit
-        with LogCapture() as log:
-            self.x.error_and_die("err")
-        log.check(
-            ('mfdata.test_plugin_name.test', 'ERROR', 'err'))
-
-    def test_error_and_die_exit(self):
-        os._exit = sys.exit
-        with self.assertRaises(SystemExit) as cm:
-            self.x.error_and_die("err")
-        self.assertEqual(cm.exception.code, 2)
 
     def test_trash_delete(self):
         self.x.failure_policy = "delete"
