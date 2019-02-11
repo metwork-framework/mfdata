@@ -19,6 +19,7 @@ plugins.install "$(ls *.plugin)"
 cd ..
 plugins.install ${MFDATA_HOME}/share/plugins/ungzip*.plugin
 plugins.list
+sleep 5
 cp Example.png.gz ${MODULE_RUNTIME_HOME}/var/in/incoming
 sleep 5
 
