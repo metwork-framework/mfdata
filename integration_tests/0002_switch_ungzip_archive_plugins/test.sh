@@ -4,11 +4,13 @@ plugins.uninstall ungzip >/dev/null 2>&1
 plugins.uninstall foobar2 >/dev/null 2>&1
 rm -Rf foobar2*
 
+
 set -x
 set -e
 
 bootstrap_plugin.py create --no-input --template=archive foobar2
 cd foobar2
+
 cat config.ini | sed "s/switch_logical_condition = True/switch_logical_condition = ( x['latest.switch.main.system_magic'].startswith(b'PNG image'))/" > config.ini.1
 cat config.ini.1 | sed "s/arg_strftime-template = %Y%m%d\/{RANDOM_ID}/arg_strftime-template = %Y%m%d\/Example.png/" > config.ini
 rm config.ini.1
@@ -35,3 +37,4 @@ plugins.uninstall foobar2
 plugins.uninstall ungzip
 
 rm -R foobar2*
+
