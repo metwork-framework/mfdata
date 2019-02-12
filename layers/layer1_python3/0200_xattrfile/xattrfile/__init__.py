@@ -393,7 +393,10 @@ class XattrFile(object):
                 pipe = self.get_redis_callable().pipeline()
                 pipe.rename(old_hash_md5, self._redis_key)
                 pipe.expire(self._redis_key, self.redis_timeout)
-                pipe.execute()
+                try:
+                    pipe.execute()
+                except Exception:
+                    self.logger.debug("Redis exception but we continue anyway")
             else:
                 self.get_redis_callable().rename(old_hash_md5, self._redis_key)
         self.logger.debug("%s moved to %s" % (old_filepath, new_filepath))
