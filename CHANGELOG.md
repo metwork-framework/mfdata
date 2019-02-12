@@ -1,6 +1,9 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+### Feat
+- add integration test (plugin create, install, desinstall)
+
 <a name="v0.5.4"></a>
 ## [v0.5.4] - 2019-02-06
 
