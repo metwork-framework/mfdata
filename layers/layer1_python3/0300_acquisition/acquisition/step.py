@@ -562,7 +562,7 @@ class AcquisitionStep(object):
 
         """
         logger = self.__get_logger()
-        logger.exception(msg, *args, **kwargs)
+        logger.exception(str(msg), *args, **kwargs)
 
     def __get_tag_name(self, name, counter_str_value='latest',
                        force_step_name=None, force_plugin_name=None):
