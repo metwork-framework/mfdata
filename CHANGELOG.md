@@ -8,6 +8,11 @@
 - Fix loss of files between plugin switch and plugin ungzip or other mfdata plugins The test test_14_move_or_copy2 is broken, we temporarily skip it
 - fix exception function errors when the parameter is an exception object rather than a string
 
+<a name="v0.5.5"></a>
+## [v0.5.5] - 2019-02-15
+### Fix
+- Fix loss of files between plugin switch and plugin ungzip or other mfdata plugins The test test_14_move_or_copy2 is broken, we temporarily skip it
+
 <a name="v0.5.4"></a>
 ## [v0.5.4] - 2019-02-06
 
