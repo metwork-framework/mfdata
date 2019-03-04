@@ -395,7 +395,22 @@ class XattrFile(object):
                 pipe.execute()
             else:
                 self.get_redis_callable().rename(old_hash_md5, self._redis_key)
-        os.rename(old_filepath, new_filepath)
+        try:
+            os.rename(old_filepath, new_filepath)
+        except Exception:
+            # we have to rollback all changes done
+            # this is necessary to move_or_copy operations
+            if self.tags:
+                if self.redis_timeout != -1:
+                    pipe = self.get_redis_callable().pipeline()
+                    pipe.rename(self._redis_key, old_hash_md5)
+                    pipe.expire(old_hash_md5, self.redis_timeout)
+                    pipe.execute()
+                else:
+                    self.get_redis_callable().rename(self._redis_key,
+                                                     old_hash_md5)
+            self.__set_filepath(old_filepath)
+            raise
         self.logger.debug("%s moved to %s" % (old_filepath, new_filepath))
 
     def delete(self):
