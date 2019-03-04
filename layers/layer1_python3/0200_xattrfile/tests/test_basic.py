@@ -168,30 +168,28 @@ class BasicTestCase(TestCase):
                     raise OSError("fake rename error")
             res = old_os_rename(src, dst)
             return res
-        # FIX : This test does not succeed anymore, we skip it
-        if False:
-            test_data_file_path = os.path.join(self.test_data_dir_path,
-                                               u'test_file.json')
-            tmp_data_file_path = os.path.join(self.test_data_dir_path,
-                                              u'test_file.tmp')
-            tmp_data_file_path2 = os.path.join(self.test_data_dir_path,
-                                               u'test_file.tmp2')
-            x = make_xattrfile(test_data_file_path)
-            x.tags['key1'] = b'value1'
-            x.copy(tmp_data_file_path)
-            y = make_xattrfile(tmp_data_file_path)
-            old_os_rename = os.rename
-            os.rename = partial(os_rename_fake, old_os_rename,
-                                y.filepath, tmp_data_file_path2)
-            r1, r2 = y.move_or_copy(tmp_data_file_path2)
-            os.rename = old_os_rename
-            self.assertTrue(r1)
-            self.assertFalse(r2)
-            self.assertFalse(os.path.isfile(tmp_data_file_path))
-            self.assertTrue(os.path.isfile(tmp_data_file_path2))
-            self.assertEquals(make_xattrfile(
-                tmp_data_file_path2).tags['key1'], b'value1')
-            make_xattrfile(tmp_data_file_path2).delete()
+        test_data_file_path = os.path.join(self.test_data_dir_path,
+                                           u'test_file.json')
+        tmp_data_file_path = os.path.join(self.test_data_dir_path,
+                                          u'test_file.tmp')
+        tmp_data_file_path2 = os.path.join(self.test_data_dir_path,
+                                           u'test_file.tmp2')
+        x = make_xattrfile(test_data_file_path)
+        x.tags['key1'] = b'value1'
+        x.copy(tmp_data_file_path)
+        y = make_xattrfile(tmp_data_file_path)
+        old_os_rename = os.rename
+        os.rename = partial(os_rename_fake, old_os_rename,
+                            y.filepath, tmp_data_file_path2)
+        r1, r2 = y.move_or_copy(tmp_data_file_path2)
+        os.rename = old_os_rename
+        self.assertTrue(r1)
+        self.assertFalse(r2)
+        self.assertFalse(os.path.isfile(tmp_data_file_path))
+        self.assertTrue(os.path.isfile(tmp_data_file_path2))
+        self.assertEquals(make_xattrfile(
+            tmp_data_file_path2).tags['key1'], b'value1')
+        make_xattrfile(tmp_data_file_path2).delete()
 
     def test_14_hardlink_or_copy(self):
         test_data_file_path = os.path.join(self.test_data_dir_path,
