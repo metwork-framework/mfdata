@@ -10,6 +10,7 @@ import hashlib
 from magic import Magic
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from acquisition.utils import _get_or_make_trash_dir
+from xattrfile import XattrFile
 
 MAGIC_OBJECTS_CACHE = {}
 CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
@@ -78,6 +79,15 @@ class AcquisitionSwitchStep(AcquisitionStep):
         parser.add_argument('--no-match-policy-move-dest-dir', action='store',
                             default=None,
                             help='dest-dir in case of move no-match policy')
+        parser.add_argument('--no-match-policy-keep-keep-tags',
+                            default=True, action='store_true',
+                            help='keep tags/attributes into another file '
+                            'in case of keep policy')
+        parser.add_argument('--no-match-policy-keep-keep-tags-suffix',
+                            action='store', default=".tags",
+                            help='if no-match-policy=keep and '
+                            'no-match-policy-keep-keep-tags=True, use this '
+                            'suffix to store attributes/tags')
 
     def _move_or_copy(self, xaf, directory):
         old_filepath = xaf.filepath
@@ -122,12 +132,23 @@ class AcquisitionSwitchStep(AcquisitionStep):
 
     def _no_match(self, xaf):
         self.info("No condition matched for %s" % xaf.filepath)
-        if self.no_match_policy == "trash":
+        if self.no_match_policy == "keep":
             new_filepath = \
                 os.path.join(_get_or_make_trash_dir(self.plugin_name,
-                                                    self.step_name),
+                                                    "nomatch"),
                              xaf.basename())
-            xaf.move_or_copy(new_filepath)
+            old_filepath = xaf.filepath
+            success, moved = xaf.move_or_copy(new_filepath)
+            if success:
+                if moved:
+                    self.info("%s moved into %s", old_filepath, new_filepath)
+                else:
+                    self.info("%s copied into %s", xaf.filepath, new_filepath)
+            if self.args.no_match_policy_keep_keep_tags:
+                tags_filepath = new_filepath + \
+                    self.args.no_match_policy_keep_keep_tags_suffix
+                xaf.write_tags_in_a_file(tags_filepath)
+                XattrFile(new_filepath).clear_tags()
         elif self.no_match_policy == "move":
             new_filepath = \
                 os.path.join(self.args.no_match_policy_move_dest_dir,
