@@ -150,10 +150,9 @@ class AcquisitionStep(object):
         if not after_status:
             self.warning("Bad processing status for file: %s",
                          xaf._original_filepath)
-            # logger = self.__get_logger()
-            # FIXME: waiting for metwork-framework/mflog#1
-            # if logger.isEnabledFor(10):  # DEBUG
-            # xaf.dump_tags_on_logger(logger, 10)  # DEBUG
+            logger = self.__get_logger()
+            if logger.isEnabledFor(10):  # DEBUG
+                xaf.dump_tags_on_logger(logger, 10)  # DEBUG
         return after_status
 
     def _conditional_copy_to_debug_plugin(self, xaf):
