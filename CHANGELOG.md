@@ -3,6 +3,7 @@
 
 ### Feat
 - add integration test (plugin create, install, desinstall)
+- fix [#65](https://github.com/metwork-framework//issues/65) and introduce new configuration options around
 
 ### Fix
 - Fix loss of files between plugin switch and plugin ungzip or other mfdata plugins The test test_14_move_or_copy2 is broken, we temporarily skip it
