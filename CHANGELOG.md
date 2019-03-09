@@ -8,6 +8,7 @@
 ### Fix
 - Fix loss of files between plugin switch and plugin ungzip or other mfdata plugins The test test_14_move_or_copy2 is broken, we temporarily skip it
 - both [#53](https://github.com/metwork-framework//issues/53) and [#61](https://github.com/metwork-framework//issues/61)
+- dump tags on errors (when in debug mode)
 - fix exception function errors when the parameter is an exception object rather than a string
 
 <a name="v0.5.6"></a>
