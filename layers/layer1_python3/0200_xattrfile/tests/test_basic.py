@@ -189,6 +189,7 @@ class BasicTestCase(TestCase):
         self.assertTrue(os.path.isfile(tmp_data_file_path2))
         self.assertEquals(make_xattrfile(
             tmp_data_file_path2).tags['key1'], b'value1')
+        self.assertEquals(y.tags['key1'], b'value1')
         make_xattrfile(tmp_data_file_path2).delete()
 
     def test_14_hardlink_or_copy(self):
