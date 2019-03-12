@@ -10,6 +10,7 @@
 - both [#53](https://github.com/metwork-framework//issues/53) and [#61](https://github.com/metwork-framework//issues/61)
 - dump tags on errors (when in debug mode)
 - fix exception function errors when the parameter is an exception object rather than a string
+- fix move_or_copy feature when src and dst are not on the same FS
 
 <a name="v0.5.6"></a>
 ## [v0.5.6] - 2019-03-04
