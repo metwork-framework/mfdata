@@ -1,6 +1,23 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+### Fix
+- Fix loss of files between plugin switch and plugin ungzip or other mfdata plugins The test test_14_move_or_copy2 is broken, we temporarily skip it
+- both [#53](https://github.com/metwork-framework//issues/53) and [#61](https://github.com/metwork-framework//issues/61)
+
+<a name="tag_doc"></a>
+## [tag_doc] - 2019-03-12
+### Feat
+- add integration test (plugin create, install, desinstall)
+- fix [#65](https://github.com/metwork-framework//issues/65) and introduce new configuration options around
+
+### Fix
+- Fix loss of files between plugin switch and plugin ungzip or other mfdata plugins The test test_14_move_or_copy2 is broken, we temporarily skip it
+- both [#53](https://github.com/metwork-framework//issues/53) and [#61](https://github.com/metwork-framework//issues/61)
+- dump tags on errors (when in debug mode)
+- fix exception function errors when the parameter is an exception object rather than a string
+- fix move_or_copy feature when src and dst are not on the same FS
+
 <a name="v0.5.6"></a>
 ## [v0.5.6] - 2019-03-04
 ### Fix
