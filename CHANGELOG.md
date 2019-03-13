@@ -1,6 +1,8 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+<a name="tag_doc"></a>
+## [tag_doc] - 2019-03-12
 ### Feat
 - add integration test (plugin create, install, desinstall)
 - fix [#65](https://github.com/metwork-framework//issues/65) and introduce new configuration options around
