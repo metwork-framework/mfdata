@@ -21,11 +21,6 @@
   servers = ["unix://{{MODULE_RUNTIME_HOME}}/var/redis.socket"]
 
 [[inputs.procstat]]
-  pattern = "python.*circus.*plugins.*{{MODULE_RUNTIME_HOME}}/var/circus.socket.*CircusAutostart"
-  user = "{{MODULE_RUNTIME_USER}}"
-  process_name = "circus_plugin_autostart"
-
-[[inputs.procstat]]
   pattern = "python.*circus.*plugins.*{{MODULE_RUNTIME_HOME}}/var/circus.socket.*CircusAutorestart"
   user = "{{MODULE_RUNTIME_USER}}"
   process_name = "circus_plugin_autorestart"

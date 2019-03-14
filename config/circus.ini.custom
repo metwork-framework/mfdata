@@ -2,9 +2,6 @@
 
 {% block custom %}
 {% raw %}
-[plugin:autostart]
-use = circus_autostart.CircusAutostart
-
 [plugin:autorestart]                                                            
 use = circus_autorestart_plugin.CircusAutorestartPlugin
 stop_signal = 9
