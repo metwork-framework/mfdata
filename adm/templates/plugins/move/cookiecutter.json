@@ -7,6 +7,7 @@
     "vendor": "MetWork",
     "dest_dir": "",
     "keep_original_basenames": ["yes", "no"],
+    "drop_tags": ["no", "yes"],
     "force_chmod": "",
     "switch_logical_condition": "False"
 }
