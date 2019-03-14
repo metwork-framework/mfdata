@@ -60,17 +60,18 @@ arg_strftime-template = %Y%m%d/{ORIGINAL_BASENAME}_{RANDOM_ID}
 
 Now we would also like to archive the compressed PNG images.
 
-**Let's now inject a compressed PNG file (.gz). **
+**Let's now inject a compressed PNG file (.gz).**
+
 Compress your PNG file (`my_png_file.png.gz`) and inject it:
 
 ```bash
-inject_file --incomming /tmp/my_png_file.png.gz 
+inject_file --incomming /tmp/my_png_file.png.gz
 ```
 
 If the `ungzip` plugin is not installed, you will see the image is not archived in the `/tmp/my_archive_image` directory, because it's not a PNG file but a GZIP file.
 
 
-**Let's now Install the `ungzip` plugin (if not already installed)**
+**Let's now Install the** `ungzip` **plugin (if not already installed).**
 
 In order to install this plugin, enter the command:
 
