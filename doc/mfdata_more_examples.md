@@ -145,7 +145,7 @@ switch_logical_condition = ( b'image' in ['latest.switch.main.system_magic'] )
 ```
 
 Now, **create the converter plugin** from the MFDATA `fork` template which allows to **execute shell commands in a subprocess**. Enter the command:
-```
+```bash
 bootstrap_plugin.py create --template=fork convert_png
 ```
 
