@@ -29,12 +29,22 @@ ls -l ${MODULE_RUNTIME_HOME}/var/in/incoming
 if [ ! -z "$(ls -A ${MODULE_RUNTIME_HOME}/var/in/incoming)" ]; then
     exit 1
 fi
-ls -l ${MODULE_RUNTIME_HOME}/var/archive/`date +%Y%m%d`
-diff ${MODULE_RUNTIME_HOME}/var/archive/`date +%Y%m%d`/Example.png Example.png
-cat ${MODULE_RUNTIME_HOME}/var/archive/`date +%Y%m%d`/Example.png.tags | grep first.core.original_basename | grep Example.png.gz
+DEST_DIR=${MODULE_RUNTIME_HOME}/var/archive/`date +%Y%m%d`
+nb=0
+
+while [ ! -d "$DEST_DIR" ]; do
+    nb=$(($nb + 1))
+    sleep 1
+    if [ $nb -eq 10 ]; then
+        exit 1
+    fi
+done
+
+ls -l ${DEST_DIR}
+diff ${DEST_DIR}/Example.png Example.png
+cat ${DEST_DIR}/Example.png.tags | grep first.core.original_basename | grep Example.png.gz
 
 plugins.uninstall foobar2
 plugins.uninstall ungzip
 
 rm -R foobar2*
-
