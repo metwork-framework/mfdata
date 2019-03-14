@@ -1,12 +1,21 @@
 #!/bin/bash
 
+# Install plugin ungzip
+# Create and install plugin foobar2 archiving PNG images
+# Inject one gzipped PNG file
+# Check PNG file and his tags on archive
+
 plugins.uninstall ungzip >/dev/null 2>&1
 plugins.uninstall foobar2 >/dev/null 2>&1
-rm -Rf foobar2*
+rm -R foobar2* >/dev/null 2>&1
 
+DEST_DIR=${MODULE_RUNTIME_HOME}/var/archive/`date +%Y%m%d`
+rm -R ${DEST_DIR} >/dev/null 2>&1
 
 set -x
 set -e
+
+plugins.install ${MFDATA_HOME}/share/plugins/ungzip*.plugin
 
 bootstrap_plugin.py create --no-input --template=archive foobar2
 cd foobar2
@@ -17,27 +26,35 @@ rm config.ini.1
 make release
 ls -l
 plugins.install "$(ls *.plugin)"
-
 cd ..
-plugins.install ${MFDATA_HOME}/share/plugins/ungzip*.plugin
+
+mfdata.stop
+mfdata.start
 plugins.list
-sleep 5
+_circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status
+
 cp Example.png.gz ${MODULE_RUNTIME_HOME}/var/in/incoming
-sleep 5
-
 ls -l ${MODULE_RUNTIME_HOME}/var/in/incoming
-if [ ! -z "$(ls -A ${MODULE_RUNTIME_HOME}/var/in/incoming)" ]; then
-    exit 1
-fi
-DEST_DIR=${MODULE_RUNTIME_HOME}/var/archive/`date +%Y%m%d`
-nb=0
 
-while [ ! -d "$DEST_DIR" ]; do
+# We wait 10s maximum for the gzipped PNG file to be processed
+nb=0
+while [ ! -z "$(ls -A ${MODULE_RUNTIME_HOME}/var/in/incoming)" ]; do
     nb=$(($nb + 1))
-    sleep 1
     if [ $nb -eq 10 ]; then
         exit 1
     fi
+    sleep 1
+done
+ls -l ${MODULE_RUNTIME_HOME}/var/in/incoming
+
+# We wait 10s maximum for creation of the archive directory
+nb=0
+while [ ! -d "$DEST_DIR" ]; do
+    nb=$(($nb + 1))
+    if [ $nb -eq 10 ]; then
+        exit 1
+    fi
+    sleep 1
 done
 
 ls -l ${DEST_DIR}
@@ -48,3 +65,4 @@ plugins.uninstall foobar2
 plugins.uninstall ungzip
 
 rm -R foobar2*
+rm -R ${DEST_DIR}
