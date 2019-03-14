@@ -199,14 +199,16 @@ class BasicTestCase(TestCase):
     def test_set_tag(self):
         xaf = make_tmp_xattrfile()
         self.x.set_tag(xaf, "test_tag", "test_value")
-        self.assertTrue(xaf.tags["0.test_plugin_name.test.test_tag"] ==
-                        b"test_value")
+        self.assertTrue(
+            xaf.tags["0.test_plugin_name.test.test_tag"] == b"test_value"
+        )
 
     def test_set_tag_latest(self):
         xaf = make_tmp_xattrfile()
         self.x.set_tag(xaf, "test_tag", "test_value")
-        self.assertTrue(xaf.tags["latest.test_plugin_name.test.test_tag"] ==
-                        b"test_value")
+        self.assertTrue(
+            xaf.tags["latest.test_plugin_name.test.test_tag"] == b"test_value"
+        )
 
     def test_move_to_plugin_step_false(self):
         xaf = make_tmp_xattrfile()
