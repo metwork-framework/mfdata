@@ -1,5 +1,5 @@
 # Quick start
-[TOC]
+
 ## Create your first plugin
 
 **This step will teach you how to create, run, release and deploy a simple MFDATA plugin with a MFDATA template.**
@@ -68,7 +68,7 @@ switch_logical_condition = ( x['latest.switch.main.system_magic'].startswith(b'J
 ```
 where `latest.switch.main.system_magic` is a tag attribute of the file processed by the switch plugin.
 
-The `switch_logical_condition` condition have to be written **as Python syntax**. **This condition must be a boolean expression that evaluates as `True` for the type of data you are interested in**.
+The `switch_logical_condition` condition have to be written **as Python syntax**. **This condition must be a boolean expression that evaluates as** `True` **for the type of data you are interested in**.
 
 <u>Note</u>: every time you change the plugin configuration, this confiuration will be always automatically reloaded.
 
@@ -140,7 +140,7 @@ The diagram below shows the data flow:
 
 ![archive_image_flow](images/move_image_flow.jpg)
 
-1. The JPEG file is process by `switch` from the MFDATA incoming directory
+1. The JPEG file is processed by `switch` from the MFDATA incoming directory
 2. The `move_image` plugin process the JPEG file (the `switch_logical_condition` is `True`)
 
 
@@ -175,7 +175,7 @@ If you set the `move` "no match" policy, you have to set the `switch_no_match_mo
 ```
 
 
-<mark>**IMPORTANT**: every time you change the MFDATA configuration file (`${HOME}/config/config.ini`), you have to stop and start MFDATA to reload the configuration</mark>, by entering the commands :
+<mark>IMPORTANT:</mark> every time you change the MFDATA configuration file (`${HOME}/config/config.ini`), you have to stop and start MFDATA to reload the configuration, by entering the commands :
 
 - either
 ```bash
@@ -252,3 +252,134 @@ In practice, the plugins are installed in the `${HOME}/var/plugins` directory.
 
 <u>Note</u> : another way to install the MFDATA `move_image` plugin in a production environment is to put down the `.plugin` file into /etc/metwork.config.d/mfdata/external_plugins. Then to install the plugin, you just restart the MFDATA service by entering `service metwork restart` mfdata command (as root user).
 
+
+## Use of the `ungzip` plugin
+
+The `ungzip` plugin allows you to unzip `.gz` files. This plugin automatically handles `.gz` files and returns the unzipped file to the switch. 
+
+The `ungzip` is **NOT** installed by default.
+
+
+
+**First, let's create an** `archive_image` **plugin from the MFDATA template `archive`.** This template allows you to **archive data**, i.e. moving a file to an associated archiving directory.
+
+Enter the command:
+```bash
+bootstrap_plugin.py create --template=archive archive_image
+```
+
+Configure the `switch_logical_condition` parameter in  the `archive_image/config.ini` that allow to archive only PNG files.
+
+```cfg
+switch_logical_condition = ( x['latest.switch.main.system_magic'].startswith(b'PNG image') )
+```
+
+Configure the archive directory `arg_dest-dir` parameter in the `archive_image/config.ini` set the `arg_dest-dir` parameter :
+
+```cfg
+arg_dest-dir = /tmp/my_archive_image
+```
+
+Install (as dev build) the plugin by entering the command from the `archive_image` plugin directory:
+
+```bash
+make develop
+```
+
+Check the plugin is installed, by running `plugins.list`
+
+
+Run the plugin: inject a PNG file :
+
+```bash
+inject_file --incomming /tmp/my_png_file.png
+```
+
+
+Check the PNG file is 'archived'. Go to the `/tmp/my_archive_image/[YYYYMMDD]` directory where `[YYYYMMDD]` is the current date: you will see your PNG file is archived with a 'RANDOM_ID' name: e.g. `2b199aac9ce2489b9f81f5a274ce7bf0`
+
+
+Notice, you may change the archive file name, by changing the defaut value of the arg_strftime-template in the `archive_image/config.ini`, e.g.:
+
+```cfg
+# strftime-template : template inside above archive directory (strftime
+#    placeholders are allowed, / are allowed to define subdirectories,
+#    {ORIGINAL_BASENAME}, {ORIGINAL_UID}, {ORIGINAL_DIRNAME}, {RANDOM_ID},
+#    {STEP_COUNTER} and {STEP_COUNTER_MINUS_1} are also available
+#    Default is : "%Y%m%d/{RANDOM_ID}"
+arg_strftime-template = %Y%m%d/{ORIGINAL_BASENAME}_{RANDOM_ID}
+```
+
+
+Now we would also like to archive the compressed PNG images.
+
+**Let's now inject a compressed PNG file (.gz).**
+
+Compress your PNG file (`my_png_file.png.gz`) and inject it:
+
+```bash
+inject_file --incomming /tmp/my_png_file.png.gz
+```
+
+If the `ungzip` plugin is not installed, you will see the image is not archived in the `/tmp/my_archive_image` directory, because it's not a PNG file but a GZIP file.
+
+
+**Let's now Install the** `ungzip` **plugin (if not already installed).**
+
+In order to install this plugin, enter the command:
+
+```bash
+plugins.install /opt/metwork-mfdata/share/plugins/ungzip-[[version]-1.metwork.mfdata.plugin
+
+```
+
+where `[version]` is the value of the `version` of the `ungzip` plugin, e.g.  plugins.install /opt/metwork-mfdata/share/plugins/ungzip-master.ci53.508288c-1.metwork.mfdata.plugin
+
+Then, check the `ugzip` plugin is installed, enter:
+
+```bash
+plugins.list
+```
+
+You should show the `ungzip` plugin is installed
+
+    | NAME                      | VERSION                   | RELEASE
+    ---------------------------------------------------------------------------
+    | switch                    | master.ci77.f0d7991       | 1
+    | ungzip                    | master.ci53.508288c       | 1
+	| archive_image             | 1.0.0                     | 1
+
+
+**Now, inject again the compressed PNG file.**
+
+You will see the PNG file is now archived in the `/tmp/my_archive_image`, according to the  `arg_strftime-template` parameter, as an uncompressed PNG file.
+
+The diagram below shows the data flow:
+
+![archive_image_flow](./images/archive_image_flow.jpg)
+
+1. The GZIP file is processed by the `switch` plugin from the MFDATA `incoming` directory
+2. The `gunzip` plugin uncompress the file
+3. The `gunzip` plugin puts the PNG file in the `incoming` directory. It will be process by the `switch` plugin
+4. The `archive_image` plugin process the PNG file (the `switch_logical_condition` is `True`)
+
+
+Note : the `archive` template allows to keep tags/attributes, about the data flow, into another file. The `.tags` file is stored in the same directory as the archived file directory (same filename with extension `.tag`):
+
+> 0.switch.main.enter_step = 2019-03-12T06:39:49:234958  
+0.switch.main.exit_step = 2019-03-12T06:39:49:238562   
+0.switch.main.process_status = ok   
+0.switch.main.system_magic = gzip compressed data, was "temp.png", from Unix, last modified: Mon Mar 11 14:21:31 2019    
+1.ungzip.main.enter_step = 2019-03-12T06:39:49:244102   
+1.ungzip.main.exit_step = 2019-03-12T06:39:49:244923   
+1.ungzip.main.process_status = ok   
+2.switch.main.enter_step = 2019-03-12T06:39:49:250833   
+2.switch.main.exit_step = 2019-03-12T06:39:49:251946   
+2.switch.main.process_status = ok   
+2.switch.main.system_magic = PNG image data, 120 x 165, 8-bit/color RGBA, non-interlaced   
+3.archive_image.main.enter_step = 2019-03-12T06:39:49:258391   
+first.core.original_basename = temp.png.gz   
+first.core.original_dirname = incoming   
+first.core.original_uid = e93932b0e2424e9d988a54c833266be5   
+latest.core.step_counter = 3   
+latest.switch.main.system_magic = PNG image data, 120 x 165, 8-bit/color RGBA, non-interlaced   
