@@ -21,7 +21,7 @@ bootstrap_plugin.py create --no-input --template=archive foobar2
 cd foobar2
 
 cat config.ini | sed "s/switch_logical_condition = True/switch_logical_condition = ( x['latest.switch.main.system_magic'].startswith(b'PNG image'))/" > config.ini.1
-cat config.ini.1 | sed "s/arg_strftime-template = %Y%m%d\/{RANDOM_ID}/arg_strftime-template = %Y%m%d\/Example.png/" > config.ini
+cat config.ini.1 | sed "s/arg_strftime-template = %Y%m%d\/{RANDOM_ID}/arg_strftime-template = %Y%m%d\/{ORIGINAL_BASENAME}/" > config.ini
 rm config.ini.1
 make release
 ls -l
@@ -33,7 +33,7 @@ mfdata.start
 plugins.list
 _circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status
 
-cp Example.png.gz ${MODULE_RUNTIME_HOME}/var/in/incoming
+cp ../data/Example.png.gz ${MODULE_RUNTIME_HOME}/var/in/incoming
 ls -l ${MODULE_RUNTIME_HOME}/var/in/incoming
 
 # We wait 10s maximum for the gzipped PNG file to be processed
@@ -58,7 +58,7 @@ while [ ! -d "$DEST_DIR" ]; do
 done
 
 ls -l ${DEST_DIR}
-diff ${DEST_DIR}/Example.png Example.png
+diff ${DEST_DIR}/Example.png ../data/Example.png
 cat ${DEST_DIR}/Example.png.tags | grep first.core.original_basename | grep Example.png.gz
 
 plugins.uninstall foobar2
