@@ -179,7 +179,7 @@ In order to stop or restart (stop and start) Metwork services, you may enter the
 
 In order to start/stop/restart a specific Metwork service, enter the command (as `root` user), respectively: `service metwork start {METWORK_PACKAGE_NAME}`, `service metwork stop {METWORK_PACKAGE_NAME}`, `service metwork restart {METWORK_PACKAGE_NAME}`, e.g.:
 
-```bash`
+```bash
 service metwork start mfdata
 ```
 
