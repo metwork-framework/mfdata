@@ -33,7 +33,7 @@ mfdata.start
 plugins.list
 _circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status
 
-cp Example.png.gz ${MODULE_RUNTIME_HOME}/var/in/incoming
+cp ../data/Example.png.gz ${MODULE_RUNTIME_HOME}/var/in/incoming
 ls -l ${MODULE_RUNTIME_HOME}/var/in/incoming
 
 # We wait 10s maximum for the gzipped PNG file to be processed
@@ -58,7 +58,7 @@ while [ ! -d "$DEST_DIR" ]; do
 done
 
 ls -l ${DEST_DIR}
-diff ${DEST_DIR}/Example.png Example.png
+diff ${DEST_DIR}/Example.png ../data/Example.png
 cat ${DEST_DIR}/Example.png.tags | grep first.core.original_basename | grep Example.png.gz
 
 plugins.uninstall foobar2
