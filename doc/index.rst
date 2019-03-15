@@ -9,6 +9,7 @@ MFDATA documentation
 
    mfdata_intro
    mfdata_install
+   mfdata_configure
    mfdata_quick_start
    mfdata_additional_tutorials
    plugins_guide
