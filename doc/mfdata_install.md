@@ -107,42 +107,93 @@ To test the repository, you can use the command `yum list "metwork*"` (as `root`
 
 ## Install a Metwork package
 
+### Full installation
+
+
 You just have to execute the following command (as `root` user):
 
 ```bash
 yum install metwork-{METWORK_PACKAGE_NAME}
 ```
-
 with `{METWORK_PACKAGE_NAME}` replaced by `mfext`, `mfcom`, `mfbase`, `mfadmin`, `mfsysmon`, `mfserv` or `mfdata` depending of your needs.
 
-For example, to install `mfdata` package:
+For instance, to install full `mfdata` package:
 
 ```bash
 yum install metwork-mfdata
 ```
 
-Of course, you can install several packages on the same linux box.
 
-You can start corresponding services (not necessary for `mfext` or `mfcom` packages) with the root command:
+### Minimal installation
+
+If you prefer to start with a minimal installation, you have to execute the following command
+(as `root` user):
+
+```
+yum install metwork-{METWORK_PACKAGE_NAME}-minimal
+```
+For instance, to install minimal `mfdata` package:
+
+```bash
+yum install metwork-mfdata-minimal
+```
+
+Note : of course, you can install several packages on the same Linux box.
+
+
+### Optional Addons
+
+#### Optional dependencies addons
+
+```
+# To install some devtools
+yum install metwork-mfext-devtools
+
+# To install some scientific libraries
+yum install metwork-mfext-scientific
+
+# To install python2 support
+# (including corresponding scientific and devtools addons)
+yum install metwork-mfext-python2
+```
+
+#### Optional mfdata addons
+
+```
+# To install python2 support
+# (see above to install full scientific and devtools support)
+yum install metwork-mfdata-python2
+```
+
+### Start/Stop/Restart Metwork services
+Since the Metwork packages are installed, you have to start the corresponding services (not necessary for `mfext` or `mfcom` packages) with the following command (as `root` user):
 
 ```bash
 service metwork start
 ```
+Note: this is not necessary with mfext or mfcom because there is no corresponding service
 
-Or you can also reboot your computer (because metwork services are started automatically on boot).
+Note: you can also reboot your computer (because metwork services are started automatically on boot).
 
+In order to stop or restart (stop and start) Metwork services, you may enter the following command (as `root` user) `service metwork stop, `service metwork restart`.
+
+In order to start/stop/restart a specific Metwork service, enter the command (as `root` user), respectively: `service metwork start {METWORK_PACKAGE_NAME}`, `service metwork stop {METWORK_PACKAGE_NAME}`, `service metwork restart {METWORK_PACKAGE_NAME}`, e.g.:
+
+```bash`
+service metwork start mfdata
+```
 
 ## Uninstall a Metwork package
 
-To uninstall a given metwork package, please stop corresponding metwork services with the `root` command:
+To uninstall a given Metwork package, please stop corresponding Metwork services with the following command (as `root` user):
 
 ```bash
 # note: this is not necessary with mfext or mfcom
-# because there is no corresponding services
+# because there is no corresponding service
 service metwork stop {METWORK_PACKAGE_NAME}
 ```
 
-Then, use the following command (still as `root` user):
+Then, enter the following command ( as `root` user):
 
 ```bash
 yum remove "metwork-{METWORK_PACKAGE_NAME}*"
@@ -150,7 +201,7 @@ yum remove "metwork-{METWORK_PACKAGE_NAME}*"
 
 ## Uninstall all Metwork packages
 
-To uninstall all Metwork packages, use following root commands:
+To uninstall all Metwork packages, enter the following commands (as `root` user):
 
 ```bash
 # We stop metwork services
@@ -160,11 +211,28 @@ service metwork stop
 yum remove "metwork-*"
 ```
 
-## Upgrade all Metwork packages
+## Upgrade a Metwork package
 
 The same idea applies to upgrade.
 
-For example, to upgrade all metwork packages on a computer, use following root commands:
+For example, to upgrade a Metwork package {METWORK_PACKAGE_NAME} on a computer, enter the following commands (as `root` user):
+
+```bash
+# We stop metwork services
+service metwork stop {METWORK_PACKAGE_NAME}
+
+# We upgrade metwork packages
+yum upgrade "metwork-{METWORK_PACKAGE_NAME}"
+
+# We start metwork services
+service metwork start {METWORK_PACKAGE_NAME}
+```
+
+In most cases, it's highly recommended to upgrade all Metwork packages together (see below)
+
+## Upgrade all Metwork packages
+
+For example, to upgrade all Metwork packages on a computer, enter the following commands (as `root` user):
 
 ```bash
 # We stop metwork services
