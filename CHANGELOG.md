@@ -1,6 +1,12 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+### Feat
+- add drop-tags option to move step (and keep-tags* options also)
+
+### Fix
+- fix intermittent fails of mfdata integration tests
+
 <a name="tag_doc"></a>
 ## [tag_doc] - 2019-03-12
 ### Feat
