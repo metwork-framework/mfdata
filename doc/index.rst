@@ -14,6 +14,7 @@ MFDATA documentation
    mfdata_additional_tutorials
    plugins_guide
    mfdata_and_magic
+   mfdata_miscellaneous
    api_xattrfile
    api_acquisition
    layer_root

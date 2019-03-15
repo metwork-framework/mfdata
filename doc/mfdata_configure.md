@@ -47,7 +47,7 @@ The beginning of the file is something like that:
 
 So this file overrides `${MODULE_HOME}/config/config.ini` (`${MODULE_HOME}` is in `/opt` in a standard metwork installation).
 
-**CAUTION: never change anything in `${MODULE_HOME}/config/config.ini`** *(because this file is silently overriden after each metwork upgrade)*
+**CAUTION: never change anything in** `${MODULE_HOME}/config/config.ini` *(because this file is silently overriden after each metwork upgrade)*
 
 So, you have to do your modifications in `${MODULE_RUNTIME_HOME}/config/config.ini` file (probably hosted in `/home`).
 
