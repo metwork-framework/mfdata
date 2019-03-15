@@ -250,7 +250,7 @@ plugins.list
 
 In practice, the plugins are installed in the `${HOME}/var/plugins` directory.
 
-<u>Note</u> : another way to install the MFDATA `move_image` plugin in a production environment is to put down the `.plugin` file into /etc/metwork.config.d/mfdata/external_plugins. Then to install the plugin, you just restart the MFDATA service by entering `service metwork restart` mfdata command (as root user).
+<u>Note</u> : another way to install the MFDATA `move_image` plugin in a production environment is to put down the `.plugin` file into `/etc/metwork.config.d/mfdata/external_plugins` directory. Then to install the plugin, you just restart the MFDATA service by entering `service metwork restart` mfdata command (as root user).
 
 
 ## Use of the `ungzip` plugin

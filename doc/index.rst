@@ -12,6 +12,7 @@ MFDATA documentation
    mfdata_configure
    mfdata_quick_start
    mfdata_additional_tutorials
+   mfdata_deploy_plugin
    plugins_guide
    mfdata_and_magic
    mfdata_miscellaneous
