@@ -7,8 +7,10 @@ MFDATA documentation
    :caption: Table of Contents
    :name: mfdatatoc
 
+   mfdata_intro
+   mfdata_install
    mfdata_quick_start
-   mfdata_more_examples
+   mfdata_additional_tutorials
    api_xattrfile
    api_acquisition
    layer_root

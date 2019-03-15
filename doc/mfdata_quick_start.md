@@ -1,4 +1,4 @@
-# Quick start
+# Quick Start
 
 ## Create your first plugin
 

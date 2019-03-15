@@ -1,4 +1,4 @@
-# More examples
+# Additional Tutorials
 
 ## A PNG to JPEG conversion plugin
 
@@ -84,4 +84,16 @@ The diagram below shows the data flow:
 5. The `convert_image` plugin puts the JPEG file in the `incoming` directory. It will be process by the `switch` plugin
 6. The `archive_image` plugin process the JPEG file (its `switch_logical_condition` is `True`).
 
+
+## Sending a file by FTP
+
+TODO
+
+## Using the `batch` template
+
+TODO
+
+## Create a plugin from scratch
+
+TODO
 
