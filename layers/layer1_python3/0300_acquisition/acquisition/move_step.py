@@ -2,6 +2,7 @@ import os.path
 
 from acquisition import AcquisitionStep
 from mfutil import mkdir_p_or_die
+from xattrfile import XattrFile
 
 
 class AcquisitionMoveStep(AcquisitionStep):
@@ -15,12 +16,24 @@ class AcquisitionMoveStep(AcquisitionStep):
         parser.add_argument('--force-chmod', action='store', default=None,
                             help='if set force chmod on target files with well'
                             'known octal value (example: 0700)')
+        parser.add_argument('--keep-tags', action='store_true',
+                            help='keep tags/attributes into another file ?')
+        parser.add_argument('--keep-tags-suffix', action='store',
+                            default=".tags",
+                            help='if keep-tags=True, suffix to add to the '
+                            'filename to keep tags')
+        parser.add_argument('--drop-tags', action='store_true',
+                            help='if drop-tags=True, just drop tags for the '
+                            'moved file')
 
     def init(self):
         if self.args.dest_dir is None:
             raise Exception('you have to set a dest-dir')
         mkdir_p_or_die(self.args.dest_dir)
         self.failure_policy = "delete"
+        self.keep_tags = self.args.keep_tags
+        self.keep_tags_suffix = self.args.keep_tags_suffix
+        self.drop_tags = self.args.drop_tags
 
     def process(self, xaf):
         if self.args.keep_original_basenames:
@@ -32,7 +45,10 @@ class AcquisitionMoveStep(AcquisitionStep):
             if self.args.force_chmod is not None else None
         # Store old xaf filepath to display in the logs
         old_filepath = xaf.filepath
-        self._set_after_tags(xaf, True)
+        if self.drop_tags:
+            xaf.clear_tags()
+        else:
+            self._set_after_tags(xaf, True)
         success, moved = xaf.move_or_copy(new_filepath,
                                           chmod_mode_int=fcmi)
         if success:
@@ -40,6 +56,10 @@ class AcquisitionMoveStep(AcquisitionStep):
                 self.info("%s moved into %s", old_filepath, new_filepath)
             else:
                 self.info("%s copied into %s", xaf.filepath, new_filepath)
+            if self.keep_tags:
+                tags_filepath = new_filepath + self.keep_tags_suffix
+                xaf.write_tags_in_a_file(tags_filepath)
+                XattrFile(new_filepath).clear_tags()
             return True
         else:
             self.warning("Can't move/copy %s to %s", xaf.filepath,
