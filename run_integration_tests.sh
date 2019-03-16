@@ -19,7 +19,7 @@ for rep in $list_rep; do
     if [ -d $rep ]; then
         cd $rep
         if test -s .layerapi2_dependencies; then
-             LAYERS_TO_LOAD=`cat .layerapi2_dependencies |xargs |sed 's/ /,/g'`
+             LAYERS_TO_LOAD=`cat .layerapi2_dependencies |xargs |sed 's/ /,/g'` 
              WRAPPER=0
         else
              WRAPPER=1
