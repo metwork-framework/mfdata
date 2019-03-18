@@ -47,7 +47,7 @@ arg_command-template = "{PLUGIN_DIR}/convert.sh {PATH}"
 ```
 
 
-Then, install (as dev build) the plugin by entering the command `make develop` from the `convert_png` plugin directory:
+Then, install (as dev build) the plugin by entering the command `make develop` from the `convert_png` plugin directory.
 
 Check the plugin is installed, by running `plugins.list`.
 
@@ -87,7 +87,46 @@ The diagram below shows the data flow:
 
 ## Sending a file by FTP
 
-TODO
+Let's now create an plugin from the "ftpsend" MFDATA template.
+
+This new plugin aims to send a JPEG file to a FTP host.
+
+Use the `ftpsend` template to create the plugin : run the following command:
+```bash
+bootstrap_plugin.py create --template=ftpsend ftpsend_to_mybox
+```
+
+Enter the `machine`, `user` and `passwd` when prompting, respectively  the destination host, user and password (press [Enter] for the other parameters to keep the default value).
+
+
+Go to the `ftpsend_to_mybox` sub-directory, open the `config.ini` file and check the parameters: you have just entered:
+```cfg
+# machine : target machine for ftp transfer
+arg_machine = mybox
+# user : target user for ftp transfer
+arg_user = myuser
+# passwd : target passwd for ftp transfer
+arg_passwd = mypassword
+```
+
+Then, install (as dev build) the plugin by entering the command `make develop` from the `ftpsend_to_mybox` plugin directory.
+
+Check the plugin is installed, by running `plugins.list`.
+
+Let's now change the `convert_png` plugin to feed the new `ftpsend_to_mybox` plugin.
+
+Open the `convert_png/convert.sh` script file and change the `inject_file` command as below in the `convert_png` plugin directory) to convert a PNG file to a JPEG file (we will use the ImageMagick convert tool):
+```bash
+#!/bin/bash
+# $1 is the incoming PNG file.
+
+# Convert to JPEG
+convert "$1" "$1.jpeg"
+# Re-inject the converted file to the switch plugin
+inject_file --plugin=ftpsend_to_mybox --step=send "$1.jpeg"
+```
+
+
 
 ## Using the `batch` template
 
