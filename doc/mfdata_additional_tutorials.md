@@ -43,9 +43,18 @@ chmod +x convert.sh
 Now, we have to say to the `convert_png` plugin to launch the `convert.sh` script for each file. To do this, configure the `arg_command-template` parameter in the `convert_png/config.ini`:
 
 ```cfg
-arg_command-template = "{PLUGIN_DIR}/convert.sh {PATH}"
+arg_command-template = {PLUGIN_DIR}/convert.sh {PATH}
 ```
 
+**Caution**: the `arg_command-template` command must NOT be enclosed by quotation marks:
+```cfg
+INVALID:
+arg_command-template = "{PLUGIN_DIR}/convert.sh {PATH}"
+arg_command-template = '{PLUGIN_DIR}/convert.sh {PATH}'
+
+VALID
+arg_command-template = {PLUGIN_DIR}/convert.sh {PATH}
+```
 
 Then, install (as dev build) the plugin by entering the command `make develop` from the `convert_png` plugin directory.
 
@@ -81,13 +90,13 @@ The diagram below shows the data flow:
 2. The `gunzip` plugin uncompress the file
 3. The `gunzip` plugin puts the PNG file in the `incoming` directory. It will be process by the `switch` plugin
 4. The `archive_image` plugin process the PNG file (its `switch_logical_condition` is `True`). The `convert_image` plugin process the PNG file (its `switch_logical_condition` is `True`).
-5. The `convert_image` plugin puts the JPEG file in the `incoming` directory. It will be process by the `switch` plugin
+5. The `convert_image` plugin puts (injects) the JPEG file in the `incoming` directory throw the `switch` plugin (`inject_file --plugin=switch "$1.jpeg"` command in the `convert.sh` script). It will be process by the `switch` plugin.
 6. The `archive_image` plugin process the JPEG file (its `switch_logical_condition` is `True`).
 
 
 ## Sending a file by FTP
 
-Let's now create an plugin from the "ftpsend" MFDATA template.
+Let's now create an plugin from the `ftpsend` MFDATA template.
 
 This new plugin aims to send a JPEG file to a FTP host.
 
@@ -99,7 +108,7 @@ bootstrap_plugin.py create --template=ftpsend ftpsend_to_mybox
 Enter the `machine`, `user` and `passwd` when prompting, respectively  the destination host, user and password (press [Enter] for the other parameters to keep the default value).
 
 
-Go to the `ftpsend_to_mybox` sub-directory, open the `config.ini` file and check the parameters: you have just entered:
+Go to the `ftpsend_to_mybox` sub-directory, open the `config.ini` file and check, in the `[step_send]` section, the parameters you have just entered:
 ```cfg
 # machine : target machine for ftp transfer
 arg_machine = mybox
@@ -126,7 +135,19 @@ convert "$1" "$1.jpeg"
 inject_file --plugin=ftpsend_to_mybox --step=send "$1.jpeg"
 ```
 
+Notice the `ftpsend` template contains two steps (`send`and `reinject`). It has no `main` (default) step. That's why we specify the step to execute in the `inject_file` command.
 
+The diagram below shows the data flow:
+
+![ftpsend_to_mybox](./images/ftpsend_to_mybox.jpg)
+
+
+1. The GZIP file is processed by the `switch` plugin from the MFDATA `incoming` directory
+2. The `gunzip` plugin uncompress the file
+3. The `gunzip` plugin puts the PNG file in the `incoming` directory. It will be process by the `switch` plugin
+4. The `archive_image` plugin process the PNG file (its `switch_logical_condition` is `True`). The `convert_image` plugin process the PNG file (its `switch_logical_condition` is `True`).
+5. The `convert_image` plugin puts (injects) the JPEG file to the `ftpsend_to_mybox` plugin (`inject_file --plugin=ftpsend_to_mybox --step=send  "$1.jpeg""` command in the `convert.sh` script). It will be process by the `ftpsend_to_mybox` plugin.
+6. The `ftpsend_to_mybox` plugin sends the JPEG file to "mybox".
 
 ## Using the `batch` template
 
