@@ -155,5 +155,16 @@ TODO
 
 ## Create a plugin from scratch
 
-TODO
+This tutorial is designed to help you get started with MFDATA plugin from scratch, i.e. without any MFDATA template.
+
+Let's suppose we want to create a plugin to convert a GRIB file into a NetCDF file.
+
+To convert the GRIB file, we will use the `grib_to_netcdf` command from eccodes and available in the Metwork MFEXT package.
+
+In this tutorial:
+- we will call `grib_to_netcdf` command from python code (instead of a shell script).
+- we will save the NetCDF file in a specific directory
+- we will save the "tags attributes" set by the switch plugin to a "tags" file in the same directory as the NetCDF file one.
+
+
 
