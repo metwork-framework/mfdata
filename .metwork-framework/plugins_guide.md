@@ -4,7 +4,7 @@
 
 This document is a generic one about plugins. It covers `mfserv`, `mfdata` and `mfbase` plugins.
 
-## Commands (as corresponding Metwork user)
+## Commands (as corresponding metwork user)
 
 ### `plugins.list`
 

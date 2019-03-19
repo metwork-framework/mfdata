@@ -250,7 +250,7 @@ plugins.list
 
 In practice, the plugins are installed in the `${HOME}/var/plugins` directory.
 
-<u>Note</u> : another way to install the MFDATA `move_image` plugin in a production environment is to put down the `.plugin` file into /etc/metwork.config.d/mfdata/external_plugins. Then to install the plugin, you just restart the MFDATA service by entering `service metwork restart` mfdata command (as root user).
+<u>Note</u> : another way to install the MFDATA `move_image` plugin in a production environment is to put down the `.plugin` file into `/etc/metwork.config.d/mfdata/external_plugins` directory. Then to install the plugin, you just restart the MFDATA service by entering `service metwork restart` mfdata command (as root user).
 
 
 ## Use of the `ungzip` plugin
@@ -359,9 +359,9 @@ The diagram below shows the data flow:
 ![archive_image_flow](./images/archive_image_flow.jpg)
 
 1. The GZIP file is processed by the `switch` plugin from the MFDATA `incoming` directory
-2. The `gunzip` plugin uncompress the file
+2. The `gunzip` plugin uncompresses the file
 3. The `gunzip` plugin puts the PNG file in the `incoming` directory. It will be process by the `switch` plugin
-4. The `archive_image` plugin process the PNG file (the `switch_logical_condition` is `True`)
+4. The `archive_image` plugin processes the PNG file (the `switch_logical_condition` is `True`)
 
 
 Note : the `archive` template allows to keep tags/attributes, about the data flow, into another file. The `.tags` file is stored in the same directory as the archived file directory (same filename with extension `.tag`):

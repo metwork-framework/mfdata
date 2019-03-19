@@ -13,6 +13,12 @@ TODO - curl examples
 
 TODO 
 
+## The `outside` Metwork command
+TODO
+
+## The `crontab` support
+TODO
+
 ## MFDATA - How it works ?
 
 TODO (circus - redis - directory observer)
