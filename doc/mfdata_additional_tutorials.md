@@ -159,22 +159,35 @@ This tutorial is designed to help you get started with MFDATA plugin from scratc
 
 Let's suppose we want to create a plugin to convert a GRIB file into a NetCDF file.
 
-To convert the GRIB file, we will use the `grib_to_netcdf` command from eccodes and available in the Metwork MFEXT 'scientific' package (Note : the MFEXT 'scientific' package must be installed)
-
 In this tutorial:
-- we will call `grib_to_netcdf` command from python code (instead of a shell script).
-- we will save the NetCDF file in a specific directory
-- we will save the "tags attributes" set by the switch plugin to a "tags" file in the same directory as the NetCDF file one.
 
+- we will use:
+	- the `grib_to_netcdf` command from eccodes (see https://confluence.ecmwf.int/display/ECC) and available in the Metwork MFEXT 'scientific' package
+	- the `NetCDF4` Python library (see http://unidata.github.io/netcdf4-python/)
+- we will call `grib_to_netcdf` command from Python code (instead of a shell script).
+- we will save the NetCDF file in a specific directory
+- we will save the "tags attributes" set by the switch plugin to a "tags" file in the same directory as the NetCDF file one
+- we will read some data of the NetCDF file from Python code with the `NetCDF4` Python library
+
+**Important**: 
+- if you are behind a proxy, you have to set `http_proxy` and `https_proxy` environment varaibles in order to be able to download any Python package you may need.
+- you may also need to disable your Linux firewall:
+
+    ```bash
+    systemctl status firewalld
+    systemctl stop firewalld.service
+    systemctl disable firewalld
+
+    ```
 
 ### Create the plugin
 
 In order to create the plugin : run the following command:
 ```bash
-bootstrap_plugin.py create convert_grib
+bootstrap_plugin.py create convert_grib2
 ```
 
-By default, a `main.py` Python script is created in the `convert_grib` directory. It corresponds to the `main` step of the plugin:
+By default, a `main.py` Python script is created in the `convert_grib2` directory. It corresponds to the `main` step of the plugin:
 
 ```python
 #!/usr/bin/env python3
@@ -182,9 +195,9 @@ By default, a `main.py` Python script is created in the `convert_grib` directory
 from acquisition.step import AcquisitionStep
 
 
-class Convert_gribMainStep(AcquisitionStep):
+class Convert_grib2MainStep(AcquisitionStep):
 
-    plugin_name = "convert_grib"
+    plugin_name = "convert_grib2"
     step_name = "main"
 
     def process(self, xaf):
@@ -193,13 +206,13 @@ class Convert_gribMainStep(AcquisitionStep):
 
 
 if __name__ == "__main__":
-    x = Convert_gribMainStep()
+    x = Convert_grib2MainStep()
     x.run()
 
 
 ```
 
-It contains a derived class `Convert_gribMainStep` that inherits of the `AcquisitionStep` class.
+It contains a derived class `Convert_grib2MainStep` that inherits of the `AcquisitionStep` class.
 
 
 The most important method is `process` which overrides the `process` method of the base class `AcquisitionStep`.
@@ -210,11 +223,136 @@ The `xaf` parameter (from `XattrFile` class) is the file to be processed.
 
 ### Set dependencies
 
-To build the plugin, we needs the `eccodes` library (see https://confluence.ecmwf.int/display/ECC) provided in the MFEXT 'scientific' package.
+To build the plugin, we needs the `eccodes` programs and libraries (see https://confluence.ecmwf.int/display/ECC) provided in the MFEXT 'scientific' package.
 
+So, the MFEXT 'scientific' package must be installed. To check this, from the `/home/mfdata/` directory, just enter the `grib_2_netcdf` command:
+```bash
+grib_to_netcdf --help
+```
 
-First, tell the plugin to use MFEXT 'scientific' package. Edit the `.layer2_dependencies` in the `convert_grib` directory and add the `python3_scientific@mfext` at the end:
+Tell the plugin to use MFEXT 'scientific' package. Edit the `.layer2_dependencies` in the `convert_grib2` directory and add the `python3_scientific@mfext` at the end:
 ```cfg
 python3@mfdata
 python3_scientific@mfext
+```
+
+As we will use the `NetCDF4` Python library, we have to add this dependency to the 'Requirements' file (for more details on this topic, see https://pip.readthedocs.io/en/1.1/requirements.html). Edit the `python3_virtualenv_sources/requirements-to-freeze.txt` file and add the following line:
+```cfg
+NetCDF4
+```
+If you don't mention any version of the library, the lastest available library will be use.
+
+You may mention a specific version, you will use:
+```cfg
+NetCDF4==1.4.2
+```
+
+Check the dependencies settings by entering the command `make develop` from the `convert_grib2` plugin directory.
+
+### Develop the `process` method
+
+
+Let's now add Python code into the `process` method to convert input GRIB file to NetCDF.
+
+
+Create a `grib_to_netcdf_command` Python method  which builds and runs the `grib_to_netcdf` command:
+
+```python
+#!/usr/bin/env python3
+import re
+import subprocess
+....
+
+class Convert_grib2MainStep(AcquisitionStep):
+...
+
+    def grib_to_netcdf_command(self, grib_file_path, netcdf_file_path):
+        """
+        Convert GRIB file to Netcdf File
+        :param grib_file_path: GRIB file path to convert
+        :param netcdf_file_path: output NetCDF file path to convert
+        :raise: Exception if something wrong happens
+        """
+
+        # Build the 'grib_to_netcdf' command
+        command_grib_to_netcdf = list()
+        command_grib_to_netcdf.append("grib_to_netcdf")
+        command_grib_to_netcdf.append(grib_file_path)
+        command_grib_to_netcdf.extend("-k 3 -d 0 -D NC_FLOAT".split(' '))
+        command_grib_to_netcdf.append("-o")
+        command_grib_to_netcdf.append(netcdf_file_path)
+
+        self.debug(command_grib_to_netcdf)
+
+        try:
+            # Run the the 'grib_to_netcdf' command
+            result_grib_to_netcdf = subprocess.check_call(command_grib_to_netcdf)
+
+            if result_grib_to_netcdf != 0:
+                msg = 'Unable to execute command {}. Result is: {}.'.format(command_grib_to_netcdf,
+                                                                             result_grib_to_netcdf)
+
+                raise Exception(msg)
+
+        except subprocess.CalledProcessError as e:
+            msg = 'Unable to execute command {}. Reason: {}'.format(command_grib_to_netcdf, str(e))
+            raise Exception( msg, e)
+
+
+```
+
+Now, we need to set the destination directory where the NetCDF files will be stored. In order to to this, we add an argument (parameter) in the section `[step_main]` of our `config/config.ini` plugin file:
+```cfg
+[step_main]
+....
+# Destination directory of the converted NetCDF files
+arg_netcdf_dest-dir = /tmp/my_netcdf
+....
+```
+
+Notice the parameter must always be prefixed by `arg_`.
+
+Then we must override the `add_extra_arguments` method in order to parse our `netcdf_dest-dir` argument:
+
+```python
+class Convert_grib2MainStep(AcquisitionStep):
+
+...
+
+    def add_extra_arguments(self, parser):
+        # Call the parent add_extra_arguments
+        super().add_extra_arguments()
+
+        parser.add_argument('--netcdf-dest-dir', action='store',
+                            default=None,
+                            help='Netcdf destination directory')
+...
+```
+
+We have to check `netcdf-dest-dir` argument is set and create the destination directory. We do this in the `init` method:
+```python
+
+...
+from mfutil import mkdir_p_or_die
+...
+
+class Convert_grib2MainStep(AcquisitionStep):
+...
+    def init(self):
+    	super().init()
+
+        if self.args.netcdf_dest_dir is None:
+            raise Exception('you have to set a netcdf-dest-dir')
+
+        # Create dthe destination directory
+        mkdir_p_or_die(self.args.dest_dir)
+
+...
+```
+
+
+We are only interested in GRIB file. In order to do this, set the `switch_logical_condition` to accept only GRIB file:
+
+```cfg
+switch_logical_condition = ( b'image' in ['latest.switch.main.system_magic'] )
 ```
