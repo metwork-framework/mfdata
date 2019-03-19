@@ -8,7 +8,7 @@ MFDATA documentation
    :name: mfdatatoc
 
    mfdata_intro
-   configure_metwork_repo_package
+   configure_metwork_repo
    install_a_metwork_package
    configure_a_metwork_package
    mfdata_quick_start
