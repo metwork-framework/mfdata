@@ -354,5 +354,8 @@ class Convert_grib2MainStep(AcquisitionStep):
 We are only interested in GRIB file. In order to do this, set the `switch_logical_condition` to accept only GRIB file:
 
 ```cfg
-switch_logical_condition = ( b'image' in ['latest.switch.main.system_magic'] )
+switch_logical_condition = ( x['latest.switch.main.system_magic'].startswith(b'GRIB'))
 ```
+
+By default, the Linux `magic` file doesn't contain any GRIB file identification.
+So, we need to create a `magic` file in the root directory of the `convert_grib2` plugin (for more details abou `magic`, see :doc:`Identify particular types of files <../mfdata_and_magic>`

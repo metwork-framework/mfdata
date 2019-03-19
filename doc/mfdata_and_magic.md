@@ -11,7 +11,7 @@ switch_logical_condition = ( x['latest.switch.main.system_magic'].startswith(b'J
 
 ```
 
-By default, MDFATA uses the  default Linux `magic` file in its attempt to identify the type of a file.
+By default, MDFATA uses the default Linux `magic` file in its attempt to identify the type of a file.
 
 To locate the `magic` file path, enter:
 
