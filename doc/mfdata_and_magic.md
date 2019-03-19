@@ -2,7 +2,7 @@
 
 ## Introduction
 
-In lot of cases, you we have to identify the type of file process by MFDATA
+In lot of cases, you we have to identify the type of file processed by MFDATA
 In most cases, you may want to identify the type of file your MFDATA plugin have to to deal with.
 
 In order to do this, you configure the `switch_logical_condition` parameter in your plugin `config.ini` file, e.g. to identifiy JPEG files

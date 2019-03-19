@@ -87,11 +87,11 @@ The diagram below shows the data flow:
 
 
 1. The GZIP file is processed by the `switch` plugin from the MFDATA `incoming` directory
-2. The `gunzip` plugin uncompress the file
-3. The `gunzip` plugin puts the PNG file in the `incoming` directory. It will be process by the `switch` plugin
-4. The `archive_image` plugin process the PNG file (its `switch_logical_condition` is `True`). The `convert_image` plugin process the PNG file (its `switch_logical_condition` is `True`).
-5. The `convert_image` plugin puts (injects) the JPEG file in the `incoming` directory throw the `switch` plugin (`inject_file --plugin=switch "$1.jpeg"` command in the `convert.sh` script). It will be process by the `switch` plugin.
-6. The `archive_image` plugin process the JPEG file (its `switch_logical_condition` is `True`).
+2. The `gunzip` plugin uncompresses the file
+3. The `gunzip` plugin puts the PNG file in the `incoming` directory. It will be processed by the `switch` plugin
+4. The `archive_image` plugin processes the PNG file (its `switch_logical_condition` is `True`). The `convert_image` plugin processes the PNG file (its `switch_logical_condition` is `True`).
+5. The `convert_image` plugin puts (injects) the JPEG file in the `incoming` directory throw the `switch` plugin (`inject_file --plugin=switch "$1.jpeg"` command in the `convert.sh` script). It will be processed by the `switch` plugin.
+6. The `archive_image` plugin processes the JPEG file (its `switch_logical_condition` is `True`).
 
 
 ## Sending a file by FTP
@@ -144,9 +144,9 @@ The diagram below shows the data flow:
 
 1. The GZIP file is processed by the `switch` plugin from the MFDATA `incoming` directory
 2. The `gunzip` plugin uncompress the file
-3. The `gunzip` plugin puts the PNG file in the `incoming` directory. It will be process by the `switch` plugin
-4. The `archive_image` plugin process the PNG file (its `switch_logical_condition` is `True`). The `convert_image` plugin process the PNG file (its `switch_logical_condition` is `True`).
-5. The `convert_image` plugin puts (injects) the JPEG file to the `ftpsend_to_mybox` plugin (`inject_file --plugin=ftpsend_to_mybox --step=send  "$1.jpeg""` command in the `convert.sh` script). It will be process by the `ftpsend_to_mybox` plugin.
+3. The `gunzip` plugin puts the PNG file in the `incoming` directory. It will be processed by the `switch` plugin
+4. The `archive_image` plugin processes the PNG file (its `switch_logical_condition` is `True`). The `convert_image` plugin processes the PNG file (its `switch_logical_condition` is `True`).
+5. The `convert_image` plugin puts (injects) the JPEG file to the `ftpsend_to_mybox` plugin (`inject_file --plugin=ftpsend_to_mybox --step=send  "$1.jpeg""` command in the `convert.sh` script). It will be processed by the `ftpsend_to_mybox` plugin.
 6. The `ftpsend_to_mybox` plugin sends the JPEG file to "mybox".
 
 ## Using the `batch` template
@@ -159,7 +159,7 @@ This tutorial is designed to help you get started with MFDATA plugin from scratc
 
 Let's suppose we want to create a plugin to convert a GRIB file into a NetCDF file.
 
-To convert the GRIB file, we will use the `grib_to_netcdf` command from eccodes and available in the Metwork MFEXT package.
+To convert the GRIB file, we will use the `grib_to_netcdf` command from eccodes and available in the Metwork MFEXT 'scientific' package (Note : the MFEXT 'scientific' package must be installed)
 
 In this tutorial:
 - we will call `grib_to_netcdf` command from python code (instead of a shell script).
@@ -167,4 +167,54 @@ In this tutorial:
 - we will save the "tags attributes" set by the switch plugin to a "tags" file in the same directory as the NetCDF file one.
 
 
+### Create the plugin
 
+In order to create the plugin : run the following command:
+```bash
+bootstrap_plugin.py create convert_grib
+```
+
+By default, a `main.py` Python script is created in the `convert_grib` directory. It corresponds to the `main` step of the plugin:
+
+```python
+#!/usr/bin/env python3
+
+from acquisition.step import AcquisitionStep
+
+
+class Convert_gribMainStep(AcquisitionStep):
+
+    plugin_name = "convert_grib"
+    step_name = "main"
+
+    def process(self, xaf):
+        self.info("process for file %s" % xaf.filepath)
+        return True
+
+
+if __name__ == "__main__":
+    x = Convert_gribMainStep()
+    x.run()
+
+
+```
+
+It contains a derived class `Convert_gribMainStep` that inherits of the `AcquisitionStep` class.
+
+
+The most important method is `process` which overrides the `process` method of the base class `AcquisitionStep`.
+
+The `process` method is called in the  `run` method of the `AcquisitionStep` class.
+
+The `xaf` parameter (from `XattrFile` class) is the file to be processed.
+
+### Set dependencies
+
+To build the plugin, we needs the `eccodes` library (see https://confluence.ecmwf.int/display/ECC) provided in the MFEXT 'scientific' package.
+
+
+First, tell the plugin to use MFEXT 'scientific' package. Edit the `.layer2_dependencies` in the `convert_grib` directory and add the `python3_scientific@mfext` at the end:
+```cfg
+python3@mfdata
+python3_scientific@mfext
+```
