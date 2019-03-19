@@ -306,11 +306,15 @@ Now, we need to set the destination directory where the NetCDF files will be sto
 [step_main]
 ....
 # Destination directory of the converted NetCDF files
-arg_netcdf_dest-dir = /tmp/my_netcdf
+arg_netcdf-dest-dir = /tmp/my_netcdf
 ....
 ```
 
-Notice the parameter must always be prefixed by `arg_`.
+Notice:
+
+- the parameter must always be prefixed by `arg_`. Then, use '-' and not '_' in your parameter: `arg_netcdf-dest-dir` is valid, but arg_netcdf_dest_dir is NOT valid.
+- the argument parameter as Python varaible will be `self.args.netcdf_dest_dir`.
+
 
 Then we must override the `add_extra_arguments` method in order to parse our `netcdf_dest-dir` argument:
 
@@ -351,11 +355,36 @@ class Convert_grib2MainStep(AcquisitionStep):
 ```
 
 
-We are only interested in GRIB file. In order to do this, set the `switch_logical_condition` to accept only GRIB file:
-
-```cfg
-switch_logical_condition = ( x['latest.switch.main.system_magic'].startswith(b'GRIB'))
-```
+**We are only interested in GRIB file.**
 
 By default, the Linux `magic` file doesn't contain any GRIB file identification.
-So, we need to create a `magic` file in the root directory of the `convert_grib2` plugin (for more details abou `magic`, see :doc:`Identify particular types of files <../mfdata_and_magic>`
+
+So, we need to create a `magic` file in the root directory of the `convert_grib2` plugin (for further about `magic`, see :doc:`Identify particular types of files <../mfdata_and_magic>`.
+
+
+Create a new `magic` file in your plugin directory and add `grib` identification rules:
+```cfg
+# GRIB
+0   string  GRIB    GRIB file
+```
+
+Save the  `magic` file. **CAUTION**: the `magic` file must be named `magic` and must be stored in the plugin root directory (i.e., here, `convert_grib2` directory).
+
+Then, set the `switch_logical_condition` to accept only GRIB file:
+
+```cfg
+switch_logical_condition = (x['latest.switch.main.convert_grib2_magic'].startswith(b'GRIB'))
+```
+
+**CAUTION**: Because we create a custom `magic` file, the condition must be set on `latest.switch.main.convert_grib2_magic` instead of `latest.switch.main.system_magic`:
+
+```cfg
+# CORRECT
+switch_logical_condition = (x['latest.switch.main.convert_grib2_magic'].startswith(b'GRIB file'))
+```
+
+```cfg
+# BAD
+switch_logical_condition = (x['latest.switch.main.system_magic'].startswith(b'GRIB file'))
+```
+

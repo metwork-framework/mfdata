@@ -59,16 +59,21 @@ file example.grib -m magic
 example.grib: GRIB file
 ```
 
-For further inforamtion, check Linux documentation (https://en.wikipedia.org/wiki/File_(command), http://man7.org/linux/man-pages/man3/libmagic.3.html, Linux `man file` and `man magic` commands)
 
+For further information, check Linux documentation (Linux `man file` and `man magic` commands)
+
+**CAUTION**: so that the switch plugin can detect the magic file stored in your plugin root directory, the magic file must be named `magic`.
 
 From now, you are able to identify GRIB files in your plugin, by setting the `switch_logical_condition` parameter in your plugin `config.ini` file:
 ```cfg
-switch_logical_condition = ( x['latest.switch.main.system_magic'].startswith(b'GRIB file') )
+switch_logical_condition = ( x['latest.switch.main.{your_plugin_name}_magic'].startswith(b'GRIB file') )
 
 ```
 or
 ```cfg
-switch_logical_condition = ( x['latest.switch.main.system_magic'].contains(b'GRIB file') )
+switch_logical_condition = ( x['latest.switch.main.{your_plugin_name}_magic'].contains(b'GRIB file') )
 
 ```
+where {your_plugin_name} is the name of your plugin.
+
+**CAUTION**: Because you create a custom `magic` file, the condition must be set on `latest.switch.main.{your_plugin_name}_magic` instead of `latest.switch.main.system_magic`.
