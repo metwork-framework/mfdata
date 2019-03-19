@@ -388,3 +388,4 @@ switch_logical_condition = (x['latest.switch.main.convert_grib2_magic'].startswi
 switch_logical_condition = (x['latest.switch.main.system_magic'].startswith(b'GRIB file'))
 ```
 
+[TO BE CONTINUED]
