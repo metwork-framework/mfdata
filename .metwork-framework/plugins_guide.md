@@ -1,10 +1,6 @@
 # Plugins guide
 
-## General
-
-This document is a generic one about plugins. It covers `mfserv`, `mfdata` and `mfbase` plugins.
-
-## Commands (as corresponding metwork user)
+## Commands
 
 ### `plugins.list`
 
