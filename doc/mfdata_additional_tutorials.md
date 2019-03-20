@@ -583,16 +583,91 @@ We could set an `arg_grib-to-netcdf-options` parameter in  the `convert_grib2/co
 grib_to_netcdf_options=-k 3 -d 0 -D NC_FLOAT
 
 ```
-Each parameter will be will transform into an environment variable whose pattern is syled like this.
+Each parameter will be will transform into an environment variable whose pattern is `{MODULE}_{SECTION_NAME}_{PARAMETER_NAME}`, e.g. `MFDATA_PLUGIN_CONVERT_GRIB2_GRIB_TO_NETCDF_OPTIONS`
 
-In order to get the new value, you have to:
-- either close/reopen your terminal to force a new profile loading or 
-- or restart services by entering `service metwork restartmf data` (as `root` user).
+**CAUTION**:
+- Enviroment variable are always in uppercase.
+- To get the new value, you have to close/reopen your terminal to force a new profile loading.
+- To change daemons and services behaviour (like `nginx` listening port in your example), you have to restart services from a newly restarted terminal or from a `root` user through `service metwork restart` command.
+
 
 For more details, see :doc:`../configure_a_metwork_package`.
 
+Then, if you enter :
+```bash
+env | grep "^${MODULE}_" | grep CONVERT
+```
+
+You should see something like this:
+
+>MFDATA_PLUGIN_CONVERT_GRIB2_GRIB_TO_NETCDF_OPTIONS=-k 3 -d 0 -D NC_FLOAT
+
+
+Adjust the `main.py` code.
+Add a `__init__` method in order to get the `grib_to_netcdf_options` from `MFDATA_PLUGIN_CONVERT_GRIB2_GRIB_TO_NETCDF_OPTIONS` envronment variable:
+```python
+    def __init__(self):
+        self.grib_to_netcdf_options_default = "-k 3 -d 0 -D NC_FLOAT"
+        self.grib_to_netcdf_options = os.environ.get("MFDATA_PLUGIN_CONVERT_GRIB2_GRIB_TO_NETCDF_OPTIONS",
+                                                self.grib_to_netcdf_options_default)
+
+```
+Adjust the `grib_to_netcdf_command` method by replacing the hard-coded grib_to_netcdf options:
+
+```python
+    def grib_to_netcdf_command(self, grib_file_path, netcdf_file_path):
+        """
+        Convert GRIB file to Netcdf File
+        :param grib_file_path: GRIB file path to convert
+        :param netcdf_file_path: output NetCDF file path to convert
+        :raise: Exception if something wrong happens
+        """
+
+        # Build the 'grib_to_netcdf' command
+        command_grib_to_netcdf = list()
+        command_grib_to_netcdf.append("grib_to_netcdf")
+        command_grib_to_netcdf.append(grib_file_path)
+        command_grib_to_netcdf.extend(self.grib_to_netcdf_options.split(' '))
+        command_grib_to_netcdf.append("-o")
+        command_grib_to_netcdf.append(netcdf_file_path)
+
+		...
+
+```
+
+**CAUTION**:
+You could be tempted to declare the `grib_to_netcdf_options` as a class attribute instead of instance attribute, e.g.:
+```python
+
+class Convert_grib2MainStep(AcquisitionStep):
+    plugin_name = "convert_grib2"
+    step_name = "main"
+
+    grib_to_netcdf_options_default = "-k 3 -d 0 -D NC_FLOAT"
+    grib_to_netcdf_options = os.environ.get("MFDATA_PLUGIN_CONVERT_GRIB2_GRIB_TO_NETCDF_OPTIONS",
+                                                self.grib_to_netcdf_options_default)
+    def __init__(self):
+    	pass
+... 
+
+
+
+```
+
+This works, but you have to relead the context at the first time and ecach time the variable value is changed in the `/home/mfdata/config.ini`, by stopping en starting again MFDATA:
+```cfg
+mfdata.stop
+```
+then
+```cfg
+mfdata.start
+```
+
+TODO override failure policy adn failure_policy_move_dest_dir,
+TODO add/override after method.
+
+_ _ _
+
 :download:`Full convert_grib2 Python example </_downloads/convert_grib2/main.py>`.
-
-
 
 
