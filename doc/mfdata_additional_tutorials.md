@@ -391,6 +391,7 @@ switch_logical_condition = (x['latest.switch.main.convert_grib2_magic'].startswi
 # BAD
 switch_logical_condition = (x['latest.switch.main.system_magic'].startswith(b'GRIB file'))
 ```
+_ _ _
 
 **Fill in the** `process` **method**:
 
@@ -561,7 +562,6 @@ Check a `.tags` file has been created next to the NetCDF file in the `netcdf-des
 0.switch.main.exit_step = 2019-03-20T11:30:42:006251  
 0.switch.main.process_status = ok  
 0.switch.main.system_magic = data  
-0.switch.main.wfsingestion_magic = data  
 1.convert_grib2.main.enter_step = 2019-03-20T11:30:42:018932  
 first.core.original_basename = AROME_SP1_201812030600.grib2  
 first.core.original_dirname = incoming  
@@ -569,4 +569,11 @@ first.core.original_uid = 463d0dc5826a4143a427d0b6b1e3245f
 latest.core.step_counter = 1  
 latest.switch.main.convert_grib2_magic = GRIB file  
 latest.switch.main.system_magic = data  
+
+
+_ _ _
+
+**Now, we are going to learn another way to configure a plugin.**
+
+We are going to improve our plugin to be able to customize the configuration of the `grib_to_netcdf` command. As we saw previously, the `grib_to_netcdf` command has optional parameter, we have hard-coded (i.e `"-k 3 -d 0 -D NC_FLOAT"`).
 
