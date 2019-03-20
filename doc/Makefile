@@ -10,6 +10,7 @@ BUILDDIR      = _build
 
 RST_FILES=$(shell ls *.md |grep -v tempo.md 2>/dev/null |sed 's/\.md$$/\.rst/g')
 IPYNB_FILES=$(shell ls *.ipynb 2>/dev/null |sed 's/\.ipynb$$/\.mdtemp/g')
+ADD_DOCFILES=$(shell cp -f ../.metwork-framework/*.md .)
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -35,12 +36,14 @@ superclean:
 	rm -f layer_*.md
 	rm -f layer_*.rst
 
+
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-html: $(IPYNB_FILES) $(RST_FILES) Makefile
+html: $(ADD_DOCFILES) $(IPYNB_FILES) $(RST_FILES) Makefile
 	rm -f tempo.*
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 clean: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	rm -f tempo.*
 	rm -f layer_*.rst
+
