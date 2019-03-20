@@ -453,7 +453,7 @@ You mays also check the logs in the `step_convert_grib2_main.stdout` and `step_c
 
 _ _ _
 
-**Did the conversion fail ?** *Possible reasons are due to some resource limits configured in `config/config.ini` file of the plugin. In order to fix these issues, you have to increase the resouce limits, especially the `rlimit_as` and/or `rlimit_fsize` parameter:*
+**Did the conversion fail ?** *Possible reasons are due to some resource limits configured in `config/config.ini` file of the plugin. In order to fix these issues, you have to increase the resouce limits, especially the* `rlimit_as` *and/or* `rlimit_fsize` *parameter:*
 
 ```cfg
 ...
@@ -497,8 +497,13 @@ Edit the `main.py` Python script and add some code in `add_extra_arguments` and 
 from xattrfile import XattrFile
 ...
 
-   def add_extra_arguments(self, parser):
-		...
+    def add_extra_arguments(self, parser):
+        # Call the parent add_extra_arguments
+        super().add_extra_arguments(parser)
+
+        parser.add_argument('--netcdf-dest-dir', action='store',
+                            default=None,
+                            help='Netcdf destination directory')
         parser.add_argument('--keep-tags', action='store',
                             type=bool, default=True,
                             help='keep tags/attributes into another file ?')
@@ -506,6 +511,7 @@ from xattrfile import XattrFile
                             default=".tags",
                             help='if keep-tags=True, suffix to add to the '
                                  'filename to keep tags')
+...
 
    def process(self, xaf):
         """
@@ -545,3 +551,22 @@ from xattrfile import XattrFile
         return True
 
 ```
+
+Build the plugin (`make develop`) and inject your GRIB file again.
+
+Check a `.tags` file has been created next to the NetCDF file in the `netcdf-dest-dir` directory. The content of the `.tags` file looks like:
+
+>0.switch.main.convert_grib2_magic = GRIB file  
+0.switch.main.enter_step = 2019-03-20T11:30:41:946203  
+0.switch.main.exit_step = 2019-03-20T11:30:42:006251  
+0.switch.main.process_status = ok  
+0.switch.main.system_magic = data  
+0.switch.main.wfsingestion_magic = data  
+1.convert_grib2.main.enter_step = 2019-03-20T11:30:42:018932  
+first.core.original_basename = AROME_SP1_201812030600.grib2  
+first.core.original_dirname = incoming  
+first.core.original_uid = 463d0dc5826a4143a427d0b6b1e3245f  
+latest.core.step_counter = 1  
+latest.switch.main.convert_grib2_magic = GRIB file  
+latest.switch.main.system_magic = data  
+
