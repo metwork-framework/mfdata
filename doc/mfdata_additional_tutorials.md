@@ -225,10 +225,12 @@ The `xaf` parameter (from `XattrFile` class) is the file to be processed.
 
 To build the plugin, we needs the `eccodes` programs and libraries (see https://confluence.ecmwf.int/display/ECC) provided in the MFEXT 'scientific' package.
 
-So, the MFEXT 'scientific' package must be installed. To check this, from the `/home/mfdata/` directory, just enter the `grib_2_netcdf` command:
+So, the MFEXT 'scientific' package must be installed. To check this, from the `/home/mfdata/` directory, just enter the `grib_to_netcdf` command:
 ```bash
 grib_to_netcdf --help
 ```
+
+For further about `grib_to_netcdf`, see https://confluence.ecmwf.int/pages/viewpage.action?pageId=23693254
 
 Tell the plugin to use MFEXT 'scientific' package. Edit the `.layer2_dependencies` in the `convert_grib2` directory and add the `python3_scientific@mfext` at the end:
 ```cfg
@@ -255,7 +257,7 @@ Check the dependencies settings by entering the command `make develop` from the 
 Let's now add Python code into the plugin to convert input GRIB file to NetCDF.
 
 
-**Create a `grib_to_netcdf_command`** Python method  which builds and runs the ecCodes `grib_to_netcdf` command:
+**Create a** `grib_to_netcdf_command` **Python method** which builds and runs the ecCodes `grib_to_netcdf` command:
 
 ```python
 #!/usr/bin/env python3
@@ -300,6 +302,8 @@ class Convert_grib2MainStep(AcquisitionStep):
 
 
 ```
+
+_ _ _
 
 Now, we need to **set the destination directory** where the NetCDF files will be stored. In order to to this, we add an argument (parameter) in the section `[step_main]` of our `config/config.ini` plugin file:
 ```cfg
@@ -353,7 +357,7 @@ class Convert_grib2MainStep(AcquisitionStep):
 
 ...
 ```
-
+- - -
 
 **We are only interested in GRIB file.** 
 
@@ -362,7 +366,7 @@ By default, the Linux `magic` file doesn't contain any GRIB file identification.
 So, we need to create a `magic` file in the root directory of the `convert_grib2` plugin (for further about `magic`, see :doc:`Identify particular types of files <../mfdata_and_magic>`.
 
 
-**Create a new `magic` file** in your plugin directory and add `grib` identification rules:
+**Create a new** `magic` **file** in your plugin directory and add `grib` identification rules:
 ```cfg
 # GRIB
 0   string  GRIB    GRIB file
@@ -370,7 +374,7 @@ So, we need to create a `magic` file in the root directory of the `convert_grib2
 
 **CAUTION**: the `magic` file must be named `magic` and must be stored in the plugin root directory (i.e., here, `convert_grib2` directory).
 
-Then, **set the `switch_logical_condition`** to accept only GRIB file:
+Then, **set the** `switch_logical_condition` to accept only GRIB file:
 
 ```cfg
 switch_logical_condition = (x['latest.switch.main.convert_grib2_magic'].startswith(b'GRIB file'))
@@ -390,8 +394,154 @@ switch_logical_condition = (x['latest.switch.main.system_magic'].startswith(b'GR
 
 **Fill in the** `process` **method**:
 
+```python
+
+...
+import os
+...
+
+ 
+   def process(self, xaf):
+        """
+        This function:
+        - Convert a GRIB file into a NetCDF file.
+        - Read some data of the NetCDF file
+
+        :param xaf: the input GRIB data file as an XattrFile object
+        :return: True, if the process is successful, False, if the process failed
+        """
+ 
+        # xaf.filepath is the internal file name created by the switch plugin into a temporary directory
+        self.info("process for file %s" % xaf.filepath)
+
+        try:
+            # In order to get the original GRIB file name, call AcquisitionStep.get_original_basename
+            original_grib_filename = str(AcquisitionStep.get_original_basename(self, xaf))
+
+            # Build the output NetCDF file name from the input file name,
+            netcdf_filename = re.sub(r'(\.grb|\.grib2|\.grib)$', '', str(original_grib_filename)) + ".nc"
+            netcdf_filepath = os.path.normpath(os.path.join(self.args.netcdf_dest_dir, netcdf_filename))
+
+            # Convert Grib to Netcdf
+            self.grib_to_netcdf_command(xaf.filepath, netcdf_filepath)
+
+        except Exception as e:
+            self.exception(str(e))
+            return False
+
+        return True
+
 ```
 
+Then, **install (as dev build) the plugin** by entering the command `make develop` from the `convert_grib2` plugin directory.
+
+Check the plugin is installed, by running `plugins.list`.
+
+**Run the plugin**: inject a GRIB file :
+
+```bash
+inject_file --incomming /tmp/my_grib_file.grib2
+```
+
+Check the NetCDF file have been created and stored in the `netcdf-dest-dir` directory. You mays check the content of the NetCDF file through th `ncdump` commands (available in MFEXT package):
+
+```bash
+ncdump -h /tmp/my_netcdf/my_grib_file.nc
+```
+
+You mays also check the logs in the `step_convert_grib2_main.stdout` and `step_convert_grib2_main.stderr` in the `/home/mfdata/log` directory.
+
+_ _ _
+
+**Did the conversion fail ?** *Possible reasons are due to some resource limits configured in `config/config.ini` file of the plugin. In order to fix these issues, you have to increase the resouce limits, especially the `rlimit_as` and/or `rlimit_fsize` parameter:*
+
+```cfg
+...
+# resource limit for each step process
+# rlimit_as => maximum area (in bytes) of address space which may be taken by the process.
+# rlimit_nofile => maximum number of open file descriptors for the current process.
+# rlimit_stack => maximum size (in bytes) of the call stack for the current process.
+#     This only affects the stack of the main thread in a multi-threaded process.
+# rlimit_core => maximum size (in bytes) of a core file that the current process can create.
+# rlimit_fsize =>  maximum size of a file which the process may create.
+# (empty value means no limit)
+#
+rlimit_as = 10000000000
+rlimit_nofile = 1000
+rlimit_stack = 10000000
+rlimit_core = 10000000000
+rlimit_fsize = 10000000000
+```
+
+*After editing the* `config.ini` *file, just rebuild the plugin with the* `make develop` *command.*
+
+_ _ _
+
+Now, we add some code to **store tags/attributes in an additional file**.
+
+Edit the `convert_grib2/config.ini`and add the following configuration:
+
+```cfg
+# Keep tags/attributes in an additional file
+arg_keep_tags = True
+
+# If keep_tags=1, the suffix to add to the filename to store tags
+arg_keep_tags_suffix = .tags
 
 ```
 
+Edit the `main.py` Python script and add some code in `add_extra_arguments` and `process` methods so that it to look like this:
+
+```python
+...
+from xattrfile import XattrFile
+...
+
+   def add_extra_arguments(self, parser):
+		...
+        parser.add_argument('--keep-tags', action='store',
+                            type=bool, default=True,
+                            help='keep tags/attributes into another file ?')
+        parser.add_argument('--keep-tags-suffix', action='store',
+                            default=".tags",
+                            help='if keep-tags=True, suffix to add to the '
+                                 'filename to keep tags')
+
+   def process(self, xaf):
+        """
+        This function:
+        - Convert a GRIB file into a NetCDF file.
+        - Read some data of the NetCDF file
+
+        :param xaf: the input GRIB data file as an XattrFile object
+        :return: True, if the process is successful, False, if the process failed
+        """
+
+        # xaf.filepath is the internal file name created by the switch plugin into a temporary directory
+        self.info("process for file %s" % xaf.filepath)
+
+        try:
+            # In order to get the original GRIB file name, call AcquisitionStep.get_original_basename
+            original_grib_filename = str(AcquisitionStep.get_original_basename(self, xaf))
+
+            # Build the output NetCDF file name from the input file name,
+            netcdf_filename = re.sub(r'(\.grb|\.grib2|\.grib)$', '', str(original_grib_filename)) + ".nc"
+            netcdf_filepath = os.path.normpath(os.path.join(self.args.netcdf_dest_dir, netcdf_filename))
+
+            # Convert Grib to Netcdf
+            self.grib_to_netcdf_command(xaf.filepath, netcdf_filepath)
+
+            # We tags/attributes in a specific file
+            if self.args.keep_tags:
+                tags_filepath = netcdf_filepath + self.args.keep_tags_suffix
+                xaf.write_tags_in_a_file(tags_filepath)
+
+            XattrFile(netcdf_filepath).clear_tags()
+
+        except Exception as e:
+            self.exception(str(e))
+            return False
+
+        return True
+
+```
