@@ -575,5 +575,24 @@ _ _ _
 
 **Now, we are going to learn another way to configure a plugin.**
 
-We are going to improve our plugin to be able to customize the configuration of the `grib_to_netcdf` command. As we saw previously, the `grib_to_netcdf` command has optional parameter, we have hard-coded (i.e `"-k 3 -d 0 -D NC_FLOAT"`).
+We are going to improve our plugin to be able to customize the configuration of the `grib_to_netcdf` command. As we saw previously, the `grib_to_netcdf` command has optional parameter, we hard-coded (i.e `"-k 3 -d 0 -D NC_FLOAT"`).
+
+We could set an `arg_grib-to-netcdf-options` parameter in  the `convert_grib2/config.ini`, but here, we set this parameter in the MFDATA configuration file `/home/mfdata/config.ini`. This configuration file can contain a section per plugin. The secton name must be named `[plugin_{plugin_name}]`. Edit `/home/mfdata/config.ini` and add the following section and parameter at the ne of the file:
+```cfg
+[plugin_convert_grib2]
+grib_to_netcdf_options=-k 3 -d 0 -D NC_FLOAT
+
+```
+Each parameter will be will transform into an environment variable whose pattern is syled like this.
+
+In order to get the new value, you have to:
+- either close/reopen your terminal to force a new profile loading or 
+- or restart services by entering `service metwork restartmf data` (as `root` user).
+
+For more details, see :doc:`../configure_a_metwork_package`.
+
+:download:`Full convert_grib2 Python example </_downloads/convert_grib2/main.py>`.
+
+
+
 
