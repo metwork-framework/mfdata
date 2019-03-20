@@ -249,13 +249,13 @@ NetCDF4==1.4.2
 
 Check the dependencies settings by entering the command `make develop` from the `convert_grib2` plugin directory.
 
-### Develop the `process` method
+### Fill in the plugin
 
 
-Let's now add Python code into the `process` method to convert input GRIB file to NetCDF.
+Let's now add Python code into the plugin to convert input GRIB file to NetCDF.
 
 
-Create a `grib_to_netcdf_command` Python method  which builds and runs the `grib_to_netcdf` command:
+**Create a `grib_to_netcdf_command`** Python method  which builds and runs the ecCodes `grib_to_netcdf` command:
 
 ```python
 #!/usr/bin/env python3
@@ -301,7 +301,7 @@ class Convert_grib2MainStep(AcquisitionStep):
 
 ```
 
-Now, we need to set the destination directory where the NetCDF files will be stored. In order to to this, we add an argument (parameter) in the section `[step_main]` of our `config/config.ini` plugin file:
+Now, we need to **set the destination directory** where the NetCDF files will be stored. In order to to this, we add an argument (parameter) in the section `[step_main]` of our `config/config.ini` plugin file:
 ```cfg
 [step_main]
 ....
@@ -313,10 +313,10 @@ arg_netcdf-dest-dir = /tmp/my_netcdf
 Notice:
 
 - the parameter must always be prefixed by `arg_`. Then, use '-' and not '_' in your parameter: `arg_netcdf-dest-dir` is valid, but arg_netcdf_dest_dir is NOT valid.
-- the argument parameter as Python varaible will be `self.args.netcdf_dest_dir`.
+- the argument parameter as Python variable will be `self.args.netcdf_dest_dir`.
 
 
-Then we must override the `add_extra_arguments` method in order to parse our `netcdf_dest-dir` argument:
+Then, we must override the `add_extra_arguments` method in order to parse our `netcdf_dest-dir` argument:
 
 ```python
 class Convert_grib2MainStep(AcquisitionStep):
@@ -325,7 +325,7 @@ class Convert_grib2MainStep(AcquisitionStep):
 
     def add_extra_arguments(self, parser):
         # Call the parent add_extra_arguments
-        super().add_extra_arguments()
+        super().add_extra_arguments(parser)
 
         parser.add_argument('--netcdf-dest-dir', action='store',
                             default=None,
@@ -355,25 +355,25 @@ class Convert_grib2MainStep(AcquisitionStep):
 ```
 
 
-**We are only interested in GRIB file.**
+**We are only interested in GRIB file.** 
 
 By default, the Linux `magic` file doesn't contain any GRIB file identification.
 
 So, we need to create a `magic` file in the root directory of the `convert_grib2` plugin (for further about `magic`, see :doc:`Identify particular types of files <../mfdata_and_magic>`.
 
 
-Create a new `magic` file in your plugin directory and add `grib` identification rules:
+**Create a new `magic` file** in your plugin directory and add `grib` identification rules:
 ```cfg
 # GRIB
 0   string  GRIB    GRIB file
 ```
 
-Save the  `magic` file. **CAUTION**: the `magic` file must be named `magic` and must be stored in the plugin root directory (i.e., here, `convert_grib2` directory).
+**CAUTION**: the `magic` file must be named `magic` and must be stored in the plugin root directory (i.e., here, `convert_grib2` directory).
 
-Then, set the `switch_logical_condition` to accept only GRIB file:
+Then, **set the `switch_logical_condition`** to accept only GRIB file:
 
 ```cfg
-switch_logical_condition = (x['latest.switch.main.convert_grib2_magic'].startswith(b'GRIB'))
+switch_logical_condition = (x['latest.switch.main.convert_grib2_magic'].startswith(b'GRIB file'))
 ```
 
 **CAUTION**: Because we create a custom `magic` file, the condition must be set on `latest.switch.main.convert_grib2_magic` instead of `latest.switch.main.system_magic`:
@@ -388,4 +388,10 @@ switch_logical_condition = (x['latest.switch.main.convert_grib2_magic'].startswi
 switch_logical_condition = (x['latest.switch.main.system_magic'].startswith(b'GRIB file'))
 ```
 
-[TO BE CONTINUED]
+**Fill in the** `process` **method**:
+
+```
+
+
+```
+
