@@ -1,6 +1,9 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+### Docs
+- update MFDATA documentation
+
 ### Feat
 - add an integration test with injection of a thousand files
 - add drop-tags option to move step (and keep-tags* options also)
