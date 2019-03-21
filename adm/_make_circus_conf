@@ -16,7 +16,6 @@ def make_watcher_conf(plugin_configuration_file):
     parser = ExtendedConfigParser(config=CONFIG, strict=False,
                                   inheritance='im', interpolation=None)
     plugin_name = os.path.basename(os.path.dirname(plugin_configuration_file))
-    plugin_dir = os.path.dirname(plugin_configuration_file)
     parser.read(plugin_configuration_file)
     steps = [x.replace("step_", "", 1).split(':')[0] for x in parser.sections()
              if x.startswith("step_")]
@@ -55,12 +54,21 @@ def make_watcher_conf(plugin_configuration_file):
             rlimit_core = parser.getint(section, "rlimit_core")
         if parser.has_option(section, "rlimit_fsize"):
             rlimit_fsize = parser.getint(section, "rlimit_fsize")
+        if numprocesses > 1:
+            std_prefix = \
+                "{{MODULE_RUNTIME_HOME}}/log/step_%s_%s_worker$(circus.wid)" % \
+                (plugin_name, step)
+
+        else:
+            std_prefix = "{{MODULE_RUNTIME_HOME}}/log/step_%s_%s" % \
+                (plugin_name, step)
+        stdout = std_prefix + ".stdout"
+        stderr = std_prefix + ".stderr"
         output.append("")
         output.append("[watcher:step.%s.%s]" % (plugin_name, step))
-        output.append("cmd = plugin_wrapper")
-        output.append("args = %s "
-                      "-- %s %s" %
-                      (plugin_name,
+        output.append("cmd = std_redirect")
+        output.append("args = -o %s -e %s -- plugin_wrapper %s -- %s %s" %
+                      (stdout, stderr, plugin_name,
                        envtpl.render_string(cmd), envtpl.render_string(args)))
         output.append("numprocesses = %i" % numprocesses)
         output.append("graceful_timeout = %i" % graceful_timeout)
@@ -82,28 +90,12 @@ def make_watcher_conf(plugin_configuration_file):
             output.append("rlimit_core = %i" % rlimit_core)
         if rlimit_fsize:
             output.append("rlimit_fsize = %i" % rlimit_fsize)
-        if numprocesses > 1:
-            output.append("stdout_stream.class = "
-                          "circus_streammultifiles.MultiFilesStream")
-            output.append("stderr_stream.class = "
-                          "circus_streammultifiles.MultiFilesStream")
-            output.append("stdout_stream.numprocesses = %i" % numprocesses)
-            output.append("stderr_stream.numprocesses = %i" % numprocesses)
-            output.append("stdout_stream.filename = "
-                          "{{MODULE_RUNTIME_HOME}}/log/"
-                          "step_%s_%s_slot{SLOT}.stdout" % (plugin_name, step))
-            output.append("stderr_stream.filename = "
-                          "{{MODULE_RUNTIME_HOME}}/log/"
-                          "step_%s_%s_slot{SLOT}.stderr" % (plugin_name, step))
-        else:
-            output.append("stdout_stream.class = FileStream")
-            output.append("stderr_stream.class = FileStream")
-            output.append("stdout_stream.filename = "
-                          "{{MODULE_RUNTIME_HOME}}/log/"
-                          "step_%s_%s.stdout" % (plugin_name, step))
-            output.append("stderr_stream.filename = "
-                          "{{MODULE_RUNTIME_HOME}}/log/"
-                          "step_%s_%s.stderr" % (plugin_name, step))
+        output.append("stdout_stream.class = FileStream")
+        output.append("stderr_stream.class = FileStream")
+        output.append("stdout_stream.filename = "
+                      "{{MODULE_RUNTIME_HOME}}/log/circus.log")
+        output.append("stderr_stream.filename = "
+                      "{{MODULE_RUNTIME_HOME}}/log/circus.log")
         if before_start:
             output.append("hooks.before_start = %s" % before_start)
 
