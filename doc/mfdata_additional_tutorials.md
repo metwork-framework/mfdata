@@ -663,7 +663,44 @@ then
 mfdata.start
 ```
 
-TODO override failure policy adn failure_policy_move_dest_dir,
+### Override a configuration parameter
+
+We are going to see how to override a configuration parameter in a plugin (inheritance).
+
+In our plugin, in case of execution failure, we would like to move the input GRIB file to a specific directory (e.g. `/tmp/convert-grib2-failure`). In order to do his , we will use the `failure-policy` and `failure-policy-move-dest-dir` options defined in the base class `AcquisitionStep`.
+
+The default value of `failure-policy` is `keep`.
+The expected value for are
+- delete => we delete the file
+- keep => we keep the file in trash
+- move => we move the file in another directory. In this case, the `failure-policy-move-dest-dir` must be set.
+
+Edit the `convert_grib2/config.ini` file and add in the `[step_main]` section:
+
+```cfg
+arg_failure-policy = move
+arg_failure-policy-move-dest-dir = /tmp/convert-grib2-failure
+```
+So, we have to override the value to `move'.
+
+
+To be  bable to raise an error in our plugin process, you may decrease the value of the `rlimit_fsize` option in the `[step_main]` section of the `convert_grib2/config.ini` file, e.g. 
+```cfg
+...
+# rlimit_fsize =>  maximum size of a file which the process may create.
+rlimit_fsize = 100000
+```
+
+Build the plugin (`make develop`) and inject your GRIB file again.
+
+You should see in the logs file `log/step_convert_grib2_main.stderr`  the `grib_to_netcdf` command fails.
+
+Check the input file has been moved to the `/tmp/convert-grib2-failure`.
+
+Now, you may reset `rlimit_fsize` value to your previous value (e.g. 1000000000)
+
+Note: in this tutorial, another way to trigger the failure policy is to always force a `return False` in th `process` method.
+
 TODO add/override after method.
 
 _ _ _
