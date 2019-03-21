@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
+import os
 import re
 import subprocess
-import os
 
-from mfutil import mkdir_p_or_die
-from xattrfile import XattrFile
 from acquisition.step import AcquisitionStep
+from mfutil import mkdir_p_or_die
+from netCDF4 import Dataset
+from xattrfile import XattrFile
 
 
 class Convert_grib2MainStep(AcquisitionStep):
     plugin_name = "convert_grib2"
     step_name = "main"
 
-    grib_to_netcdf_options = "-k 3 -d 0 -D NC_FLOAT"
+    def __init__(self):
+        self.grib_to_netcdf_options_default = "-k 3 -d 0 -D NC_FLOAT"
+        self.grib_to_netcdf_options = os.environ.get("MFDATA_PLUGIN_CONVERT_GRIB2_GRIB_TO_NETCDF_OPTIONS",
+                                                     self.grib_to_netcdf_options_default)
 
     def init(self):
         super().init()
@@ -47,7 +51,7 @@ class Convert_grib2MainStep(AcquisitionStep):
         command_grib_to_netcdf = list()
         command_grib_to_netcdf.append("grib_to_netcdf")
         command_grib_to_netcdf.append(grib_file_path)
-        command_grib_to_netcdf.extend("-k 3 -d 0 -D NC_FLOAT".split(' '))
+        command_grib_to_netcdf.extend(self.grib_to_netcdf_options.split(' '))
         command_grib_to_netcdf.append("-o")
         command_grib_to_netcdf.append(netcdf_file_path)
 
@@ -56,7 +60,7 @@ class Convert_grib2MainStep(AcquisitionStep):
         try:
 
             # Run the the 'grib_to_netcdf' command
-            result_grib_to_netcdf = subprocess.check_call(command_grib_to_netcdf, stderr=file_out)
+            result_grib_to_netcdf = subprocess.check_call(command_grib_to_netcdf)
 
             if result_grib_to_netcdf != 0:
                 msg = 'Unable to execute command {}. Result is: {}.'.format(command_grib_to_netcdf,
@@ -76,9 +80,6 @@ class Convert_grib2MainStep(AcquisitionStep):
         :param xaf: the input GRIB data file as an XattrFile object
         :return: True, if the process is successful, False, if the process failed
         """
-        self.info("TAGS {}".format(xaf.tags))
-        self.info("BASENAME {}".format(xaf.basename()))
-        self.info("ARGS {}".format(self.args))
 
         # xaf.filepath is the internal file name created by the switch plugin into a temporary directory
         self.info("process for file %s" % xaf.filepath)
@@ -101,11 +102,31 @@ class Convert_grib2MainStep(AcquisitionStep):
 
             XattrFile(netcdf_filepath).clear_tags()
 
+            # Read the output NetCDF
+            # Log the dimensions name and variable names
+            netcdf_dataset = Dataset(netcdf_filepath, "r")
+
+            self.info("Dimensions of the Netcdf dataset {}:".format(netcdf_filepath))
+            for dim_name in netcdf_dataset.dimensions:
+                self.info(dim_name)
+
+            self.info("Variables of the Netcdf dataset {}:".format(netcdf_filepath))
+            for var_name in netcdf_dataset.variables:
+                self.info(var_name)
+
+
         except Exception as e:
             self.exception(str(e))
             return False
 
         return True
+
+    def after(self, status):
+        """
+        Method called after the process execution
+        :param status: status of the process execution
+        """
+        self.info("GRIB to NetCDF conversion ended with status {}".format(status))
 
 
 if __name__ == "__main__":

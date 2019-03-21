@@ -242,9 +242,9 @@ As we will use the `NetCDF4` Python library, we have to add this dependency to t
 ```cfg
 NetCDF4
 ```
-If you don't mention any version of the library, the lastest available library will be use.
+If you don't mention any version of the library, the latest available version will be use.
 
-You may mention a specific version, you will use:
+You may mention a specific version:
 ```cfg
 NetCDF4==1.4.2
 ```
@@ -663,6 +663,39 @@ then
 mfdata.start
 ```
 
+_ _ _
+
+We will now use the `NetCDF4` library to read the NetCDF file.
+
+Add the following instructions in the `Convert_grib2MainStep` class and the `process` method:
+```python
+...
+from netCDF4 import Dataset
+...
+     def process(self, xaf):
+     ...
+        try:
+        	...
+
+            # Read the output NetCDF
+            # Log the dimensions name and variable names
+            netcdf_dataset = Dataset(netcdf_filepath, "r")
+
+            self.info("Dimensions of the Netcdf dataset {}:".format(netcdf_filepath))
+            for dim_name in netcdf_dataset.dimensions:
+                self.info(dim_name)
+
+            self.info("Variables of the Netcdf dataset {}:".format(netcdf_filepath))
+            for var_name in netcdf_dataset.variables:
+                self.info(var_name)
+
+```
+
+
+Build the plugin (`make develop`) and inject your GRIB file again.
+
+Check the the logs file `log/step_convert_grib2_main.stdout`.
+
 ### Override a configuration parameter
 
 We are going to see how to override a configuration parameter in a plugin (inheritance).
@@ -681,10 +714,11 @@ Edit the `convert_grib2/config.ini` file and add in the `[step_main]` section:
 arg_failure-policy = move
 arg_failure-policy-move-dest-dir = /tmp/convert-grib2-failure
 ```
-So, we have to override the value to `move'.
+So, we have to override the value to `move`.
 
 
-To be  bable to raise an error in our plugin process, you may decrease the value of the `rlimit_fsize` option in the `[step_main]` section of the `convert_grib2/config.ini` file, e.g. 
+To be  bable to raise an error in our plugin process, you may decrease the value of the `rlimit_fsize` option in the `[step_main]` section of the `convert_grib2/config.ini` file, e.g.:
+
 ```cfg
 ...
 # rlimit_fsize =>  maximum size of a file which the process may create.
@@ -701,10 +735,26 @@ Now, you may reset `rlimit_fsize` value to your previous value (e.g. 1000000000)
 
 Note: in this tutorial, another way to trigger the failure policy is to always force a `return False` in th `process` method.
 
-TODO add/override after method.
+For further about overriding a configuration option, refer to  :doc:`../configure_a_metwork_package`.
+
+
+### Using the `after` callback
+
+An `after` callback is called after the `process` method execution whether the method failed or not.
+
+If you consider performing some actions after the `process`  execution, just define (ovveride) the `after` method in the `Convert_grib2MainStep` class, e.g.:
+```python
+    def after(self, status):
+        """
+        Method called after the process execution
+        :param status: status of the process execution
+        """
+        self.info("GRIB to NetCDF conversion ended with status {}".format(status))
+```
 
 _ _ _
 
 :download:`Full convert_grib2 Python example </_downloads/convert_grib2/main.py>`.
 
+:download:`GRIB file example </_downloads/AROME_201811280600.grib2>`.
 
