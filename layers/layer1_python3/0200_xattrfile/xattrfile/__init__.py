@@ -521,6 +521,8 @@ class XattrFile(object):
             self.copy(new_filepath, tmp_suffix=tmp_suffix,
                       chmod_mode_int=chmod_mode_int)
             self.delete()
+            self.__set_filepath(new_filepath)
+            self._read_tags()
             return (True, False)
         except Exception:
             if hardlink_mode:
