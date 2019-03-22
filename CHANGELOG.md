@@ -3,6 +3,7 @@
 
 ### Docs
 - update MFDATA documentation
+- update MFDATA tutorials
 
 ### Feat
 - add an integration test with injection of a thousand files
