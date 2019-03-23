@@ -1,6 +1,11 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+<a name="v0.5.8"></a>
+## [v0.5.8] - 2019-03-22
+### Fix
+- fix move_or_copy feature when src and dst are not on the same FS
+
 <a name="v0.5.7"></a>
 ## [v0.5.7] - 2019-03-15
 ### Feat
@@ -42,11 +47,11 @@
 <a name="v0.5.2"></a>
 ## [v0.5.2] - 2019-01-31
 
-<a name="v0.5.1"></a>
-## [v0.5.1] - 2019-01-29
-
 <a name="v0.5.0"></a>
 ## [v0.5.0] - 2019-01-29
+
+<a name="v0.5.1"></a>
+## [v0.5.1] - 2019-01-29
 ### Feat
 - Changes in management of layer dependencies and metapackage names (only minimal and full) Associated with changes in mfext _metwork.spec, this reduces the number of layers installed by default when installing mfdata (only necessary mfext layers are installed) Metapackage metwork-mfdata-minimal only installs the necessary layers for mfdata to work properly Metapackage metwork-mfdata or metwork-mfserv-full installs all mfdata layers
 - execute integration tests directly from mfdata module and lauch them on a pull request on the module
