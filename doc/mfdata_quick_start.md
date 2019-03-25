@@ -56,9 +56,9 @@ Set the destination directory `dest-dir` parameter: edit the `move_image/config.
 arg_dest-dir = /tmp/my-jpeg-file
 ```
 
-You will notice the syntax to set argument in the config.ini file: `arg_[my-arg]` with `[my-arg]` the argument name, e.g. `arg_dest-dir` means `--dest-dir` argument.
+You will notice the syntax to set argument in the `config.ini file`: `arg_[my-arg]` with `[my-arg]` the argument name, e.g. `arg_dest-dir` means `--dest-dir` argument.
 
-We vill now set the condition that allow to move only JPEG files in a destination directory.
+We will now set the condition that allow to move only JPEG files in a destination directory.
 
 To do this, set the `switch_logical_condition` parameter in  the `move_image/config.ini` : **it represents the condition that must be respected so the switch directs the data to your plugin**. In other words, it represents what kind of data will be orientated towards your plugin by the switch plugin: 
 
