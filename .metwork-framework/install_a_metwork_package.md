@@ -15,7 +15,7 @@ You must:
 
 You just have to execute the following command (as `root` user):
 
-```
+```bash
 yum install metwork-mfdata
 ```
 
@@ -24,7 +24,7 @@ yum install metwork-mfdata
 If you prefer to start with a minimal installation, you have to execute the following command
 (as `root` user):
 
-```
+```bash
 yum install metwork-mfdata-minimal
 ```
 
@@ -32,7 +32,7 @@ yum install metwork-mfdata-minimal
 
 ### Optional dependencies addons
 
-```
+```bash
 # To install some devtools
 yum install metwork-mfext-devtools
 
@@ -49,7 +49,7 @@ yum install metwork-mfext-python2
 
 ### Optional mfdata addons
 
-```
+```bash
 # To install python2 support
 # (see above to install full scientific and devtools support)
 yum install metwork-mfdata-python2
@@ -61,7 +61,7 @@ yum install metwork-mfdata-python2
 
 You can start corresponding services with the root command:
 
-```
+```bash
 service metwork start
 ```
 
@@ -74,14 +74,14 @@ Or you can also reboot your computer (because metwork services are started autom
 
 To uninstall mfdata metwork module, please stop corresponding metwork services with the `root` command:
 
-```
+```bash
 service metwork stop mfdata
 ```
 
 Then, use the following command (still as `root` user):
 
 
-```
+```bash
 yum remove "metwork-mfdata*"
 ```
 
@@ -90,19 +90,19 @@ yum remove "metwork-mfdata*"
 To upgrade mfdata metwork module, use the following commands (still as `root` user):
 
 
-```
+```bash
 # We stop mfdata services
 service metwork stop mfdata
 ```
 
 
-```
+```bash
 # We upgrade mfdata metwork module
 yum upgrade "metwork-mfdata*"
 ```
 
 
-```
+```bash
 # We start mfdata services
 service metwork start mfdata
 ```
@@ -112,7 +112,7 @@ service metwork start mfdata
 
 To uninstall all metwork modules, use following root commands:
 
-```
+```bash
 # We stop metwork services
 service metwork stop
 
@@ -126,7 +126,7 @@ The same idea applies to upgrade.
 
 For example, to upgrade all metwork modules on a computer, use following root commands:
 
-```
+```bash
 # We stop metwork services
 service metwork stop
 
