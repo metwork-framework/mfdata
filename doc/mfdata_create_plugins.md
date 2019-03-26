@@ -13,7 +13,7 @@ bootstrap_plugin.py create --template={TEMPLATE} {PLUGIN_NAME}
 ```
 where `{TEMPLATE}` is the tmplate you want to use and `{PLUGIN_NAME}` the name of ypur plugin.
 
-Notice if you omit the `--template` argument, [the default template](#the-default-templates) will be used.
+Notice if you omit the `--template` argument, [the default template](#id1) will be used.
 
 Once you have entered this command, you will be asked to fill in some fields to configurate and customize your plugin. 
 You can also configure your plugin anytime by **editing the** `mfdata/{PLUGIN_NAME}/config.ini` **config file**. For more details about each field, check the documentation in the `mfdata/{PLUGIN_NAME}/config.ini` file.
@@ -25,7 +25,7 @@ One of the most crucial field for your plugin is `switch_logical_condition`: **i
 In other words, it represents what kind of data will be orientated towards your plugin by the `switch` plugin. For example, this is where you would put that you want `.jpg` files to be treated by a plugin. In the same example, this would translate as `( x['latest.switch.main.system_magic'].startswith(b'JPEG image') )`. The condition is written in Python and is `None` by default. **This condition must be a boolean expression that evaluates as** `True` **for the type of data you are interested in**.
 
 
-**If the templates don't satisfy your needs, you can always edit the generated** `main.py` **file** in your plugin's directory. This file inherits from a certain class depending on the template you chose during the creation of the plugin (if you chose a template). From your `main.py` file, you can override any method to suit your needs. For more infos about the role of each method, check :doc:`../api_acquisition` documentation.
+**If the templates don't satisfy your needs, you can always edit the generated** `main.py` **file** in your plugin's directory. This file inherits from a certain class depending on the template you chose during the creation of the plugin (if you chose a template). From your `main.py` file, you can override any method to suit your needs. For further about the role of each method, check :doc:`../api_acquisition` documentation.
 
 The `process` function is one of the most important since it defines what action will be executed on the data files sent to your plugin. It is this function that moves the files, archives them or unzips them... It represents the pre-processing that the data files will go through.
 
@@ -68,8 +68,9 @@ This template **deletes incoming files**, plain and simple.
 
 For more details about each configurable fields, check the documentation in the `mfdata/{PLUGIN_NAME}/config.ini` file.
 
+
 ### The `default` template
-The `default` template allows you to define a custom behaviour by overriding the :doc:`../api_acquisition` class.
+The `default` template allows you to define a custom behaviour by overriding the   :py:class:`AcquisitionStep <acquisition.step.AcquisitionStep>` class.
 
 Doing so will allow you to define a custom processing method for your data. **Use this if you want to edit** `main.py` **to create a custom pre-processing method which is not based on any existing template**.
 

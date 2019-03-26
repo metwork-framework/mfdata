@@ -801,25 +801,141 @@ if __name__ == "__main__":
 
 So, the `Batch_tutoMainStep` class inherits of the  :py:class:`AcquisitionBatchStep <acquisition.batch_step.AcquisitionBatchStep>` class.
 
-The most important method is `batch_process` which overrides the  py:meth:`batch_process <acquisition.batch_step.AcquisitionBatchStep.batch_process>` method of the base class :py:class:`AcquisitionBatchStep <acquisition.batch_step.AcquisitionBatchStep>`.
+The most important method is `batch_process` which overrides the  :py:meth:`batch_process  <acquisition.batch_step.AcquisitionBatchStep.batch_process>` method of the base class :py:class:`AcquisitionBatchStep <acquisition.batch_step.AcquisitionBatchStep>`.
 
 The `batch_process` method is called in the :py:meth:`run <acquisition.step.AcquisitionStep.run>` method of the :py:class:`AcquisitionStep <acquisition.step.AcquisitionStep>` class.
 
 The `xafs` parameter is an array containing the files to be processed, each item is an :py:class:`XattrFile <xattrfile.XattrFile>` instance.
 
-Process several XattrFile (between 1 and max_batch_size files in one
-call). You have to override this method.
 
-File are moved into a temporary directory before the call with
-unique filenames. Extended attributes are copied to them.
-So you can do what you want with them.
-
-If the `batch_process` method returns
+If the `batch_process` method returns:
 
 - `True`: the processing is considered to be successful for each processed file
 - `False`: the processing is considered to be failed for each processed file
 - an array of `boolean` with the same than the `xafs` array: the processing status is considered for each file.
 
+The main arguments of a `batch` plugin are:
+
+- **batch-process-max-size**: the maximum number of files before launching `batch_process`. Default value is 100 (files).
+- **batch-process-max-wait**: the maximum waiting time, in seconds, before launching `batch_process` (when the batch_process_max_size is not reached). Default value is 10 (seconds).
+
+So, the `batch_process` method is called when, at least, one of the two conditions is true:
+- the maximum of files to process is reached
+- the mximum of time to wait is reached
+
+If the default values don't suit you, you may override the `batch_process_max_size` and `batch_process_max_wait` properties in the `main.py` Python script:
 
 
-TODO
+```python
+...
+
+class Batch_tutoMainStep(AcquisitionBatchStep):
+...
+
+   @property
+    def batch_process_max_size(self):
+        """Return the max size of a batch in batch process mode.
+        """
+        return 5
+
+    @property
+    def batch_process_max_wait(self):
+        """Max wait (in seconds) to fill the batch in batch process mode.
+        """
+        return 60
+
+...
+```
+
+You may use an more dynamic way to override  the `batch_process_max_size` and `batch_process_max_wait` properties:
+
+- edit the `[step_main]` section of the `bacth_tuto/config.ini` file and add:
+```cfg
+# batch-process-max-size : maximum number of files before launching batch process.
+#   Default is : '100'
+arg_batch-process-max-size = 5
+# batch-process-max-wait : maximum time before launching batch process (in seconds)
+#   Default is : '10' (seconds)
+arg_batch-process-max-wait = 60
+```
+
+- In the `main.py` Python script:
+	1. ovverride the :py:meth:`add_extra_arguments  <acquisition.step.AcquisitionStep.add_extra_arguments>`
+	2. change the `batch_process_max_size` and `batch_process_max_wait` properties
+	3. log the `batch_process_max_size` and `batch_process_max_wait` properties
+
+```python
+
+from acquisition.batch_step import AcquisitionBatchStep
+
+
+class Batch_tutoMainStep(AcquisitionBatchStep):
+    plugin_name = "batch_tuto"
+    step_name = "main"
+
+    def add_extra_arguments(self, parser):
+        parser.add_argument('--batch-process-max-size', action='store', default='100',
+                            help='Max number of files before launching batch process')
+
+        parser.add_argument('--batch-process-max-wait', action='store', default='10',
+                            help='Max time before launching batch process')
+
+    @property
+    def batch_process_max_size(self):
+        """Return the max size of a batch in batch process mode.
+        """
+        return int(self.args.batch_process_max_size)
+
+    @property
+    def batch_process_max_wait(self):
+        """Max wait (in seconds) to fill the batch in batch process mode.
+        """
+        return int(self.args.batch_process_max_wait)
+
+    def batch_process(self, xafs):
+        self.info("batch process batch_process_max_size: {}".format(self.batch_process_max_size))
+        self.info("batch process batch_process_max_wait: {}".format(self.batch_process_max_wait))
+        self.info("batch process xafs size: {}".format(len(xafs)))
+
+        results = []
+        for xaf in xafs:
+            file_name = self.get_original_basename(xaf)
+            self.info("batch process for file {} (original name is: {}".format(xaf.filepath, file_name))
+            results.append(True)
+
+        return results
+
+
+if __name__ == "__main__":
+    x = Batch_tutoMainStep()
+    x.run()
+
+```
+
+In this tutorial, we will accept all incoming files by setting the `switch_logical_condition` to `True` in the `[step_main]` section of the `bacth_tuto/config.ini` file:
+
+```cfg
+switch_logical_condition = True
+```
+
+Then, install (as dev build) the plugin by entering the command `make develop` from the `bacth_tuto` plugin directory.
+
+Check the plugin is installed, by running `plugins.list`.
+
+Run the plugin: inject a file :
+
+```bash
+inject_file --incomming {my_file}
+```
+
+Then, you should see in the logs `~/log/step_batch_tuto_main.stdout` the file is processed after the `batch-process-max-wait` is reached.
+
+Then, run again the plugin by injecting more than the `batch-process-max-size`number of files.
+
+Let's assume, `arg_batch-process-max-size = 5` and `arg_batch-process-max-wait = 60`. Inject 7 files in the incomin MFDATA directory (repeat command `inject_file --incomming {my_file}`  7 times or  use `cp {files} /home/mfdata/var/in/incoming/` ).
+
+Then, check the logs `~/log/step_batch_tuto_main.stdout`. You will see the `batch_process` is launched after the 5th file is injected. Then, wait 60 seconds, check the logs again and you will see the last two files are processed 60 seconds later.
+
+_ _ _
+
+You could also build and check the [Sending a file by FTP](#sending-a-file-by-ftp) tutorial which implements a :py:class:`AcquisitionBatchStep <acquisition.batch_step.AcquisitionBatchStep>` base class (see `send.py` Python script).
