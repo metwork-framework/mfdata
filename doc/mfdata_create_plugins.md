@@ -35,6 +35,23 @@ The `process` function is one of the most important since it defines what action
 
 Predefined templates are available in order to create your plugin.
 
+The following command allows to display the available templates:
+```bash
+bootstrap_plugin.py list
+```
+
+```
+List of availabel plugin templates:
+     * archive
+     * default
+     * delete
+     * fork
+     * ftpsend
+     * move
+```
+
+
+
 ### The `move` template
 This template simply **moves incoming files to a set destination folder**. This destination folder is customizable via the `--dest-dir` argument. You can also choose to keep the original filename via the `--keep-original-basenames` argument. You can also force a chmod on target files by inputting octal chmod values (ex: `0700`) to the `--force-chmod` argument.
 
@@ -52,8 +69,7 @@ This template **deletes incoming files**, plain and simple.
 For more details about each configurable fields, check the documentation in the `mfdata/{PLUGIN_NAME}/config.ini` file.
 
 ### The `default` template
-The `default` template allows you to define a custom behaviour by overriding 
-the :doc:`../api_acquisition` class.
+The `default` template allows you to define a custom behaviour by overriding the :doc:`../api_acquisition` class.
 
 Doing so will allow you to define a custom processing method for your data. **Use this if you want to edit** `main.py` **to create a custom pre-processing method which is not based on any existing template**.
 

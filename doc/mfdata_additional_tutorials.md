@@ -149,10 +149,6 @@ The diagram below shows the data flow:
 5. The `convert_image` plugin puts (injects) the JPEG file to the `ftpsend_to_mybox` plugin (`inject_file --plugin=ftpsend_to_mybox --step=send  "$1.jpeg""` command in the `convert.sh` script). It will be processed by the `ftpsend_to_mybox` plugin.
 6. The `ftpsend_to_mybox` plugin sends the JPEG file to "mybox".
 
-## Using the `batch` template
-
-TODO
-
 ## Create a plugin from scratch
 
 This tutorial is designed to help you get started with MFDATA plugin from scratch, i.e. without any MFDATA template.
@@ -212,14 +208,15 @@ if __name__ == "__main__":
 
 ```
 
-It contains a derived class `Convert_grib2MainStep` that inherits of the `AcquisitionStep` class.
+It contains a derived class `Convert_grib2MainStep` that inherits of the
+:py:class:`AcquisitionStep <acquisition.step.AcquisitionStep>` class.
 
 
-The most important method is `process` which overrides the `process` method of the base class `AcquisitionStep`.
+The most important method is `process` which overrides the :py:meth:`process <acquisition.step.AcquisitionStep.process>` method of the base class :py:class:`AcquisitionStep <acquisition.step.AcquisitionStep>`.
 
-The `process` method is called in the  `run` method of the `AcquisitionStep` class.
+The `process` method is called in the :py:meth:`run <acquisition.step.AcquisitionStep.run>` method of the `AcquisitionStep` class.
 
-The `xaf` parameter (from `XattrFile` class) is the file to be processed.
+The `xaf` parameter (from :py:class:`XattrFile <xattrfile.XattrFile>` class) is the file to be processed.
 
 ### Set dependencies
 
@@ -758,3 +755,71 @@ _ _ _
 
 :download:`GRIB file example </_downloads/AROME_201811280600.grib2>`.
 
+_ _ _
+
+## Creating a `batch` plugin
+
+This tutorial is designed to help you to create a plugin which allow to process several files from 1 to `max_batch_size` in one call.
+
+Create a plugin from scratch (as explained in the [Create a plugin from scratch](#create-a-plugin-from-scratch) tutorial:
+```bash
+bootstrap_plugin.py create batch_tuto
+```
+
+Go to the `batch_tuto` plugin directory, edit the `main.py` Python script and change:
+
+- the base class `AcquisitionStep` by `AcquisitionBatchStep`
+- the `process` method by `batch_process` method
+
+as below:
+
+```python
+#!/usr/bin/env python3
+
+from acquisition.batch_step import AcquisitionBatchStep
+
+
+class Batch_tutoMainStep(AcquisitionBatchStep):
+    plugin_name = "batch_tuto"
+    step_name = "main"
+
+    def batch_process(self, xafs):
+        results = []
+        for xaf in xafs:
+            file_name = self.get_original_basename(xaf)
+            self.info("batch process for file {} (original name is: {}".format(xaf.filepath, file_name))
+            results.append(True)
+
+        return results
+
+
+if __name__ == "__main__":
+    x = Batch_tutoMainStep()
+    x.run()
+
+```
+
+So, the `Batch_tutoMainStep` class inherits of the  :py:class:`AcquisitionBatchStep <acquisition.batch_step.AcquisitionBatchStep>` class.
+
+The most important method is `batch_process` which overrides the  py:meth:`batch_process <acquisition.batch_step.AcquisitionBatchStep.batch_process>` method of the base class :py:class:`AcquisitionBatchStep <acquisition.batch_step.AcquisitionBatchStep>`.
+
+The `batch_process` method is called in the :py:meth:`run <acquisition.step.AcquisitionStep.run>` method of the :py:class:`AcquisitionStep <acquisition.step.AcquisitionStep>` class.
+
+The `xafs` parameter is an array containing the files to be processed, each item is an :py:class:`XattrFile <xattrfile.XattrFile>` instance.
+
+Process several XattrFile (between 1 and max_batch_size files in one
+call). You have to override this method.
+
+File are moved into a temporary directory before the call with
+unique filenames. Extended attributes are copied to them.
+So you can do what you want with them.
+
+If the `batch_process` method returns
+
+- `True`: the processing is considered to be successful for each processed file
+- `False`: the processing is considered to be failed for each processed file
+- an array of `boolean` with the same than the `xafs` array: the processing status is considered for each file.
+
+
+
+TODO
