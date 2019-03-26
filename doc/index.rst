@@ -24,3 +24,10 @@ MFDATA documentation
    layer_root
    layer_python2
    layer_python3
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
