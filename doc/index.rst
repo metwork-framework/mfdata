@@ -13,6 +13,7 @@ MFDATA documentation
    configure_a_metwork_package
    mfdata_quick_start
    mfdata_create_plugins
+   mfdata_debug_plugin
    mfdata_additional_tutorials
    mfdata_deploy_plugin
    plugins_guide
