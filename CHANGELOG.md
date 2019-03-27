@@ -15,6 +15,7 @@
 
 ### Fix
 - Fix loss of files between plugin switch and plugin ungzip or other mfdata plugins The test test_14_move_or_copy2 is broken, we temporarily skip it
+- add garbage_collector.sh call in crontab
 - both [#53](https://github.com/metwork-framework//issues/53) and [#61](https://github.com/metwork-framework//issues/61)
 - dump tags on errors (when in debug mode)
 - fix an integration test
