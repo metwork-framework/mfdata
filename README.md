@@ -1,5 +1,7 @@
 # mfdata
 
+test
+
 [//]: # (automatically generated from https://github.com/metwork-framework/resources/blob/master/cookiecutter/_%7B%7Bcookiecutter.repo%7D%7D/README.md)
 
 ## Status (master branch)
