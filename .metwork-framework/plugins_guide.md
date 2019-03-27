@@ -105,20 +105,89 @@ Build your virtualenv from sources
 ```bash
 make
 ```
+## Python virtualenv
 
-#### python3_virtualenv_sources/requirements-to-freeze.txt
+When developing Python applications, it’s standard practice to have a `requirements.txt` file.
 
-Add you python3 dependencies inside this file
+This file can be used in different ways, and typically takes one of these two forms:
 
-FIXME: explain requirements3.txt and the differences with requirements-to-freeze.txt and how the freeze of versions
-is managed
+- Simple requirements: A list of top-level dependencies a plugin has, often without versions specified.
+- Exact requirements: A complete list of all dependencies a plugin has, each with exact versions specified.
 
-#### python2_virtualenv_sources/requirements-to-freeze.txt
+### The 'Simple' requirements
 
-Add you python2 dependencies inside this file
+A list of **top-level dependencies** a plugin has, often without versions specified.
 
-FIXME: explain requirements3.txt and the differences with requirements-to-freeze.txt and how the freeze of versions
-is managed
+The `requirements.txt` looks like:
+```cfg
+requests[security]
+flask
+gunicorn==19.4.5
+```
+When a `requirements.txt` file like above is used to deploy in production environment, unexpected consequences can occur. Effectively, because versions haven’t been pinned, running `pip install` will give you different results today than it will tomorrow.
+
+This is rather a bad way. As different versions of sub-dependencies are released, the result of a fresh `pip install -r requirements.txt` will result in different packages being installed, and potentially, your application failing for unknown and hidden reasons.
+
+### The 'Exact' Requirements
+
+A complete list of **all dependencies** a plugin has, each with exact package versions specified.
+
+The `requirements.txt` looks like:
+```cfg
+cffi==1.5.2
+cryptography==1.2.2
+enum34==1.1.2
+Flask==0.10.1
+gunicorn==19.4.5
+idna==2.0
+ipaddress==1.0.16
+itsdangerous==0.24
+Jinja2==2.8
+MarkupSafe==0.23
+ndg-httpsclient==0.4.0
+pyasn1==0.1.9
+pycparser==2.14
+pyOpenSSL==0.15.1
+requests==2.9.1
+six==1.10.0
+Werkzeug==0.11.4
+```
+
+This is a best-practice for deploying applications, and ensures an explicit runtime environment with deterministic builds.
+
+All dependencies, including sub-dependencies, are listed, each with an exact version specified.
+
+While the this method for requirements.txt is best practice, it is a bit cumbersome. Namely, if you want to upgrade some or all of the packages, it's not so easy to do.
+
+### The 'Best' Requirements
+
+The best an simple way is to have two requirements file instead of having one:
+
+- requirements-to-freeze.txt
+- requirements.txt
+
+
+The `requirements-to-freeze.txt` uses 'simple' requirements', and is used to specify the top-level dependencies, and any explicit versions you need to specify.
+
+the `requirements.txt` uses 'exact' requirements, and contains the output of a `pip freeze` after `pip install requirements-to-freeze.txt` has been run.
+
+Working with Metwork plugin, you just need to fill the `requirements-to-freeze.txt` file. Then, when building/releasing the plugin, the `requirements.txt` will be generated.
+
+Depending of the Python
+Depending on which python version (python2 or python3) you are working with, the `requirements.txt` file will be named, respectively  `requirementsé.txt` and `requirements3.txt`
+
+### Python3 requirements-to-freeze.txt
+
+If you are working with python3, an empty `requirements-to-freeze.txt` is created in the `python3_virtualenv_sources` plugin directory (during the `bootstrap_plugin.py` create command)
+
+Add you python3 dependencies inside this file (with or without package version)
+
+
+### Python2 requirements-to-freeze.txt
+
+If you are working with python2, an empty `requirements-to-freeze.txt` is created in the `python2_virtualenv_sources` plugin directory (during the `bootstrap_plugin.py` create command)
+
+Add you python2 dependencies inside this file (with or without package version)
 
 
 
