@@ -12,8 +12,10 @@ MFDATA documentation
    install_a_metwork_package
    configure_a_metwork_package
    mfdata_quick_start
-   mfdata_additional_tutorials
+   mfdata_create_plugins
+   mfdata_debug_plugin
    mfdata_deploy_plugin
+   mfdata_additional_tutorials
    plugins_guide
    mfdata_and_magic
    mfdata_miscellaneous
@@ -23,3 +25,10 @@ MFDATA documentation
    layer_root
    layer_python2
    layer_python3
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
