@@ -15,17 +15,6 @@ MAGIC_OBJECTS_CACHE = {}
 CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
 
 
-def get_magic(xaf_file, magic_file=None):
-    global MAGIC_OBJECTS_CACHE
-    key = hashlib.md5(magic_file.encode('utf8')).hexdigest() \
-        if magic_file is not None else "system"
-    if key not in MAGIC_OBJECTS_CACHE:
-        MAGIC_OBJECTS_CACHE[key] = Magic(magic_file=magic_file)
-    magic = MAGIC_OBJECTS_CACHE[key]
-    tag_magic = magic.from_file(xaf_file.filepath)
-    return tag_magic
-
-
 def eval_condition(xaf_file, condition):
     x = xaf_file.tags  # noqa: F841
     return eval(condition)
@@ -78,6 +67,29 @@ class AcquisitionSwitchStep(AcquisitionStep):
         parser.add_argument('--no-match-policy-move-dest-dir', action='store',
                             default=None,
                             help='dest-dir in case of move no-match policy')
+
+    def _get_magic(self, xaf_file, magic_file=None):
+        global MAGIC_OBJECTS_CACHE
+        key = hashlib.md5(magic_file.encode('utf8')).hexdigest() \
+            if magic_file is not None else "system"
+        if key not in MAGIC_OBJECTS_CACHE:
+            MAGIC_OBJECTS_CACHE[key] = Magic(magic_file=magic_file)
+        magic = MAGIC_OBJECTS_CACHE[key]
+        try:
+            tag_magic = magic.from_file(xaf_file.filepath)
+        except Exception as e:
+            if magic_file is None:
+                self.warning(
+                    "exception during magic call with system magic "
+                    "configuration: %s => let's return magic_exception as "
+                    "magic output" % str(e))
+            else:
+                self.warning(
+                    "exception during magic call with custom magic: %s "
+                    "configuration: %s => let's return magic_exception as "
+                    "magic output" % (magic_file, str(e)))
+            tag_magic = "magic_exception"
+        return tag_magic
 
     def _move_or_copy(self, xaf, directory):
         old_filepath = xaf.filepath
@@ -140,7 +152,7 @@ class AcquisitionSwitchStep(AcquisitionStep):
         for plugin_name, condition, directory, magic_file, use_hardlink in \
                 self.condition_tuples:
             if magic_file:
-                plugin_magic = get_magic(xaf, magic_file)
+                plugin_magic = self._get_magic(xaf, magic_file)
                 self.set_tag(xaf, "%s_magic" % plugin_name, plugin_magic
                              if plugin_magic is not None else "unknown")
             self.debug("Evaluating condition: %s on tags: %s..." % (condition,
@@ -158,7 +170,7 @@ class AcquisitionSwitchStep(AcquisitionStep):
         return directories
 
     def process(self, xaf):
-        system_magic = get_magic(xaf)
+        system_magic = self._get_magic(xaf)
         self.set_tag(xaf, "system_magic", system_magic
                      if system_magic is not None else "unknown")
         directories = self._selected_directories(xaf)
