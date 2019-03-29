@@ -1,6 +1,10 @@
 
 # Miscellaneous
 
+## The `switch_logical_condition` field
+
+TODO
+
 ## The `switch` plugin tags attributes
 
 TODO
