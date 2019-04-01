@@ -5,6 +5,9 @@ DESCRIPTION = "print attributes of the given file"
 
 
 def main():
+    """
+    Print attributes of the given file
+    """
     parser = argparse.ArgumentParser(description=DESCRIPTION)
     parser.add_argument('filepath',
                         help='Path of the file of which you want to print tags'

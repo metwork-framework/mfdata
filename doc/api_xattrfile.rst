@@ -2,12 +2,11 @@
 XATTRFILE API
 =============
 
-.. automodule:: xattrfile
+.. automodapi:: xattrfile
+   :include-all-objects:
 
- .. autoclass:: XattrFile
-     :members:
-     :inherited-members:
-     :show-inheritance:
+.. automodapi:: xattrfile.print_tags
 
-     .. automethod:: __init__
+.. automodapi:: xattrfile.get_tag
 
+.. automodapi:: xattrfile.set_tag

@@ -1,14 +1,70 @@
 # Release and Deploy a plugin
 
-TODO  
 ## Release a plugin
-Explain release a plugin (make release, generated .plugin file)
 
-What about version, etc 
+Releasing a plugin consists in keeping all the plugin related files together in one `.plugin`file and makes the plugin production-ready, ready to be deployed.
+
+In order to release a plugin, To do this, go to the `move_image` plugin directory and enter the run the following command from the root directory of the plugin:
+```bash
+make release
+```
+
+Then a `{plugin name}-{version}-1.metwork.mfdata.plugin` file is created, where:
+
+- {plugin name} is the name of the plugin
+- `{version}` is the value of the `version` parameter defined in the plugin `config.ini` file you enter when you create the plugin (default value is `${MODULE_VERSION}`)
+ 
+
+You can change the `version` in  plugin `config.ini` file:
+```cfg
+# Version of the plugin (X.Y.Z)
+# If the value is [MODULE_VERSION],
+# the current module version is used
+version=1.0.0
+```
+
 
 ## Deploy a plugin in a production environment
-Deploy the .plugin file 
 
-- with plugins.install xxxx.plugin file
-or
-- Recommended : `/etc/metwork.config.d/{metwork_module_in_lowercase}
+In order to deploy a plugin in a production environment:
+
+- Metwork have to be installed on this environment (at least MFDATA and its dependencies MFEXT and MFCOM).
+- the plugin you want to deploy have to be 'released' in a `.plugin` file (refer to [Release a plugin](#release-a-plugin))
+
+### The 'basic' way
+
+**You be logged in as** `{METWORK_MODULE}` **user, e.g.** `mfdata` **user.**
+
+In order to deploy the plugin on a production environment,  put down the `.plugin` file in a directory on this target environement, e.g. `~/released_plugins`
+
+
+Then, install the plugin by entering:
+
+```bash
+plugins.install ~/released_plugins/{your_plugin_released}.plugin
+```
+Then, check the plugin is installed, enter:
+
+```bash
+plugins.list
+```
+
+In practice, the plugins are installed in the `~/var/plugins` directory.
+
+
+### The 'well-done' way
+
+** This is the recommended way to deploy a plugin in a production environment**
+
+**You be logged in as** `root` **user.**
+
+In order to deploy the plugin on a production environment,  put down the `.plugin` file  into `/etc/metwork.config.d/mfdata/external_plugins` directory.
+
+Then to install the plugin, you just restart the `{METWORK MODULE}` service by entering `service metwork restart {METWORK MODULE}` command, e.g.  `service metwork restart mfdata`.
+
+```
+Then, check the plugin is installed, enter the command `su --command="plugins.list" - {METWORK MODULE}`, e.g.:
+
+```bash
+su --command="plugins.list" - mfdata
+```
