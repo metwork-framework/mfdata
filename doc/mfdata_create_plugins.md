@@ -22,7 +22,7 @@ The syntax to set argument in the `mfdata/{PLUGIN_NAME}/config.ini` file is of t
 
 One of the most crucial field for your plugin is `switch_logical_condition`: **it represents the condition that must be respected so the switch directs the data to your plugin**.
 
-In other words, it represents what kind of data will be orientated towards your plugin by the `switch` plugin. For example, this is where you would put that you want `.jpg` files to be treated by a plugin. In the same example, this would translate as `( x['latest.switch.main.system_magic'].startswith(b'JPEG image') )`. The condition is written in Python and is `None` by default. **This condition must be a boolean expression that evaluates as** `True` **for the type of data you are interested in**.
+In other words, it represents what kind of data will be orientated towards your plugin by the `switch` plugin. For example, this is where you would put that you want `.jpg` files to be treated by a plugin. In the same example, this would translate as `( x['latest.switch.main.system_magic'].startswith(b'JPEG image') )`. The condition is written in Python and is `False` by default. **This condition must be a boolean expression that evaluates as** `True` **for the type of data you are interested in**.
 
 
 **If the templates don't satisfy your needs, you can always edit the generated** `main.py` **file** in your plugin's directory. This file inherits from a certain class depending on the template you chose during the creation of the plugin (if you chose a template). From your `main.py` file, you can override any method to suit your needs. For further about the role of each method, check :doc:`../api_acquisition` documentation.

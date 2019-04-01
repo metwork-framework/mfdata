@@ -21,6 +21,7 @@ help:
 %.rst: %.md
 	rm -f tempo.md
 	echo ".. GENERATED FILE, DO NOT EDIT (edit $< instead)" >tempo.md
+	echo ":original_file: $<" >>tempo.md
 	echo >>tempo.md
 	cat $< |envtpl >>tempo.md
 	layer_wrapper --layers=python3_devtools@mfext -- m2r --overwrite tempo.md

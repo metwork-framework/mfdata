@@ -583,7 +583,7 @@ grib_to_netcdf_options=-k 3 -d 0 -D NC_FLOAT
 Each parameter will be will transform into an environment variable whose pattern is `{MODULE}_{SECTION_NAME}_{PARAMETER_NAME}`, e.g. `MFDATA_PLUGIN_CONVERT_GRIB2_GRIB_TO_NETCDF_OPTIONS`
 
 **CAUTION**:
-- Enviroment variable are always in uppercase.
+- Enviroment variables are always in uppercase.
 - To get the new value, you have to close/reopen your terminal to force a new profile loading.
 - To change daemons and services behaviour (like `nginx` listening port in your example), you have to restart services from a newly restarted terminal or from a `root` user through `service metwork restart` command.
 
