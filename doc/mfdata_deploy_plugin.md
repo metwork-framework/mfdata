@@ -52,7 +52,7 @@ plugins.list
 In practice, the plugins are installed in the `~/var/plugins` directory.
 
 
-### The 'workmanlike' way
+### The 'well-done' way
 
 ** This is the recommended way to deploy a plugin in a production environment**
 
