@@ -3,6 +3,7 @@
 
 ### Docs
 - Update MFDATA documentation
+- Update MFDATA documentation + add "Edit on GitHub"
 - update MFDATA documentation
 - update MFDATA tutorials
 - we prefer to keep a specific list of what we copy to doc
