@@ -4,6 +4,13 @@
 ### Docs
 - Update MFDATA documentation
 - Update MFDATA documentation + add "Edit on GitHub"
+
+### Fix
+- catch some magic exception with some exotic files
+
+<a name="v0.6.0"></a>
+## [v0.6.0] - 2019-04-01
+### Docs
 - update MFDATA documentation
 - update MFDATA tutorials
 - we prefer to keep a specific list of what we copy to doc
