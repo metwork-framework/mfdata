@@ -1,3 +1,4 @@
+.. index:: debug, log
 # Debug a plugin
 
 ## Log level

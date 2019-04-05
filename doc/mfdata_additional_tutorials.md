@@ -4,12 +4,12 @@
 
 Let's create an plugin to convert a PNG image to a JPEG image and then to archive the JPEG image.
 
-First, we have to modify the `archive_image` plugin to be able to archive all images and not only PNG images.
+First, we have to modify the `archive_image` plugin (see :ref:`mfdata_quick_start:Use of the ungzip plugin` tutorial) to be able to archive all images and not only PNG images.
 
 Open the `config.ini` file of the `archive_image` plugin and change the `switch_logical_condition` to accept all images:
 
 ```cfg
-switch_logical_condition = ( b'image' in ['latest.switch.main.system_magic'] )
+switch_logical_condition = ( b'image' in x['latest.switch.main.system_magic'] )
 ```
 
 Now, **create the converter plugin** from the MFDATA `fork` template which allows to **execute shell commands in a subprocess**. Enter the command:
@@ -46,7 +46,8 @@ Now, we have to say to the `convert_png` plugin to launch the `convert.sh` scrip
 arg_command-template = {PLUGIN_DIR}/convert.sh {PATH}
 ```
 
-**Caution**: the `arg_command-template` command must NOT be enclosed by quotation marks:
+.. caution::
+	The `arg_command-template` command must NOT be enclosed by quotation marks:
 ```cfg
 INVALID:
 arg_command-template = "{PLUGIN_DIR}/convert.sh {PATH}"
@@ -93,7 +94,7 @@ The diagram below shows the data flow:
 5. The `convert_image` plugin puts (injects) the JPEG file in the `incoming` directory throw the `switch` plugin (`inject_file --plugin=switch "$1.jpeg"` command in the `convert.sh` script). It will be processed by the `switch` plugin.
 6. The `archive_image` plugin processes the JPEG file (its `switch_logical_condition` is `True`).
 
-
+.. index:: FTP
 ## Sending a file by FTP
 
 Let's now create an plugin from the `ftpsend` MFDATA template.
@@ -135,7 +136,8 @@ convert "$1" "$1.jpeg"
 inject_file --plugin=ftpsend_to_mybox --step=send "$1.jpeg"
 ```
 
-Notice the `ftpsend` template contains two steps (`send`and `reinject`). It has no `main` (default) step. That's why we specify the step to execute in the `inject_file` command.
+.. tip::
+	The `ftpsend` template contains two steps (`send`and `reinject`). It has no `main` (default) step. That's why we specify the step to execute in the `inject_file` command.
 
 The diagram below shows the data flow:
 
@@ -311,10 +313,9 @@ arg_netcdf-dest-dir = /tmp/my_netcdf
 ....
 ```
 
-Notice:
-
-- the parameter must always be prefixed by `arg_`. Then, use '-' and not '_' in your parameter: `arg_netcdf-dest-dir` is valid, but arg_netcdf_dest_dir is NOT valid.
-- the argument parameter as Python variable will be `self.args.netcdf_dest_dir`.
+.. important::
+    - the parameter must always be prefixed by `arg_`. Then, use '-' and not '_' in your parameter: `arg_netcdf-dest-dir` is valid, but arg_netcdf_dest_dir is NOT valid.
+    - the argument parameter as Python variable will be `self.args.netcdf_dest_dir`.
 
 
 Then, we must override the `add_extra_arguments` method in order to parse our `netcdf_dest-dir` argument:
@@ -369,7 +370,8 @@ So, we need to create a `magic` file in the root directory of the `convert_grib2
 0   string  GRIB    GRIB file
 ```
 
-**CAUTION**: the `magic` file must be named `magic` and must be stored in the plugin root directory (i.e., here, `convert_grib2` directory).
+.. caution::
+	The `magic` file must be named `magic` and must be stored in the plugin root directory (i.e., here, `convert_grib2` directory).
 
 Then, **set the** `switch_logical_condition` to accept only GRIB file:
 
@@ -377,7 +379,8 @@ Then, **set the** `switch_logical_condition` to accept only GRIB file:
 switch_logical_condition = (x['latest.switch.main.convert_grib2_magic'].startswith(b'GRIB file'))
 ```
 
-**CAUTION**: Because we create a custom `magic` file, the condition must be set on `latest.switch.main.convert_grib2_magic` instead of `latest.switch.main.system_magic`:
+.. tip::
+	Because we create a custom `magic` file, the condition must be set on `latest.switch.main.convert_grib2_magic` instead of `latest.switch.main.system_magic`:
 
 ```cfg
 # CORRECT
@@ -582,13 +585,12 @@ grib_to_netcdf_options=-k 3 -d 0 -D NC_FLOAT
 ```
 Each parameter will be will transform into an environment variable whose pattern is `{MODULE}_{SECTION_NAME}_{PARAMETER_NAME}`, e.g. `MFDATA_PLUGIN_CONVERT_GRIB2_GRIB_TO_NETCDF_OPTIONS`
 
-**CAUTION**:
-- Enviroment variables are always in uppercase.
-- To get the new value, you have to close/reopen your terminal to force a new profile loading.
-- To change daemons and services behaviour (like `nginx` listening port in your example), you have to restart services from a newly restarted terminal or from a `root` user through `service metwork restart` command.
+.. note::
+    - Environment variables are always in uppercase.
+    - To get the new value, you have to close/reopen your terminal to force a new profile loading.
+    - To change daemons and services behaviour (like `nginx` listening port in your example), you have to restart services from a newly restarted terminal or from a `root` user through `service metwork restart` command.
 
-
-For more details, see :doc:`../configure_a_metwork_package`.
+	For more details, see :doc:`../configure_a_metwork_package`.
 
 Then, if you enter :
 ```bash
@@ -730,11 +732,12 @@ Check the input file has been moved to the `/tmp/convert-grib2-failure`.
 
 Now, you may reset `rlimit_fsize` value to your previous value (e.g. 1000000000)
 
-Note: in this tutorial, another way to trigger the failure policy is to always force a `return False` in th `process` method.
+.. note::
+	In this tutorial, another way to trigger the failure policy is to always force a `return False` in the `process` method.
 
 For further about overriding a configuration option, refer to  :doc:`../configure_a_metwork_package`.
 
-
+.. index:: after callback
 ### Using the `after` callback
 
 An `after` callback is called after the `process` method execution whether the method failed or not.
@@ -757,7 +760,8 @@ _ _ _
 
 _ _ _
 
-## Creating a `batch` plugin
+.. index:: batch plugin
+## Creating a batch plugin
 
 This tutorial is designed to help you to create a plugin which allow to process several files from 1 to `max_batch_size` in one call.
 
@@ -939,3 +943,8 @@ Then, check the logs `~/log/step_batch_tuto_main.stdout`. You will see the `batc
 _ _ _
 
 You could also build and check the [Sending a file by FTP](#sending-a-file-by-ftp) tutorial which implements a :py:class:`AcquisitionBatchStep <acquisition.batch_step.AcquisitionBatchStep>` base class (see `send.py` Python script).
+
+.. index:: monitoring, MFADMIN, dashboard
+## Implement custom monitoring and metrics in a plugin
+
+.. todo:: Add tutorial to learn how to implement specific monitoring and metrics using AcquisitionStep.get_stats_client function.

@@ -19,6 +19,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.napoleon',
               'sphinx.ext.intersphinx',
               'sphinx.ext.autosectionlabel',
+              'sphinx.ext.todo',
               'sphinx_automodapi.automodapi',
               'sphinx_automodapi.smart_resolver',
               ]
@@ -101,8 +102,9 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = False
-
+todo_include_todos = True
+# Emits a warning or not for each TO DO entries. The default is False.
+todo_emit_warnings = False
 
 # -- Options for HTML output ----------------------------------------------
 

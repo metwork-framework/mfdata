@@ -1,15 +1,17 @@
 # Quick Start
 
+## Activate the MFDATA environment
+
+One of the first thing, you have to do is to load the "MFDATA environnement" in your shell session. There are several ways to do that: check :doc:`the related documentation <../mfdata_load_env>`.
+
+In this tutorial, follow :ref:`this way <activate_mfdata_user>`, i.e. log in as the `mfdata` user.
+
 ## Create your first plugin
 
 **This step will teach you how to create, run, release and deploy a simple MFDATA plugin with a MFDATA template.**
 
 We are going to make a `move` plugin, we will called `move_image`. This plugin will simply moves incoming JPEG image files to a set destination folder, and ignore all other file types.
 
-Log in as the mfdata user:
-```bash
-su - mdfata
-```
 
 If it's the first time you log in as mfdata, you have to set a password before (`passwd mfdata` or `sudo passwd mfdata`).
 
@@ -70,7 +72,8 @@ where `latest.switch.main.system_magic` is a tag attribute of the file processed
 
 The `switch_logical_condition` condition have to be written **as Python syntax**. **This condition must be a boolean expression that evaluates as** `True` **for the type of data you are interested in**.
 
-<u>Note</u>: every time you change the plugin configuration, this confiuration will be always automatically reloaded.
+.. tip::
+	Every time you change the plugin configuration, this configuration will be always automatically reloaded.
 
 Let's now **install (as dev build)** the plugin by entering the command (from the `move_image` plugin directory):
 
@@ -255,10 +258,12 @@ plugins.list
 
 In practice, the plugins are installed in the `${HOME}/var/plugins` directory.
 
-<u>Note</u> : another way to install the MFDATA `move_image` plugin in a production environment is to put down the `.plugin` file into `/etc/metwork.config.d/mfdata/external_plugins` directory. Then to install the plugin, you just restart the MFDATA service by entering `service metwork restart mfdata` command (as root user).
+.. tip::
+	Another way to install the MFDATA `move_image` plugin in a production environment is to put down the `.plugin` file into `/etc/metwork.config.d/mfdata/external_plugins` directory. Then to install the plugin, you just restart the MFDATA service by entering `service metwork restart mfdata` command (as root user).
+	Check :doc:`../mfdata_deploy_plugin`.
 
 
-## Use of the `ungzip` plugin
+## Use of the ungzip plugin
 
 The `ungzip` plugin allows you to unzip `.gz` files. This plugin automatically handles `.gz` files and returns the unzipped file to the switch. 
 
@@ -266,7 +271,7 @@ The `ungzip` is **NOT** installed by default.
 
 
 
-**First, let's create an** `archive_image` **plugin from the MFDATA template `archive`.** This template allows you to **archive data**, i.e. moving a file to an associated archiving directory.
+**First, let's create an** `archive_image` **plugin from the MFDATA template** `archive`. This template allows you to **archive data**, i.e. moving a file to an associated archiving directory.
 
 Enter the command:
 ```bash
