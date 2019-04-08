@@ -1,4 +1,6 @@
+{# Import the theme's breadcrumbs. The exclamation point/mark forces jinja to use the parent template.#}
 {% extends "!breadcrumbs.html" %}
+    {# Override breadcrumbs_aside block in order to customize the "Edit on Github".#}
     {% block breadcrumbs_aside %}
       <li class="wy-breadcrumbs-aside">
         {% if hasdoc(pagename) %}

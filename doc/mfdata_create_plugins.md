@@ -31,6 +31,7 @@ The `process` function is one of the most important since it defines what action
 
 :doc:`../mfdata_quick_start`  and :doc:`../mfdata_additional_tutorials` may help you to create your plugin.
 
+.. index:: plugin templates, templates
 ## Plugin templates
 
 Predefined templates are available in order to create your plugin.
@@ -57,11 +58,14 @@ This template simply **moves incoming files to a set destination folder**. This 
 
 For more details about each configurable fields, check the documentation in the `mfdata/{PLUGIN_NAME}/config.ini` file.
 
+You may also check the :ref:`mfdata_quick_start:Create your first plugin` example which implements a `move` template.
+
 ### The `fork` template
 This template allows you to **execute shell commands in a subprocess**. The command you want to execute is given to the `--command-template` argument.
 
 For more details about each configurable fields, check the documentation in the `mfdata/{PLUGIN_NAME}/config.ini` file.
 
+You may also check the :ref:`mfdata_additional_tutorials:A PNG to JPEG conversion plugin` example which implements a `fork` template.
 
 ### The `delete` template
 This template **deletes incoming files**, plain and simple.
@@ -76,13 +80,19 @@ Doing so will allow you to define a custom processing method for your data. **Us
 
 For more details about each configurable field, check the documentation in the `mfdata/{PLUGIN_NAME}/config.ini` file.
 
+You may also check the :ref:`mfdata_additional_tutorials:Create a plugin from scratch` and :ref:`mfdata_additional_tutorials:Creating a batch plugin` examples which implement a `default` template.
+
+
 ### The `archive` template
 This template allows you to **archive data**. Archiving a file moves it to the associated archiving directory, but it also formats its name. The archiving directory and the archiving format are customizable via the  `--dest-dir` and `--strftime-template` arguments.
 
 For more details about each configurable fields, check the documentation in the `mfdata/{PLUGIN_NAME}/config.ini` file.
+
+You may also check the :ref:`mfdata_quick_start:Use of the ungzip plugin` example which implements an `archive` template.
 
 ### The `ftpsend` template
 This template allows you to send your data via `ftp` to a certain host. It has numerous parameters :
 
 For more details about each configurable fields, check the documentation in the `mfdata/{PLUGIN_NAME}/config.ini` file.
 
+You may also check the :ref:`mfdata_additional_tutorials:Sending a file by FTP` example which implements a `ftpsend` template.

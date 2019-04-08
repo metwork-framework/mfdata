@@ -1,5 +1,5 @@
 # Release and Deploy a plugin
-
+.. index:: release a plugin
 ## Release a plugin
 
 Releasing a plugin consists in keeping all the plugin related files together in one `.plugin`file and makes the plugin production-ready, ready to be deployed.
@@ -23,7 +23,7 @@ You can change the `version` in  plugin `config.ini` file:
 version=1.0.0
 ```
 
-
+.. index:: deploy a plugin
 ## Deploy a plugin in a production environment
 
 In order to deploy a plugin in a production environment:
@@ -68,3 +68,6 @@ Then, check the plugin is installed, enter the command `su --command="plugins.li
 ```bash
 su --command="plugins.list" - mfdata
 ```
+## Override a plugin configuration
+
+Refer to :ref:`configure_a_metwork_package:How to configure plugins during production deployment process ?` section.

@@ -1,7 +1,6 @@
 ====================
 MFDATA documentation
 ====================
-
 .. toctree::
    :numbered:
    :caption: Table of Contents
@@ -11,6 +10,7 @@ MFDATA documentation
    configure_metwork_repo
    install_a_metwork_package
    configure_a_metwork_package
+   mfdata_load_env
    mfdata_quick_start
    mfdata_create_plugins
    mfdata_debug_plugin
@@ -20,11 +20,13 @@ MFDATA documentation
    mfdata_and_magic
    mfdata_miscellaneous
    mfdata_log
+   mfdata_tuning_monitoring
    api_xattrfile
    api_acquisition
    layer_root
    layer_python2
    layer_python3
+   todo
 
 Indices and tables
 ==================
