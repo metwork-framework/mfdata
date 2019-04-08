@@ -801,7 +801,6 @@ def run():
         stopMonitoring(notifier)
 
     except Exception as err:
-        raise
         logger.error(str(err))
         return False
 
