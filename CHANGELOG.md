@@ -5,6 +5,9 @@
 - Update MFDATA documentation
 - Update MFDATA documentation + add "Edit on GitHub"
 
+### Feat
+- introduce log management with mfadmin
+
 ### Fix
 - catch some magic exception with some exotic files
 
