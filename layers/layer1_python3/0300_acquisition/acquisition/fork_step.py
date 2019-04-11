@@ -4,6 +4,9 @@ from acquisition import AcquisitionStep
 
 
 class AcquisitionForkStep(AcquisitionStep):
+    """
+    Class to describe a fork acquisition step.
+    """
 
     plugin_dir = None
 

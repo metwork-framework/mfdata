@@ -7,6 +7,14 @@ from xattrfile import XattrFile
 
 
 class AcquisitionArchiveStep(AcquisitionStep):
+    """
+    Class to describe an archive acquisition step.
+
+    Attributes:
+        archive_dir (string): the root directory where files will be archived.
+        strftime_template (string): template to define the sub-directory inside archive directory
+
+    """
 
     archive_dir = None
     strftime_template = None

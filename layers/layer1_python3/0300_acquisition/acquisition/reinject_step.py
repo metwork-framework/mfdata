@@ -8,6 +8,9 @@ from mfutil import get_unique_hexa_identifier
 
 
 class AcquisitionReinjectStep(AcquisitionStep):
+    """
+    Class to describe a re-inject acquisition step.
+    """
 
     debug_mode_allowed = False
     __xafs = None
