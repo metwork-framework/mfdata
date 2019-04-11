@@ -12,7 +12,8 @@ class AcquisitionArchiveStep(AcquisitionStep):
 
     Attributes:
         archive_dir (string): the root directory where files will be archived.
-        strftime_template (string): template to define the sub-directory inside archive directory
+        strftime_template (string): template to define the sub-directory
+                                    inside archive directory
 
     """
 
