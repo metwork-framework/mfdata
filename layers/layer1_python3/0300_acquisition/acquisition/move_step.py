@@ -6,6 +6,9 @@ from xattrfile import XattrFile
 
 
 class AcquisitionMoveStep(AcquisitionStep):
+    """
+    Class to describe a move acquisition step.
+    """
 
     def add_extra_arguments(self, parser):
         parser.add_argument('--dest-dir', action='store',

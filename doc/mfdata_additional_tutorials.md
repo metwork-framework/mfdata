@@ -231,7 +231,7 @@ grib_to_netcdf --help
 
 For further about `grib_to_netcdf`, see https://confluence.ecmwf.int/pages/viewpage.action?pageId=23693254
 
-Tell the plugin to use MFEXT 'scientific' package. Edit the `.layer2_dependencies` in the `convert_grib2` directory and add the `python3_scientific@mfext` at the end:
+Tell the plugin to use MFEXT 'scientific' package. Edit the `.layerapi2_dependencies` in the `convert_grib2` directory and add the `python3_scientific@mfext` at the end:
 ```cfg
 python3@mfdata
 python3_scientific@mfext
@@ -947,4 +947,153 @@ You could also build and check the [Sending a file by FTP](#sending-a-file-by-ft
 .. index:: monitoring, MFADMIN, dashboard
 ## Implement custom monitoring and metrics in a plugin
 
-.. todo:: Add tutorial to learn how to implement specific monitoring and metrics using AcquisitionStep.get_stats_client function.
+In this tutorial, we will learn how to implement some metrics in a plugin and how to show them in a monitoring dashboard.
+
+What we want to measure is the elapsed time to convert a GRIB file to a NetCDF file in the ['grib_to_netcdf_command' function of the Create a plugin from scratch tutorial](#fill-in-the-plugin).
+
+
+### Add metrics in the Python code of the plugin
+
+In order to do this, we will use the :py:meth:`get_stats_client <acquisition.step.AcquisitionStep.get_stats_client>` method of the base class :py:class:`AcquisitionStep <acquisition.step.AcquisitionStep>`.
+
+The `get_stats_client` method returns a :py:class:`AcquisitionStatsDClient <acquisition.stats.AcquisitionStatsDClient>` instance.
+
+In order to create metrics, we just have to call the [timer](https://statsd.readthedocs.io/en/latest/reference.html#StatsClient.timer) 
+:py:meth:`timer <acquisition.step.AcquisitionStep.timer>` method from `AcquisitionStatsDClient` instance. It returns an
+[timer](https://statsd.readthedocs.io/en/latest/reference.html#StatsClient.timer) instance. For further details, you may check [StatsD documentation](https://statsd.readthedocs.io/) and its [Api Reference](https://statsd.readthedocs.io/en/latest/reference.html).
+
+Let's add our metrics to the `grib_to_netcdf_command` function. Edit the `main.py` file and add the instructions as below:
+
+```python
+    def grib_to_netcdf_command(self, grib_file_path, netcdf_file_path):
+        """
+        Convert GRIB file to Netcdf File
+        :param grib_file_path: GRIB file path to convert
+        :param netcdf_file_path: output NetCDF file path to convert
+        :raise: Exception if something wrong happens
+        """
+
+		# ADD THESE LINES
+        #------------------
+        # Create timer called 'grib_to_netcdf_metrics'
+        timer = self.get_stats_client().timer("grib_to_netcdf_metrics")
+        #  timer object to start counting
+        timer.start()
+        #------------------
+
+        # Build the 'grib_to_netcdf' command
+        command_grib_to_netcdf = list()
+        command_grib_to_netcdf.append("grib_to_netcdf")
+        command_grib_to_netcdf.append(grib_file_path)
+        command_grib_to_netcdf.extend(self.grib_to_netcdf_options.split(' '))
+        command_grib_to_netcdf.append("-o")
+        command_grib_to_netcdf.append(netcdf_file_path)
+
+        self.debug(command_grib_to_netcdf)
+
+        try:
+
+            # Run the the 'grib_to_netcdf' command
+            result_grib_to_netcdf = subprocess.check_call(command_grib_to_netcdf)
+            if result_grib_to_netcdf != 0:
+                msg = 'Unable to execute command {}. Result is: {}.'.format(command_grib_to_netcdf,
+                                                                            result_grib_to_netcdf)
+                raise Exception(msg)
+
+			# ADD THESE LINES
+        	#------------------
+            # Increment a counter 'bytes_of_output_netcdf_files' with the size of the output Netcdf (in bytes)
+            self.get_stats_client().incr("bytes_of_output_netcdf_files", os.path.getsize(netcdf_file_path))
+            #------------------
+
+        except subprocess.CalledProcessError as e:
+            msg = 'Unable to execute command {}. Reason: {}'.format(command_grib_to_netcdf, str(e))
+            raise Exception(msg, e)
+
+        # ADD THESE LINES
+        #------------------
+        finally:
+            # stop timing and send the results
+            timer.stop()
+
+```
+
+
+Then, build the plugin by entering the command `make develop` from the `convert_grib2` plugin directory.
+
+### Create a specific dashboard with our metrics
+
+Now, we have to 'connect' MFDATA to MFADMIN for monitoring and open MFADMIN Grafana GUI Interface from a browser. In order to do this, refer to :ref:`mfdata_tuning_monitoring:Monitoring and Dashboards`.
+
+Now, we will create a specific dashboard with the following metrics:
+
+- The `grib_to_netcdf_metrics` metrics will measure the duration of the GRIB to Netcdf conversion.
+- The `bytes_of_output_netcdf_files` metrics will measure the size of the NetCDF output file.
+- The `bytes_of_processed_files` metrics, created in the base class :py:class:`AcquisitionStep <acquisition.step.AcquisitionStep>`, will measure the size of the input file.
+
+
+From the Grafana Interface, create a new dashboard (click `+` then `dashboard`):
+
+![Grafana Create a new dashboard](./images/grafana_create_dashboard1.jpg)
+
+Then, select `Graph`:
+![Grafana Create a Graph dashboard](./images/grafana_create_dashboard2.jpg)
+
+We are going to create a graph that display the mean duration of the GRIB to NetCDF conversion, i.e. the `grib_to_netcdf_metrics`, we created in the Python code above.
+
+Edit the dashboard, from `Panel title`, select `Edit`:
+![Grafana Edit the dashboard](./images/grafana_create_dashboard3.jpg)
+
+Enter the title from the General Tab:
+![Grafana Edit General Tab](./images/grafana_edit_general_dashboard1.jpg)
+
+Enter query data from the Metrics Tab, as below:
+![Grafana Edit Metrics Tab](./images/grafana_edit_metrics_dashboard1.jpg)
+
+Enter axes data from the Axes Tab, as below:
+![Grafana Edit Axes Tab](./images/grafana_edit_axes_dashboard1.jpg)
+
+Then, Legend Tab:
+![Grafana Edit Legend Tab](./images/grafana_edit_legend_dashboard1.jpg)
+
+Display Tab:
+![Grafana Edit Display Tab](./images/grafana_edit_display_dashboard1.jpg)
+
+Then save the dashboard:
+![Grafana Save dashboard](./images/grafana_save_dashboard.jpg)
+
+Then add a new graph in our dashboard that display the sum of the input and output files sizes, i.e. the `bytes_of_output_netcdf_files` and `bytes_of_processed_files` metrics:
+![Grafana New graph](./images/grafana_new_graph_dashboard.jpg)
+
+Enter data as below:
+![Grafana Edit General Tab](./images/grafana_edit_general_dashboard2.jpg)
+![Grafana Edit Metrics Tab](./images/grafana_edit_metrics_dashboard2.jpg)
+![Grafana Edit Axes Tab](./images/grafana_edit_axes_dashboard2.jpg)
+![Grafana Edit Display Tab](./images/grafana_edit_display_dashboard2.jpg)
+
+
+Save the dashboard.
+
+### View metrics on the dashboard
+
+Then, run the `convert_grib2` plugin by injecting some GRIB files.
+
+You may download this :download:`GRIB file example </_downloads/AROME_201811280600.grib2>`. You may also download more GRIB files from this [site](https://donneespubliques.meteofrance.fr/?fond=produit&id_produit=131&id_rubrique=51).
+
+Then, from the MFADMIN Grafana GUI Interface, open your dashboard and you should see some the metrics displayed on the graphs.
+![Grafana Display métrics](./images/grafana_view_metrics_dashboard.jpg)
+
+You may also change the time ranges, by selecting a prédefined range or entering your custom range:
+![Grafana Quick ranges](./images/grafana_quick_ranges_dashboard.jpg)
+
+You may automatically refresh the graph:
+![Grafana Automatic refresh](./images/grafana_refresh_dashboard.jpg)
+
+### Useful links and Tips
+
+Check :ref:`mfdata_tuning_monitoring:Useful links and Tips` from the :doc:`../mfdata_tuning_monitoring` documentation.
+
+
+
+
+
