@@ -4,6 +4,7 @@
 ### Docs
 - Update MFDATA documentation
 - Update MFDATA documentation + add "Edit on GitHub"
+- fix E501 line too long (97 > 79 characters)
 
 ### Feat
 - introduce log management with mfadmin
