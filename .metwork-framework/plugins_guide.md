@@ -1,7 +1,9 @@
 # Plugins guide
 
+[//]: # (automatically generated from https://github.com/metwork-framework/resources/blob/master/cookiecutter/_%7B%7Bcookiecutter.repo%7D%7D/.metwork-framework/plugins_guide.md)
+
 ## Plugins Configuration
-A plugin has its own configuration in `config.ini` file stored in the root directory of the plugin (`${MODULE_RUNTIME_HOME}`).
+A plugin has its own configuration in `config.ini` file stored in the root directory of the plugin.
 
 This `config.ini` file is created with its requisite configuration during the `bootstrap_plugin.py create` command.
 
@@ -196,8 +198,7 @@ the `requirements.txt` uses 'exact' requirements, and contains the output of a `
 
 Working with Metwork plugin, you just need to fill the `requirements-to-freeze.txt` file. Then, when building/releasing the plugin, the `requirements.txt` will be generated.
 
-Depending of the Python
-Depending on which python version (python2 or python3) you are working with, the `requirements.txt` file will be named, respectively  `requirementsé.txt` and `requirements3.txt`
+Depending on which python version (python2 or python3) you are working with, the `requirements.txt` file will be named, respectively  `requirements2.txt` and `requirements3.txt`
 
 ### Python3 requirements-to-freeze.txt
 
