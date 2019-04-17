@@ -51,7 +51,6 @@ class AcquisitionArchiveStep(AcquisitionStep):
         self.keep_tags = self.args.keep_tags
         self.keep_tags_suffix = self.args.keep_tags_suffix
         mkdir_p_or_die(self.archive_dir)
-        self.failure_policy = "delete"
 
     def process(self, xaf):
         original_dirname = self.get_original_dirname(xaf)

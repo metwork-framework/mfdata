@@ -33,7 +33,6 @@ class AcquisitionMoveStep(AcquisitionStep):
         if self.args.dest_dir is None:
             raise Exception('you have to set a dest-dir')
         mkdir_p_or_die(self.args.dest_dir)
-        self.failure_policy = "delete"
         self.keep_tags = self.args.keep_tags
         self.keep_tags_suffix = self.args.keep_tags_suffix
         self.drop_tags = self.args.drop_tags

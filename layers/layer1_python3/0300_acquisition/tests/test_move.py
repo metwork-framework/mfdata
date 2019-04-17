@@ -37,6 +37,7 @@ class AcquisitionMoveTestCase(TestCase):
     def test_init_failure_policy(self):
         dest_dir = self.x.get_tmp_filepath() + "/move/"
         self.x.unit_tests_args = [
+            "--failure-policy=delete",
             "--dest-dir=%s" % dest_dir,
             "DUMMY_QUEUE"
         ]
