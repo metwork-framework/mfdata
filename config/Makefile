@@ -1,4 +1,4 @@
-CONFIGS=config.ini directory_observer.ini redis.conf nginx.conf content_by_lua.lua mflog_override.conf
+CONFIGS=config.ini directory_observer.ini redis.conf nginx.conf content_by_lua.lua mflog_override.conf redis_plugin_xxx.conf
 
 include ../adm/root.mk
 include $(MFEXT_HOME)/share/subdir_root.mk
