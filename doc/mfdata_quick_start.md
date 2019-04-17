@@ -2,7 +2,7 @@
 
 ## Activate the MFDATA environment
 
-One of the first thing, you have to do is to load the "MFDATA environnement" in your shell session. There are several ways to do that: check :doc:`the related documentation <../mfdata_load_env>`.
+One of the first thing, you have to do is to load the "MFDATA environment" in your shell session. There are several ways to do that: check :doc:`the related documentation <../mfdata_load_env>`.
 
 In this tutorial, follow :ref:`this way <activate_mfdata_user>`, i.e. log in as the `mfdata` user.
 
@@ -100,7 +100,7 @@ You should show the plugin is installed as dev build, i.e. dev_link
 Let's now run the plugin by <u>injecting a JPEG file</u> in the incomming directory of the switch plugin. Enter the command below to inject the file into the configured directory listened by the switch plugin
 
 ```bash
-inject_file --incomming [my_jpeg_file]
+inject_file --incoming [my_jpeg_file]
 ```
 
 <u>Note</u>: by default :
@@ -121,7 +121,7 @@ cp [my_jpeg_file] /home/mfdata/var/in/incoming/
 
 Then check the JPEG file has been copied in the destination directory (i.e `/tmp/my-jpeg-file`).
 
-You can also <u>check the log files</u> of the swicth plugin and the move_image plugin. log files are stored in the `${HOME}/log` directory :
+You can also <u>check the log files</u> of the switch plugin and the move_image plugin. log files are stored in the `${HOME}/log` directory :
 
 - step_switch_main.stdout:
 
@@ -216,9 +216,9 @@ Let's now deploy the `move_image` plugin on a production environment.
 - Metwork have to be installed on this environment (at least MFDATA and its dependencies MFEXT and MFCOM).
 - You be logged in as mfdata user
 
-In order to deploy the plugin on a production environment,  put down the `move_image-[version]-1.metwork.mfdata.plugin` in a directory on this target environement, e.g. `/home/mfdata/released_plugins`
+In order to deploy the plugin on a production environment,  put down the `move_image-[version]-1.metwork.mfdata.plugin` in a directory on this target environment, e.g. `/home/mfdata/released_plugins`
 
-<u>Note</u>: for this tutorial, if your production environment is the same as your development environment, you have to unstall the `move_image` plugin which is already installed (by the `make develop` command). To uninstall the plugin, enter:
+<u>Note</u>: for this tutorial, if your production environment is the same as your development environment, you have to uninstall the `move_image` plugin which is already installed (by the `make develop` command). To uninstall the plugin, enter:
 
 ```bash
 plugins.uninstall move_image
@@ -302,7 +302,7 @@ Check the plugin is installed, by running `plugins.list`
 Run the plugin: inject a PNG file :
 
 ```bash
-inject_file --incomming /tmp/my_png_file.png
+inject_file --incoming /tmp/my_png_file.png
 ```
 
 
@@ -328,7 +328,7 @@ Now we would also like to archive the compressed PNG images.
 Compress your PNG file (`my_png_file.png.gz`) and inject it:
 
 ```bash
-inject_file --incomming /tmp/my_png_file.png.gz
+inject_file --incoming /tmp/my_png_file.png.gz
 ```
 
 If the `ungzip` plugin is not installed, you will see the image is not archived in the `/tmp/my_archive_image` directory, because it's not a PNG file but a GZIP file.
@@ -369,7 +369,7 @@ The diagram below shows the data flow:
 ![archive_image_flow](./images/archive_image_flow.jpg)
 
 1. The GZIP file is processed by the `switch` plugin from the MFDATA `incoming` directory
-2. The `gunzip` plugin uncompresses the file
+2. The `gunzip` plugin uncompress the file
 3. The `gunzip` plugin puts the PNG file in the `incoming` directory. It will be process by the `switch` plugin
 4. The `archive_image` plugin processes the PNG file (the `switch_logical_condition` is `True`)
 

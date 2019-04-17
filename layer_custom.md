@@ -36,7 +36,7 @@ For example:
 
 #!/usr/bin/env python2
 
-print "this code will be always executed in python2 environnement"
+print "this code will be always executed in python2 environment"
 print "(thanks to the above python2 shebang)"
 ```
 
@@ -67,7 +67,7 @@ For example:
 
 #!/usr/bin/env python3
 
-print("this code will be always executed in python3 environnement")
+print("this code will be always executed in python3 environment")
 print("(thanks to the above python3 shebang)")
 ```
 
@@ -81,6 +81,6 @@ python3 /path/to/a/python3/script.py
 
 The `python` wrapper is available in `${MFEXT_HOME}/bin`. It works exactly
 as the two above wrappers. But the major python version is selected with
-the `METWORK_PYTHON_MODE` environnement variable.
+the `METWORK_PYTHON_MODE` environment variable.
 
 {% endblock %}
