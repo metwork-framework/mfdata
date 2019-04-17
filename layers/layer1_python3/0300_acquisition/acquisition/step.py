@@ -91,6 +91,10 @@ class AcquisitionStep(object):
                                    'failure-policy-move-dest-dir'
                                    ' in case of move failure policy')
             mkdir_p_or_die(fpmdd)
+            self.failure_policy_move_keep_tags = \
+                self.args.failure_policy_move_keep_tags
+            self.failure_policy_move_keep_tags_suffix = \
+                self.args.failure_policy_move_keep_tags_suffix
         signal.signal(signal.SIGTERM, self.__sigterm_handler)
         self.init()
 
@@ -217,7 +221,12 @@ class AcquisitionStep(object):
         elif self.failure_policy == "move":
             new_filepath = os.path.join(self.args.failure_policy_move_dest_dir,
                                         xaf.basename())
-            xaf.move_or_copy(new_filepath)
+            (success, move) = xaf.move_or_copy(new_filepath)
+            if success:
+                if self.failure_policy_move_keep_tags:
+                    suffix = self.failure_policy_move_keep_tags_suffix
+                    xaf.write_tags_in_a_file(new_filepath + suffix)
+                    xattrfile.XattrFile(new_filepath).clear_tags()
 
     def _after(self, xaf, process_status):
         if process_status:
@@ -349,6 +358,14 @@ class AcquisitionStep(object):
         parser.add_argument('--failure-policy-move-dest-dir', action='store',
                             default=None,
                             help='dest-dir in case of move failure policy')
+        parser.add_argument('--failure-policy-move-keep-tags', action='store',
+                            type=bool, default=True,
+                            help='keep tags into another file in case of '
+                            'move failure policy ?')
+        parser.add_argument('--failure-policy-move-keep-tags-suffix',
+                            action='store', default=".tags",
+                            help='suffix to add to the filename in case of '
+                            'move failure policy keep tags')
         self.add_extra_arguments(parser)
         parser.add_argument('FULL_FILEPATH_OR_QUEUE_NAME',
                             action='store',
