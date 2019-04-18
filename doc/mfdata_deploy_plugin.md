@@ -35,7 +35,7 @@ In order to deploy a plugin in a production environment:
 
 **You be logged in as** `{METWORK_MODULE}` **user, e.g.** `mfdata` **user.**
 
-In order to deploy the plugin on a production environment,  put down the `.plugin` file in a directory on this target environement, e.g. `~/released_plugins`
+In order to deploy the plugin on a production environment,  put down the `.plugin` file in a directory on this target environment, e.g. `~/released_plugins`
 
 
 Then, install the plugin by entering:
