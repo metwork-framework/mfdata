@@ -46,8 +46,7 @@ python3@mfdata
 ```
 means the plugin will use Python3 from the python3 package supplied in MFDATA.
 
-.. todo:: Add link to MFEXT layerapi2 documentation
-For more details on `layerapi2`, check MFEXT documentation.
+For more details on `layerapi2`, check :doc:`MFEXT layerapi2 <mfext:layerapi2>` and :ref:`MFEXT layerapi2 syntax <mfext:layerapi2:general>` documentation.
 
 Let's assume you need a module or package which is available in the MFEXT 'scientific' package, you have to add this dependencies to the `.layerapi2_dependencies` file:
 ```cfg
@@ -64,10 +63,12 @@ python2_scientific@mfext
 .. index:: layerapi2, layerapi2_extra_env, .layerapi2_extra_env
 ## The `.layerapi2_extra_env` file
 
-.. todo:: Add link to MFEXT layerapi2 documentation
 The `.layerapi2_extra_env` file allows you to defined environment variable only in the plugin context. Check `layerapi2` MFEXT documentation.
 
 By default, this `.layerapi2_extra_env` doesn't exist. If you need to add extra environment variables, create this file in the plugin root directory.
+
+.. seealso::
+    :ref:`MFEXT layerapi2 syntax <mfext:layerapi2:general>` documentation.
 
 .. index:: http, curl
 ## Inject data files in HTTP
@@ -89,7 +90,7 @@ You may change some configuration fields of the nginx server (including the port
 
 For a more detailed description of nginx configuration, check the  `/home/mfdata/config/config.ini` file.
 
-.. index:: multipule steps
+.. index:: multiple steps
 ## Plugins with more than one step
 
 A plugin may one or more step.
@@ -309,8 +310,7 @@ Enter `cronwrap.sh --help` for more details.
 
 A plugin can access a database through PYthon ORMs, like [SQLAlchemy](https://www.sqlalchemy.org/), [Records](https://github.com/kennethreitz/records), [Django ORM](https://www.djangoproject.com/), [peewee](http://docs.peewee-orm.com/), and so on.
 
-.. todo:: add a link to MFBASE documentation.
-Metwork supply PostgreSQL/PostGIS database through the MFBASE storage module.
+Metwork supply PostgreSQL/PostGIS database through the MFBASE storage module. If you want to easily and quickly install a Postgres database, check the :doc:`MFBASE documentation <mfbase:index>`.
 
 
 ## MFDATA - How it works ?
@@ -350,7 +350,7 @@ Once the monitoring of the directories is started, any action on the monitored d
 - the event timestamp
 
 
-Depending on the event, the correponding plugin step is executed. The event is popped from the Redis queue.
+Depending on the event, the corresponding plugin step is executed. The event is popped from the Redis queue.
 
 
 

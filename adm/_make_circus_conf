@@ -6,6 +6,8 @@ import envtpl
 from configparser_extended import ExtendedConfigParser
 from acquisition.utils import _set_custom_environment
 
+MODULE_HOME = os.environ["MODULE_HOME"]
+MODULE_RUNTIME_HOME = os.environ["MODULE_RUNTIME_HOME"]
 MFDATA_PLUGIN_HOME = os.path.join(os.environ["MODULE_RUNTIME_HOME"],
                                   "var", "plugins")
 CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
@@ -19,6 +21,11 @@ def make_watcher_conf(plugin_configuration_file):
     parser.read(plugin_configuration_file)
     steps = [x.replace("step_", "", 1).split(':')[0] for x in parser.sections()
              if x.startswith("step_")]
+
+    redis_service = False
+    if parser.has_option("general", "redis_service"):
+        redis_service = parser.getboolean("general", "redis_service")
+
     for step in steps:
         _set_custom_environment(plugin_name, step)
         section = "step_%s" % step
@@ -98,6 +105,31 @@ def make_watcher_conf(plugin_configuration_file):
                       "{{MODULE_RUNTIME_HOME}}/log/circus.log")
         if before_start:
             output.append("hooks.before_start = %s" % before_start)
+
+    if redis_service:
+        output.append("")
+        output.append("[watcher:redis_service_for_plugin_%s]" % plugin_name)
+        output.append("cmd = redis-server")
+        output.append("args = {{MODULE_RUNTIME_HOME}}/tmp/config_auto/"
+                      "redis_plugin_%s.conf" % plugin_name)
+        output.append("numprocesses = 1")
+        output.append("stdout_stream.class = FileStream")
+        output.append("stdout_stream.filename = {{MODULE_RUNTIME_HOME}}/log/"
+                      "redis_plugin_%s.log" % plugin_name)
+        output.append("stderr.class = FileStream")
+        output.append("stderr.filename = {{MODULE_RUNTIME_HOME}}/log/"
+                      "redis_plugin_%s.log" % plugin_name)
+        output.append("copy_env = True")
+        output.append("autostart = True")
+        output.append("respawn = True")
+        with open("%s/tmp/config_auto/redis_plugin_%s.conf" %
+                  (MODULE_RUNTIME_HOME, plugin_name), "w+") as f:
+            with open("%s/config/redis_plugin_xxx.conf" % MODULE_HOME,
+                      "r") as f2:
+                content = f2.read()
+            new_content = envtpl.render_string(content,
+                                               {"PLUGIN_NAME": plugin_name})
+            f.write(new_content)
 
     return envtpl.render_string("\n".join(output))
 
