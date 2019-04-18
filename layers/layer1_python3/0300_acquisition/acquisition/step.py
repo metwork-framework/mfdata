@@ -227,6 +227,8 @@ class AcquisitionStep(object):
             if success:
                 xaf.write_tags_in_a_file(new_filepath + ".tags")
                 xattrfile.XattrFile(new_filepath).clear_tags()
+            else:
+                xaf.delete_or_nothing()
         elif self.failure_policy == "move":
             new_filepath = os.path.join(self.args.failure_policy_move_dest_dir,
                                         xaf.basename())
@@ -236,6 +238,8 @@ class AcquisitionStep(object):
                     suffix = self.failure_policy_move_keep_tags_suffix
                     xaf.write_tags_in_a_file(new_filepath + suffix)
                     xattrfile.XattrFile(new_filepath).clear_tags()
+            else:
+                xaf.delete_or_nothing()
 
     def _after(self, xaf, process_status):
         if process_status:
