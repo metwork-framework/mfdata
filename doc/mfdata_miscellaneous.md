@@ -35,7 +35,41 @@ If you need to set your own tags, refer to :py:meth:`write_tags_in_a_file <xattr
 
 You may also check the :ref:`mfdata_additional_tutorials:Fill in the plugin` section of  :doc:`./mfdata_additional_tutorials`.
 
-.. index:: http
+.. index:: layerapi2, layerapi2_dependencies, .layerapi2_dependencies, dependencies
+## The `.layerapi2_dependencies` file
+
+When you create a plugin with the :ref:`bootstap_plugin <mfdata_create_plugins:Create and customize the plugin>` command, a `.layerapi2_dependencies` file is created in the plugin root directory. This file contains the module/package dependencies you need for the plugin.
+
+By default, the `.layerapi2_dependencies` file contains only minimal dependencies, e.g.:
+```cfg
+python3@mfdata
+```
+means the plugin will use Python3 from the python3 package supplied in MFDATA.
+
+.. todo:: Add link to MFEXT layerapi2 documentation
+For more details on `layerapi2`, check MFEXT documentation.
+
+Let's assume you need a module or package which is available in the MFEXT 'scientific' package, you have to add this dependencies to the `.layerapi2_dependencies` file:
+```cfg
+python3@mfdata
+python3_scientific@mfext
+```
+
+Let's assume now, you want to build your plugin relies on Python2 instead of Python3, the `.layerapi2_dependencies` file will look like this:
+```cfg
+python2@mfdata
+python2_scientific@mfext
+```
+
+.. index:: layerapi2, layerapi2_extra_env, .layerapi2_extra_env
+## The `.layerapi2_extra_env` file
+
+.. todo:: Add link to MFEXT layerapi2 documentation
+The `.layerapi2_extra_env` file allows you to defined environment variable only in the plugin context. Check `layerapi2` MFEXT documentation.
+
+By default, this `.layerapi2_extra_env` doesn't exist. If you need to add extra environment variables, create this file in the plugin root directory.
+
+.. index:: http, curl
 ## Inject data files in HTTP
 
 MFDATA allows to inject files through HTTP protocol.
@@ -271,6 +305,12 @@ If you need to execute your `cron` command in the Metwork context, you should us
 
 Enter `cronwrap.sh --help` for more details.
 
+## Access a database
+
+A plugin can access a database through PYthon ORMs, like [SQLAlchemy](https://www.sqlalchemy.org/), [Records](https://github.com/kennethreitz/records), [Django ORM](https://www.djangoproject.com/), [peewee](http://docs.peewee-orm.com/), and so on.
+
+.. todo:: add a link to MFBASE documentation.
+Metwork supply PostgreSQL/PostGIS database through the MFBASE storage module.
 
 
 ## MFDATA - How it works ?

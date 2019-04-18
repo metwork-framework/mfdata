@@ -2,6 +2,9 @@ from acquisition import AcquisitionStep
 
 
 class AcquisitionDeleteStep(AcquisitionStep):
+    """
+    Class to describe a delete acquisition step.
+    """
 
     def init(self):
         self.failure_policy = "delete"

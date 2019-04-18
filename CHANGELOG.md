@@ -4,12 +4,41 @@
 ### Docs
 - Update MFDATA documentation
 - Update MFDATA documentation + add "Edit on GitHub"
+- fix E501 line too long (97 > 79 characters)
+- update MFDATA documentation
+- update MFDATA tutorials
+- we prefer to keep a specific list of what we copy to doc
 
 ### Feat
+- add an integration test with injection of a thousand files
+- add drop-tags option to move step (and keep-tags* options also)
+- add integration test (plugin create, install, desinstall)
+- fix [#65](https://github.com/metwork-framework//issues/65) and introduce new configuration options around
 - introduce log management with mfadmin
+- remove circus_autostart and autostart plugins in circus config
 
 ### Fix
+- Fix loss of files between plugin switch and plugin ungzip or other mfdata plugins The test test_14_move_or_copy2 is broken, we temporarily skip it
+- add garbage_collector.sh call in crontab
+- both [#53](https://github.com/metwork-framework//issues/53) and [#61](https://github.com/metwork-framework//issues/61)
 - catch some magic exception with some exotic files
+- dump tags on errors (when in debug mode)
+- fix an integration test
+- fix exception function errors when the parameter is an exception object rather than a string
+- fix intermittent fails of mfdata integration tests
+- fix move_or_copy feature when src and dst are not on the same FS
+
+<a name="v0.5.9"></a>
+## [v0.5.9] - 2019-04-01
+### Feat
+- add drop-tags option to move step (and keep-tags* options also)
+
+### Fix
+- Fix loss of files between plugin switch and plugin ungzip or other mfdata plugins The test test_14_move_or_copy2 is broken, we temporarily skip it
+- add garbage_collector.sh call in crontab
+- both [#53](https://github.com/metwork-framework//issues/53) and [#61](https://github.com/metwork-framework//issues/61)
+- catch some magic exception with some exotic files
+- fix move_or_copy feature when src and dst are not on the same FS
 
 <a name="v0.6.0"></a>
 ## [v0.6.0] - 2019-04-01

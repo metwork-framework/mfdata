@@ -8,15 +8,16 @@ import redis
 import hashlib
 import codecs
 
-# Logger definition
+#: Logger definition
 DEFAULT_LOGGER = logging.getLogger("xattrfile")
 
-# Redis instance to manage extended attributes
+
+#: Redis instance to manage extended attributes
 RED = None
 
 UNITTESTS_RED = None
 
-# MODULE_RUNTIME_HOME value
+#: MODULE_RUNTIME_HOME value
 MODULE_RUNTIME_HOME = os.environ.get('MODULE_RUNTIME_HOME', None)
 
 
