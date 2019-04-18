@@ -43,6 +43,12 @@ class AcquisitionStep(object):
         stop_flag (boolean): if True, stop the daemon as soon as possible.
         unit_tests (boolean): if True, we are in unit tests mode.
         failure_policy (string): failure policy.
+        failure_policy_move_dest_dir (string): destination directory when
+            failure policy is move
+        failure_policy_move_keep_tags (boolean): keep tags into another file
+            when failure policy is move ?
+        failure_policy_move_keep_tags_suffix (string): suffix to add to the
+            filename to keep tags when failure policy is move
         args (Namespace): argparser Namespace object with parsed cli args.
         __logger (Logger): Logger object.
         __last_ping (Datetime): Datetime object of the last ping() call.
@@ -54,6 +60,9 @@ class AcquisitionStep(object):
     unit_tests = False
     unit_tests_args = None
     failure_policy = None
+    failure_policy_move_dest_dir = None
+    failure_policy_move_keep_tags = True
+    failure_policy_move_keep_tags_suffix = None
     step_limit = DEFAULT_STEP_LIMIT
     args = None
     __logger = None
