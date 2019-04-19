@@ -64,7 +64,7 @@ Check the plugin is installed, by running `plugins.list`.
 Run the plugin: inject a PNG compressed file :
 
 ```bash
-inject_file --incomming /tmp/my_png_file.png.gz
+inject_file --incoming /tmp/my_png_file.png.gz
 ```
 
 
@@ -88,7 +88,7 @@ The diagram below shows the data flow:
 
 
 1. The GZIP file is processed by the `switch` plugin from the MFDATA `incoming` directory
-2. The `gunzip` plugin uncompresses the file
+2. The `gunzip` plugin uncompress the file
 3. The `gunzip` plugin puts the PNG file in the `incoming` directory. It will be processed by the `switch` plugin
 4. The `archive_image` plugin processes the PNG file (its `switch_logical_condition` is `True`). The `convert_image` plugin processes the PNG file (its `switch_logical_condition` is `True`).
 5. The `convert_image` plugin puts (injects) the JPEG file in the `incoming` directory throw the `switch` plugin (`inject_file --plugin=switch "$1.jpeg"` command in the `convert.sh` script). It will be processed by the `switch` plugin.
@@ -441,7 +441,7 @@ Check the plugin is installed, by running `plugins.list`.
 **Run the plugin**: inject a GRIB file :
 
 ```bash
-inject_file --incomming /tmp/my_grib_file.grib2
+inject_file --incoming /tmp/my_grib_file.grib2
 ```
 
 Check the NetCDF file have been created and stored in the `netcdf-dest-dir` directory. You mays check the content of the NetCDF file through th `ncdump` commands (available in MFEXT package):
@@ -929,14 +929,14 @@ Check the plugin is installed, by running `plugins.list`.
 Run the plugin: inject a file :
 
 ```bash
-inject_file --incomming {my_file}
+inject_file --incoming {my_file}
 ```
 
 Then, you should see in the logs `~/log/step_batch_tuto_main.stdout` the file is processed after the `batch-process-max-wait` is reached.
 
 Then, run again the plugin by injecting more than the `batch-process-max-size`number of files.
 
-Let's assume, `arg_batch-process-max-size = 5` and `arg_batch-process-max-wait = 60`. Inject 7 files in the incomin MFDATA directory (repeat command `inject_file --incomming {my_file}`  7 times or  use `cp {files} /home/mfdata/var/in/incoming/` ).
+Let's assume, `arg_batch-process-max-size = 5` and `arg_batch-process-max-wait = 60`. Inject 7 files in the incomin MFDATA directory (repeat command `inject_file --incoming {my_file}`  7 times or  use `cp {files} /home/mfdata/var/in/incoming/` ).
 
 Then, check the logs `~/log/step_batch_tuto_main.stdout`. You will see the `batch_process` is launched after the 5th file is injected. Then, wait 60 seconds, check the logs again and you will see the last two files are processed 60 seconds later.
 

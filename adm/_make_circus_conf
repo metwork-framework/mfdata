@@ -6,6 +6,8 @@ import envtpl
 from configparser_extended import ExtendedConfigParser
 from acquisition.utils import _set_custom_environment
 
+MODULE_HOME = os.environ["MODULE_HOME"]
+MODULE_RUNTIME_HOME = os.environ["MODULE_RUNTIME_HOME"]
 MFDATA_PLUGIN_HOME = os.path.join(os.environ["MODULE_RUNTIME_HOME"],
                                   "var", "plugins")
 CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
@@ -16,9 +18,18 @@ def make_watcher_conf(plugin_configuration_file):
     parser = ExtendedConfigParser(config=CONFIG, strict=False,
                                   inheritance='im', interpolation=None)
     plugin_name = os.path.basename(os.path.dirname(plugin_configuration_file))
+    plugin_dir = os.path.dirname(plugin_configuration_file)
     parser.read(plugin_configuration_file)
     steps = [x.replace("step_", "", 1).split(':')[0] for x in parser.sections()
              if x.startswith("step_")]
+    extra_daemons = [x.replace("extra_daemon_", "", 1).split(':')[0]
+                     for x in parser.sections()
+                     if x.startswith("extra_daemon_")]
+
+    redis_service = False
+    if parser.has_option("general", "redis_service"):
+        redis_service = parser.getboolean("general", "redis_service")
+
     for step in steps:
         _set_custom_environment(plugin_name, step)
         section = "step_%s" % step
@@ -99,6 +110,84 @@ def make_watcher_conf(plugin_configuration_file):
         if before_start:
             output.append("hooks.before_start = %s" % before_start)
 
+    if redis_service:
+        output.append("")
+        output.append("[watcher:redis_service_for_plugin_%s]" % plugin_name)
+        output.append("cmd = redis-server")
+        output.append("args = {{MODULE_RUNTIME_HOME}}/tmp/config_auto/"
+                      "redis_plugin_%s.conf" % plugin_name)
+        output.append("numprocesses = 1")
+        output.append("stdout_stream.class = FileStream")
+        output.append("stdout_stream.filename = {{MODULE_RUNTIME_HOME}}/log/"
+                      "redis_plugin_%s.log" % plugin_name)
+        output.append("stderr.class = FileStream")
+        output.append("stderr.filename = {{MODULE_RUNTIME_HOME}}/log/"
+                      "redis_plugin_%s.log" % plugin_name)
+        output.append("copy_env = True")
+        output.append("autostart = True")
+        output.append("respawn = True")
+        with open("%s/tmp/config_auto/redis_plugin_%s.conf" %
+                  (MODULE_RUNTIME_HOME, plugin_name), "w+") as f:
+            with open("%s/config/redis_plugin_xxx.conf" % MODULE_HOME,
+                      "r") as f2:
+                content = f2.read()
+            new_content = envtpl.render_string(content,
+                                               {"PLUGIN_NAME": plugin_name})
+            f.write(new_content)
+
+    for extra_daemon in extra_daemons:
+        section = "extra_daemon_%s" % extra_daemon
+        cmd_and_args = parser.get(section, "cmd_and_args")
+        numprocesses = parser.getint(section, "numprocesses")
+        output.append("")
+        output.append("[watcher:extra_daemon_%s_for_plugin_%s]" %
+                      (extra_daemon, plugin_name))
+        output.append("cmd = plugin_wrapper")
+        output.append("args = %s -- %s" % (plugin_name, cmd_and_args))
+        output.append("working_dir = %s" % plugin_dir)
+        output.append("numprocesses = %i" % numprocesses)
+        output.append("copy_env = True")
+        output.append("async_kill = True")
+        output.append("autostart = True")
+        output.append("respawn = True")
+        output.append("stdout_stream.class = FileStream")
+        output.append("stdout_stream.filename = {{MODULE_RUNTIME_HOME}}/log/"
+                      "extra_daemon_%s_plugin_%s.log" %
+                      (extra_daemon, plugin_name))
+        output.append("stderr.class = FileStream")
+        output.append("stderr_stream.filename = {{MODULE_RUNTIME_HOME}}/log/"
+                      "extra_daemon_%s_plugin_%s.log" %
+                      (extra_daemon, plugin_name))
+        rlimit_as = None
+        rlimit_nofile = None
+        rlimit_nproc = None
+        rlimit_stack = None
+        rlimit_core = None
+        rlimit_fsize = None
+        if parser.has_option(section, "rlimit_as"):
+            rlimit_as = parser.getint(section, "rlimit_as")
+        if parser.has_option(section, "rlimit_nofile"):
+            rlimit_nofile = parser.getint(section, "rlimit_nofile")
+        if parser.has_option(section, "rlimit_nproc"):
+            rlimit_nproc = parser.getint(section, "rlimit_nproc")
+        if parser.has_option(section, "rlimit_stack"):
+            rlimit_stack = parser.getint(section, "rlimit_stack")
+        if parser.has_option(section, "rlimit_core"):
+            rlimit_core = parser.getint(section, "rlimit_core")
+        if parser.has_option(section, "rlimit_fsize"):
+            rlimit_fsize = parser.getint(section, "rlimit_fsize")
+        if rlimit_as:
+            output.append("rlimit_as = %i" % rlimit_as)
+        if rlimit_nofile:
+            output.append("rlimit_nofile = %i" % rlimit_nofile)
+        if rlimit_nproc:
+            output.append("rlimit_nproc = %i" % rlimit_nproc)
+        if rlimit_stack:
+            output.append("rlimit_stack = %i" % rlimit_stack)
+        if rlimit_core:
+            output.append("rlimit_core = %i" % rlimit_core)
+        if rlimit_fsize:
+            output.append("rlimit_fsize = %i" % rlimit_fsize)
     return envtpl.render_string("\n".join(output))
 
 

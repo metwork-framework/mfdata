@@ -67,7 +67,9 @@ max_age_variance = 300
 .. index:: monitoring, MFADMIN, dashboard
 ## Monitoring and Dashboards
 
-.. todo:: Add links to MFADMIN documentation
+.. seealso::
+    :doc:`MFADMIN documentation <mfadmin:index>`
+
 
 ### Monitor a plugin
 Through Metwork MFADMIN module, you may monitoring your plugin. 
