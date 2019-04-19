@@ -6,9 +6,6 @@ class AcquisitionDeleteStep(AcquisitionStep):
     Class to describe a delete acquisition step.
     """
 
-    def init(self):
-        self.failure_policy = "delete"
-
     def process(self, xaf):
         res = xaf.delete_or_nothing()
         if res:

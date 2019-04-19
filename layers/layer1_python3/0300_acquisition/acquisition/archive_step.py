@@ -11,13 +11,17 @@ class AcquisitionArchiveStep(AcquisitionStep):
     Class to describe an archive acquisition step.
 
     Attributes:
-        archive_dir (string): the root directory where files will be archived.
+        archive_dir (string): the root directory where files will be archived
+        keep_tags (boolean): keep tags into another file ?
+        keep_tags_suffix (string): suffix to add to the filename to keep tags
         strftime_template (string): template to define the sub-directory
                                     inside archive directory
 
     """
 
     archive_dir = None
+    keep_tags = True
+    keep_tags_suffix = None
     strftime_template = None
 
     def add_extra_arguments(self, parser):
@@ -51,7 +55,6 @@ class AcquisitionArchiveStep(AcquisitionStep):
         self.keep_tags = self.args.keep_tags
         self.keep_tags_suffix = self.args.keep_tags_suffix
         mkdir_p_or_die(self.archive_dir)
-        self.failure_policy = "delete"
 
     def process(self, xaf):
         original_dirname = self.get_original_dirname(xaf)

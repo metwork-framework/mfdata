@@ -6,9 +6,13 @@ from acquisition import AcquisitionStep
 class AcquisitionForkStep(AcquisitionStep):
     """
     Class to describe a fork acquisition step.
+
+    Attributes:
+        command_template (string): command template to execute
+
     """
 
-    plugin_dir = None
+    command_template = None
 
     def add_extra_arguments(self, parser):
         parser.add_argument('--command-template', action='store',

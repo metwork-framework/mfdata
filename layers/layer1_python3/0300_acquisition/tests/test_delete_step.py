@@ -27,7 +27,11 @@ class AcquisitionDeleteStepTestCase(TestCase):
         self.x = AcquisitionDeleteTestStep()
 
     def test_init(self):
-        self.x.init()
+        self.x.unit_tests_args = [
+            "--failure-policy=delete",
+            "DUMMY_QUEUE"
+        ]
+        self.x._init()
         self.assertEqual(self.x.failure_policy, "delete")
 
     def test_process_return_True(self):

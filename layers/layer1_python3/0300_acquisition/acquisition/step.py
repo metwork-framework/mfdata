@@ -43,6 +43,12 @@ class AcquisitionStep(object):
         stop_flag (boolean): if True, stop the daemon as soon as possible.
         unit_tests (boolean): if True, we are in unit tests mode.
         failure_policy (string): failure policy.
+        failure_policy_move_dest_dir (string): destination directory when
+            failure policy is move
+        failure_policy_move_keep_tags (boolean): keep tags into another file
+            when failure policy is move ?
+        failure_policy_move_keep_tags_suffix (string): suffix to add to the
+            filename to keep tags when failure policy is move
         args (Namespace): argparser Namespace object with parsed cli args.
         __logger (Logger): Logger object.
         __last_ping (Datetime): Datetime object of the last ping() call.
@@ -54,6 +60,9 @@ class AcquisitionStep(object):
     unit_tests = False
     unit_tests_args = None
     failure_policy = None
+    failure_policy_move_dest_dir = None
+    failure_policy_move_keep_tags = True
+    failure_policy_move_keep_tags_suffix = None
     step_limit = DEFAULT_STEP_LIMIT
     args = None
     __logger = None
@@ -91,6 +100,10 @@ class AcquisitionStep(object):
                                    'failure-policy-move-dest-dir'
                                    ' in case of move failure policy')
             mkdir_p_or_die(fpmdd)
+            self.failure_policy_move_keep_tags = \
+                self.args.failure_policy_move_keep_tags
+            self.failure_policy_move_keep_tags_suffix = \
+                self.args.failure_policy_move_keep_tags_suffix
         signal.signal(signal.SIGTERM, self.__sigterm_handler)
         self.init()
 
@@ -214,10 +227,19 @@ class AcquisitionStep(object):
             if success:
                 xaf.write_tags_in_a_file(new_filepath + ".tags")
                 xattrfile.XattrFile(new_filepath).clear_tags()
+            else:
+                xaf.delete_or_nothing()
         elif self.failure_policy == "move":
             new_filepath = os.path.join(self.args.failure_policy_move_dest_dir,
                                         xaf.basename())
-            xaf.move_or_copy(new_filepath)
+            (success, move) = xaf.move_or_copy(new_filepath)
+            if success:
+                if self.failure_policy_move_keep_tags:
+                    suffix = self.failure_policy_move_keep_tags_suffix
+                    xaf.write_tags_in_a_file(new_filepath + suffix)
+                    xattrfile.XattrFile(new_filepath).clear_tags()
+            else:
+                xaf.delete_or_nothing()
 
     def _after(self, xaf, process_status):
         if process_status:
@@ -349,6 +371,14 @@ class AcquisitionStep(object):
         parser.add_argument('--failure-policy-move-dest-dir', action='store',
                             default=None,
                             help='dest-dir in case of move failure policy')
+        parser.add_argument('--failure-policy-move-keep-tags', action='store',
+                            type=bool, default=True,
+                            help='keep tags into another file in case of '
+                            'move failure policy ?')
+        parser.add_argument('--failure-policy-move-keep-tags-suffix',
+                            action='store', default=".tags",
+                            help='suffix to add to the filename in case of '
+                            'move failure policy keep tags')
         self.add_extra_arguments(parser)
         parser.add_argument('FULL_FILEPATH_OR_QUEUE_NAME',
                             action='store',
