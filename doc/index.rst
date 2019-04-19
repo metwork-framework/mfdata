@@ -5,6 +5,7 @@ MFDATA documentation
    :numbered:
    :caption: Table of Contents
    :name: mfdatatoc
+   :maxdepth: 3
 
    mfdata_intro
    configure_metwork_repo
@@ -27,6 +28,7 @@ MFDATA documentation
    layer_python2
    layer_python3
    todo
+   changelogs
 
 Indices and tables
 ==================
