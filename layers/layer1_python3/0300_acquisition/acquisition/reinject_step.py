@@ -28,7 +28,6 @@ class AcquisitionReinjectStep(AcquisitionStep):
                             help='destination directory')
 
     def init(self):
-        self.failure_policy = "delete"
         self.__xafs = {}
         if self.args.reinject_dir is None:
             self.error_and_die('you have to set a reinject-dir')

@@ -33,6 +33,7 @@ class AcquisitionReinjectTestCase(TestCase):
         reinject_attempts = 3
         reinject_dir = self.x.get_tmp_filepath() + "/reinject/"
         self.x.unit_tests_args = [
+            "--failure-policy=delete",
             "--reinject-delay=%s" % reinject_delay,
             "--reinject-attempts=%s" % reinject_attempts,
             "--reinject-dir=%s" % reinject_dir,

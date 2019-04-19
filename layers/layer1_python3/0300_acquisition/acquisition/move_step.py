@@ -8,7 +8,24 @@ from xattrfile import XattrFile
 class AcquisitionMoveStep(AcquisitionStep):
     """
     Class to describe a move acquisition step.
+
+    Attributes:
+        dest_dir (string): destination directory
+        keep_original_basenames (boolean): keep original basenames for move ?
+        force_chmod (string): if set, force chmod on target files with well
+            know octal value such as 0700
+        keep_tags (boolean): keep tags into another file ?
+        keep_tags_suffix (string): suffix to add to the filename to keep tags
+        drop_tags (string): drop tags for the moved file
+
     """
+
+    dest_dir = None
+    keep_original_basenames = True
+    force_chmod = None
+    keep_tags = True
+    keep_tags_suffix = None
+    drop_tags = None
 
     def add_extra_arguments(self, parser):
         parser.add_argument('--dest-dir', action='store',
@@ -33,7 +50,6 @@ class AcquisitionMoveStep(AcquisitionStep):
         if self.args.dest_dir is None:
             raise Exception('you have to set a dest-dir')
         mkdir_p_or_die(self.args.dest_dir)
-        self.failure_policy = "delete"
         self.keep_tags = self.args.keep_tags
         self.keep_tags_suffix = self.args.keep_tags_suffix
         self.drop_tags = self.args.drop_tags
