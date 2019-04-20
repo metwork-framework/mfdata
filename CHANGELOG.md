@@ -5,7 +5,11 @@
 
 ### New Features
 - introduce log management with mfadmin
+- add keep-tags and keep-tags-suffix when failure-policy is move
 - port redis_service feature of mfserv to mfdata
+- add missing initialization and description of some atributes
+- incase of failure during failure policy, delete file and tags
+- port "extra_daemon" feature from mfserv to mfdata
 
 
 
