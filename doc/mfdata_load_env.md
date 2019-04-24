@@ -45,7 +45,7 @@ source {MFDATA_HOME}/share/interative_profile
 Then, the MFDATA environment is loaded/activated for the whole session of your account. A `metwork/mfdata` directory is created in your home directory. From now, you are able to work with your plugin(s) in this `~/metwork/mfdata` directory.
 
 .. caution::
-	The `~/metwork/mfdata` diretory has nothing to do with the `/home/mfdata` :ref:`directory <activate_mfdata_user>` and they don't share anything
+	The `~/metwork/mfdata` directory has nothing to do with the `/home/mfdata` :ref:`directory <activate_mfdata_user>` and they don't share anything
 
 .. caution::
 	Before sourcing `interactive_profile` mfdata service must not be started, for instance, from a `mfdata` user session. Check from a `mfdata` user session mfdata is stopped : `mfdata.status`, `mfdata.stop`.
