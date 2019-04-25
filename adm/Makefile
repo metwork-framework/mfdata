@@ -1,4 +1,4 @@
-BINS=before_start_directory_observer garbage_collector.sh _make_directory_observer_conf _make_circus_conf _make_switch_conf before_start_step.switch.main mfdata_conf_monitor.py redis_metwork.py telegraf_collector_var_in_files_count.py _directory_observer.stop _switch.stop
+BINS=before_start_directory_observer garbage_collector.sh _make_directory_observer_conf _make_circus_conf _make_switch_conf before_start_step.switch.main mfdata_conf_monitor.py redis_metwork.py telegraf_collector_var_in_files_count.py _directory_observer.stop _switch.stop _make_nginx_conf
 
 include root.mk
 include $(MFEXT_HOME)/share/subdir_root.mk
