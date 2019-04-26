@@ -308,9 +308,9 @@ Enter `cronwrap.sh --help` for more details.
 
 ## Access a database
 
-A plugin can access a database through PYthon ORMs, like [SQLAlchemy](https://www.sqlalchemy.org/), [Records](https://github.com/kennethreitz/records), [Django ORM](https://www.djangoproject.com/), [peewee](http://docs.peewee-orm.com/), and so on.
+A plugin can access a database through Python ORMs, like [SQLAlchemy](https://www.sqlalchemy.org/), [Records](https://github.com/kennethreitz/records), [Django ORM](https://www.djangoproject.com/), [peewee](http://docs.peewee-orm.com/), and so on.
 
-Metwork supply PostgreSQL/PostGIS database through the MFBASE storage module. If you want to easily and quickly install a Postgres database, check the :doc:`MFBASE documentation <mfbase:index>`.
+Metwork supplies :index:`PostgreSQL`/:index:`PostGIS` database through the MFBASE storage module. If you want to easily and quickly install a Postgres database, check the :doc:`MFBASE documentation <mfbase:index>`.
 
 
 ## MFDATA - How it works ?
