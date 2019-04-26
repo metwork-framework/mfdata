@@ -12,6 +12,9 @@
 - port "extra_daemon" feature from mfserv to mfdata
 
 
+### Bug Fixes
+- don't clean nginx upload tmp directory
+
 
 
 
