@@ -25,7 +25,7 @@ su - mfdata
 ```
 
 .. note::
-	If it's the first time you log in as mfdata, you have to set a password before (`passwd mfdata` or `sudo passwd mfdata`).
+	If it's the first time you log in as mfdata user, there is no default password. You have to either set a password before (`passwd mfdata` or `sudo passwd mfdata`), or or use `su - mfdata` from `root` to log in as `mfdata` user.
 
 Then, the MFDATA environment is loaded/activated for the whole session of the `mfdata` user.
 
