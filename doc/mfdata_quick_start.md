@@ -192,7 +192,7 @@ service metwork restart mfdata
 
 ### Release the plugin
 
-We wll now release the move_image plugin (considering it as a stable version). Releasing a plugin makes it production-ready, ready to be deployed.
+We will now release the move_image plugin (considering it as a stable version). Releasing a plugin makes it production-ready, ready to be deployed.
 
 To do this, go to the `move_image` plugin directory and enter the command:
 ```bash
