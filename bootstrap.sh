@@ -134,6 +134,25 @@ echo "endif" >>adm/root.mk
     fi
     #echo "export PREFIX := ${MODULE_HOME}" >>adm/root.mk
 
+if test "${ftp_proxy:-}" != ""; then
+    echo "export ftp_proxy:=${ftp_proxy:-}" >>adm/root.mk
+fi
+if test "${FTP_PROXY:-}" != ""; then
+    echo "export FTP_PROXY:=${FTP_PROXY:-}" >>adm/root.mk
+fi
+if test "${http_proxy:-}" != ""; then
+    echo "export http_proxy:=${http_proxy:-}" >>adm/root.mk
+fi
+if test "${https_proxy:-}" != ""; then
+    echo "export https_proxy:=${https_proxy:-}" >>adm/root.mk
+fi
+if test "${HTTPS_PROXY:-}" != ""; then
+    echo "export HTTPS_PROXY:=${HTTPS_PROXY:-}" >>adm/root.mk
+fi
+if test "${HTTP_PROXY:-}" != ""; then
+    echo "export HTTP_PROXY:=${HTTP_PROXY:-}" >>adm/root.mk
+fi
+
 
 # FIXME: do not hardcode this
 # FIXME: move to layer root extra_env ?
