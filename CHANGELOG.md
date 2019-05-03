@@ -4,6 +4,18 @@
 ## [Unreleased]
 
 ### New Features
+
+
+### Bug Fixes
+- fix building issues with proxy
+
+
+
+
+
+## v0.6.1 (2019-04-26)
+
+### New Features
 - introduce log management with mfadmin
 - add keep-tags and keep-tags-suffix when failure-policy is move
 - port redis_service feature of mfserv to mfdata
