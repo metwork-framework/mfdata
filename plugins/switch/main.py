@@ -82,10 +82,10 @@ class AcquisitionSwitchStep(AcquisitionStep):
         global MAGIC_OBJECTS_CACHE
         key = hashlib.md5(magic_file.encode('utf8')).hexdigest() \
             if magic_file is not None else "system"
-        if key not in MAGIC_OBJECTS_CACHE:
-            MAGIC_OBJECTS_CACHE[key] = Magic(magic_file=magic_file)
-        magic = MAGIC_OBJECTS_CACHE[key]
         try:
+            if key not in MAGIC_OBJECTS_CACHE:
+                MAGIC_OBJECTS_CACHE[key] = Magic(magic_file=magic_file)
+            magic = MAGIC_OBJECTS_CACHE[key]
             tag_magic = magic.from_file(xaf_file.filepath)
         except Exception as e:
             if magic_file is None:
