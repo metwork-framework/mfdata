@@ -39,16 +39,17 @@ You can activate the MFDATA environment from your own account.
 
 Load the `mfdata` environment for the whole shell session by entering:
 ```bash
+# {MFDATA_HOME} is the root mfbase directory, e.g. /opt/metwork-mfdata
 source {MFDATA_HOME}/share/interative_profile
 ```
 
 Then, the MFDATA environment is loaded/activated for the whole session of your account. A `metwork/mfdata` directory is created in your home directory. From now, you are able to work with your plugin(s) in this `~/metwork/mfdata` directory.
 
 .. caution::
-	The `~/metwork/mfdata` directory has nothing to do with the `/home/mfdata` :ref:`directory <activate_mfdata_user>` and they don't share anything
+	The `~/metwork/mfdata` directory has nothing to do with the `/home/mfdata` :ref:`directory <activate_mfdata_user>` and they don't share anything.
 
 .. caution::
-	Before sourcing `interactive_profile` mfdata service must not be started, for instance, from a `mfdata` user session. Check from a `mfdata` user session mfdata is stopped : `mfdata.status`, `mfdata.stop`.
+	Before sourcing `interactive_profile`, mfdata service must not be started, for instance, from a `mfdata` user session. Check from a `mfdata` user session mfdata is stopped : `mfdata.status`, `mfdata.stop`.
 
 
 .. tip::
@@ -63,7 +64,7 @@ Then, the MFDATA environment is loaded/activated for the whole session of your a
 
 ## Activate MFDATA for one command only from any user.
 
-If you want to load the "MFDATA environment" for one only command and then return back to a standard running environment, you can use the specific wrapper `{MFDATA_HOME}/bin/mfdata_wrapper`:
+If you want to load the "MFDATA environment" for only one command and then return back to a standard running environment, you can use the specific wrapper `{MFDATA_HOME}/bin/mfdata_wrapper`:
 ```bash
 ##### mfdata_wrapper example #####
 
@@ -83,13 +84,13 @@ $ {MFDATA_HOME}/bin/mfdata_wrapper which python
 /opt/metwork-mfext-master/opt/python3_core/bin/python
 # => this is the metwork python command included in this module
 
-# what is the version of the mfext python command ?
-$ {MFDATA_HOME}/bin/mfext_wrapper python --version
+# what is the version of the mfbase python command ?
+$ {MFDATA_HOME}/bin/mfdata_wrapper python --version
 Python 3.5.6
 # => this is a python3 version
 ```
 
-For more details, enter `{MFDATA_HOME}/bin/mfext_wrapper python --help` command.
+For more details, enter `{MFDATA_HOME}/bin/mfdata_wrapper --help` command.
 
 ## Miscellaneous
 
