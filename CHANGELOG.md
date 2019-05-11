@@ -9,6 +9,7 @@
 ### Bug Fixes
 - fix building issues with proxy
 - fix issue 'bad magic file in a plugin can break the switch plugin'
+- fix typo
 
 
 
