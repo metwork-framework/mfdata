@@ -11,7 +11,7 @@ BUILDDIR      = _build
 RST_FILES=$(shell ls *.md |grep -v tempo.md 2>/dev/null |sed 's/\.md$$/\.rst/g')
 IPYNB_FILES=$(shell ls *.ipynb 2>/dev/null |sed 's/\.ipynb$$/\.mdtemp/g')
 COMMON_DOCFILES=configure_a_metwork_package.rst configure_metwork_repo.rst install_a_metwork_package.rst plugins_guide.rst
-CHANGELOGS_FILES=$(shell ls ../CHANGELOG*.md |awk -F '/' '{print $$2;}')
+CHANGELOGS_FILES=$(shell ls ../CHANGELOG*.md |awk -F '/' '{print $$2;}' |sed 's/\.md$$/\.rst/g')
 
 # Put it first so that "make" without argument is like "make help".
 help:
