@@ -306,6 +306,32 @@ If you need to execute your `cron` command in the Metwork context, you should us
 
 Enter `cronwrap.sh --help` for more details.
 
+.. index:: Extra daemon, daemon
+## Extra daemon
+
+You can add extra daemons which will be launched within your plugin. In order to do this, edit the `config.ini` plugin configuration file and add an `[extra_daemon_xxx]` section.
+You have to provide a command to daemonize (the command must run in foreground and not daemonize by itself):
+```cfg
+[extra_daemon_foo]
+cmd_and_args = /your/foreground/command command_arg1 command_arg2
+# numprocesses=1
+```
+The `numprocesses` argument is the the number of processes allocated to you daemon command. The default value is 1.
+
+Of course, you can define as many daemon as you want by adding `[extra_daemon_*]` section:
+```cfg
+[extra_daemon_xxx]
+cmd_and_args = /your/foreground/command1 command_arg1 command_arg2
+
+[extra_daemon_yyy]
+cmd_and_args = /your/foreground/command2 command_arg1
+
+[extra_daemon_zzz]
+cmd_and_args = /your/foreground/command3
+
+...
+```
+
 ## Access a database
 
 A plugin can access a database through Python ORMs, like [SQLAlchemy](https://www.sqlalchemy.org/), [Records](https://github.com/kennethreitz/records), [Django ORM](https://www.djangoproject.com/), [peewee](http://docs.peewee-orm.com/), and so on.
