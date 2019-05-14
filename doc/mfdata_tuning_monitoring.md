@@ -7,7 +7,7 @@
 
 A plugin is able to run multiple processes simultaneously.
 
-You may change the number of process allocate for each step of each plugin. In order to configure this number of processes, add or update the `numprocesses` parameter in the [step....] section of the `config.ini` plugin configuration file, e.g.:
+You may change the number of process allocated for each step of each plugin. In order to configure this number of processes, add or update the `numprocesses` parameter in the [step....] section of the `config.ini` plugin configuration file, e.g.:
 ```cfg
 # Number of process allocate to the step. Default value is 1
 numprocesses = 3
