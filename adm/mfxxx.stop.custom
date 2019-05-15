@@ -21,6 +21,13 @@ if test $? -eq 0; then
     for STEP in ${STEPS}; do
         _circus_wait_watcher_stopped.sh "${STEP}"
     done
+    EXTRA_DAEMONS=$(timeout 10s _circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status 2>/dev/null |grep "^extra_daemon.*: active" |awk -F ':' '{print $1;}')
+    for EXTRA_DAEMON in ${EXTRA_DAEMONS}; do
+        _circus_schedule_stop_watcher.sh "${EXTRA_DAEMON}"
+    done
+    for EXTRA_DAEMON in ${EXTRA_DAEMONS}; do
+        _circus_wait_watcher_stopped.sh "${EXTRA_DAEMON}"
+    done
 fi
 
 {% endblock %}
