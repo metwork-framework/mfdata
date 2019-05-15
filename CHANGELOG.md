@@ -10,6 +10,7 @@
 - fix building issues with proxy
 - fix issue 'bad magic file in a plugin can break the switch plugin'
 - fix typo
+- fix bug CHANGELOGS not generated when CHANGELOGS.md doesn't exist (for the first time)
 
 
 
