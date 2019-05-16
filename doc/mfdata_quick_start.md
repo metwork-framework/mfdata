@@ -141,7 +141,7 @@ You can also <u>check the log files</u> of the switch plugin and the move_image 
 
 The diagram below shows the data flow:
 
-![archive_image_flow](images/move_image_flow.jpg)
+![archive_image_flow](./_images/move_image_flow.jpg)
 
 1. The JPEG file is processed by `switch` from the MFDATA incoming directory
 2. The `move_image` plugin process the JPEG file (the `switch_logical_condition` is `True`)
@@ -366,7 +366,7 @@ You will see the PNG file is now archived in the `/tmp/my_archive_image`, accord
 
 The diagram below shows the data flow:
 
-![archive_image_flow](./images/archive_image_flow.jpg)
+![archive_image_flow](./_images/archive_image_flow.jpg)
 
 1. The GZIP file is processed by the `switch` plugin from the MFDATA `incoming` directory
 2. The `gunzip` plugin uncompress the file
