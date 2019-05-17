@@ -1,5 +1,5 @@
 include ../adm/root.mk
-PLUGINS=ungzip switch debug
+PLUGINS=ungzip switch debug mqtt_listener
 
 all:: $(MFDATA_HOME)/share/plugins
 
