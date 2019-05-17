@@ -351,7 +351,7 @@ Metwork supplies :index:`PostgreSQL`/:index:`PostGIS` database through the MFBAS
 
 `conf_monitor` is a Metwork tool in order to monitor the configuration files.
 
-![MFDATA Overall architecture](./images/overall_architecture.jpg)
+![MFDATA Overall architecture](./_images/overall_architecture.jpg)
 
 Circus acts as a process watcher and runner. You may check the full `circus.ini` configuration file in the `/home/mfdata/tmp/config_auto/` directory. Check the [Circus architecture](https://circus.readthedocs.io/en/latest/design/architecture/)
 
