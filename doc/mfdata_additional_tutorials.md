@@ -84,7 +84,7 @@ file c210be74b8644aeeb6c1d41e4883649d
 
 The diagram below shows the data flow:
 
-![png_to_jpeg_flow](./images/png_to_jpeg_flow.jpg)
+![png_to_jpeg_flow](./_images/png_to_jpeg_flow.jpg)
 
 
 1. The GZIP file is processed by the `switch` plugin from the MFDATA `incoming` directory
@@ -141,7 +141,7 @@ inject_file --plugin=ftpsend_to_mybox --step=send "$1.jpeg"
 
 The diagram below shows the data flow:
 
-![ftpsend_to_mybox](./images/ftpsend_to_mybox.jpg)
+![ftpsend_to_mybox](./_images/ftpsend_to_mybox.jpg)
 
 
 1. The GZIP file is processed by the `switch` plugin from the MFDATA `incoming` directory
@@ -1034,42 +1034,42 @@ Now, we will create a specific dashboard with the following metrics:
 
 From the Grafana Interface, create a new dashboard (click `+` then `dashboard`):
 
-![Grafana Create a new dashboard](./images/grafana_create_dashboard1.jpg)
+![Grafana Create a new dashboard](./_images/grafana_create_dashboard1.jpg)
 
 Then, select `Graph`:
-![Grafana Create a Graph dashboard](./images/grafana_create_dashboard2.jpg)
+![Grafana Create a Graph dashboard](./_images/grafana_create_dashboard2.jpg)
 
 We are going to create a graph that display the mean duration of the GRIB to NetCDF conversion, i.e. the `grib_to_netcdf_metrics`, we created in the Python code above.
 
 Edit the dashboard, from `Panel title`, select `Edit`:
-![Grafana Edit the dashboard](./images/grafana_create_dashboard3.jpg)
+![Grafana Edit the dashboard](./_images/grafana_create_dashboard3.jpg)
 
 Enter the title from the General Tab:
-![Grafana Edit General Tab](./images/grafana_edit_general_dashboard1.jpg)
+![Grafana Edit General Tab](./_images/grafana_edit_general_dashboard1.jpg)
 
 Enter query data from the Metrics Tab, as below:
-![Grafana Edit Metrics Tab](./images/grafana_edit_metrics_dashboard1.jpg)
+![Grafana Edit Metrics Tab](./_images/grafana_edit_metrics_dashboard1.jpg)
 
 Enter axes data from the Axes Tab, as below:
-![Grafana Edit Axes Tab](./images/grafana_edit_axes_dashboard1.jpg)
+![Grafana Edit Axes Tab](./_images/grafana_edit_axes_dashboard1.jpg)
 
 Then, Legend Tab:
-![Grafana Edit Legend Tab](./images/grafana_edit_legend_dashboard1.jpg)
+![Grafana Edit Legend Tab](./_images/grafana_edit_legend_dashboard1.jpg)
 
 Display Tab:
-![Grafana Edit Display Tab](./images/grafana_edit_display_dashboard1.jpg)
+![Grafana Edit Display Tab](./_images/grafana_edit_display_dashboard1.jpg)
 
 Then save the dashboard:
-![Grafana Save dashboard](./images/grafana_save_dashboard.jpg)
+![Grafana Save dashboard](./_images/grafana_save_dashboard.jpg)
 
 Then add a new graph in our dashboard that display the sum of the input and output files sizes, i.e. the `bytes_of_output_netcdf_files` and `bytes_of_processed_files` metrics:
-![Grafana New graph](./images/grafana_new_graph_dashboard.jpg)
+![Grafana New graph](./_images/grafana_new_graph_dashboard.jpg)
 
 Enter data as below:
-![Grafana Edit General Tab](./images/grafana_edit_general_dashboard2.jpg)
-![Grafana Edit Metrics Tab](./images/grafana_edit_metrics_dashboard2.jpg)
-![Grafana Edit Axes Tab](./images/grafana_edit_axes_dashboard2.jpg)
-![Grafana Edit Display Tab](./images/grafana_edit_display_dashboard2.jpg)
+![Grafana Edit General Tab](./_images/grafana_edit_general_dashboard2.jpg)
+![Grafana Edit Metrics Tab](./_images/grafana_edit_metrics_dashboard2.jpg)
+![Grafana Edit Axes Tab](./_images/grafana_edit_axes_dashboard2.jpg)
+![Grafana Edit Display Tab](./_images/grafana_edit_display_dashboard2.jpg)
 
 
 Save the dashboard.
@@ -1081,13 +1081,13 @@ Then, run the `convert_grib2` plugin by injecting some GRIB files.
 You may download this :download:`GRIB file example </_downloads/AROME_201811280600.grib2>`. You may also download more GRIB files from this [site](https://donneespubliques.meteofrance.fr/?fond=produit&id_produit=131&id_rubrique=51).
 
 Then, from the MFADMIN Grafana GUI Interface, open your dashboard and you should see some the metrics displayed on the graphs.
-![Grafana Display métrics](./images/grafana_view_metrics_dashboard.jpg)
+![Grafana Display métrics](./_images/grafana_view_metrics_dashboard.jpg)
 
 You may also change the time ranges, by selecting a prédefined range or entering your custom range:
-![Grafana Quick ranges](./images/grafana_quick_ranges_dashboard.jpg)
+![Grafana Quick ranges](./_images/grafana_quick_ranges_dashboard.jpg)
 
 You may automatically refresh the graph:
-![Grafana Automatic refresh](./images/grafana_refresh_dashboard.jpg)
+![Grafana Automatic refresh](./_images/grafana_refresh_dashboard.jpg)
 
 ### Useful links and Tips
 
