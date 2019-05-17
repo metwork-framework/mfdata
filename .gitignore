@@ -18,6 +18,8 @@ plugins/*/.autorestart_includes
 **/__pycache__
 plugins/switch/local
 plugins/switch/python3_virtualenv_sources/src
+plugins/mqtt_listener/local
+plugins/mqtt_listener/python3_virtualenv_sources/src
 doc/layer_*.md
 doc/layer_*.rst
 doc/plugin.rst
