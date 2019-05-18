@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- add optional mqtt 3.1.1 incoming messages support
 
 
 ### Bug Fixes
