@@ -1,14 +1,4 @@
-#!/usr/bin/env python3
+{% extends "_common/main.py" %}
 
-from acquisition import AcquisitionMoveStep
+{% set typeStep = "Move" %}
 
-
-class {{cookiecutter.name|capitalize}}MoveMainStep(AcquisitionMoveStep):
-
-    plugin_name = "{{cookiecutter.name}}"
-    step_name = "main"
-
-
-if __name__ == "__main__":
-    x = {{cookiecutter.name|capitalize}}MoveMainStep()
-    x.run()

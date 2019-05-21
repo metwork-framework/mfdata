@@ -1,18 +1,12 @@
-#!/usr/bin/env {{cookiecutter.python_version}}
+{% extends "_common/main.py" %}
 
-from acquisition.step import AcquisitionStep
+{% set typeStep = "" %}
 
-
-class {{cookiecutter.name|capitalize}}MainStep(AcquisitionStep):
-
-    plugin_name = "{{cookiecutter.name}}"
-    step_name = "main"
+{% block process %}
 
     def process(self, xaf):
         self.info("process for file %s" % xaf.filepath)
         return True
 
 
-if __name__ == "__main__":
-    x = {{cookiecutter.name|capitalize}}MainStep()
-    x.run()
+{% endblock %}

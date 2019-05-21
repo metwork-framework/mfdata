@@ -9,6 +9,12 @@ set -e
 bootstrap_plugin.py create --no-input foobar
 
 cd foobar
+
+#Security if virtualenv_support is not yes by default
+if [ ! -d python3_virtualenv_sources ]; then
+    mkdir python3_virtualenv_sources
+fi
+
 echo django >python3_virtualenv_sources/requirements-to-freeze.txt
 make release
 plugins.install "$(ls *.plugin)"
