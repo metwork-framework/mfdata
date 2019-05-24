@@ -78,6 +78,7 @@ In order to do this, you have to:
 
 - install Metwork MFADMIN and MFSYSMON modules
 - in the `[admin]` section of the `config/config.ini` in the root directory of MFDATA, set the `hostname` parameter value with the host name or IP address where MFADMIN is running:
+
 ```cfg
 [admin]
 # null => no monitoring
