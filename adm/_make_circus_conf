@@ -80,7 +80,8 @@ def make_watcher_conf(plugin_configuration_file):
         output.append("cmd = std_redirect")
         output.append("args = -o %s -e %s -- plugin_wrapper %s -- %s %s" %
                       (stdout, stderr, plugin_name,
-                       envtpl.render_string(cmd), envtpl.render_string(args)))
+                       envtpl.render_string(cmd, keep_multi_blank_lines=False),
+                       envtpl.render_string(args, keep_multi_blank_lines=False)))
         output.append("numprocesses = %i" % numprocesses)
         output.append("graceful_timeout = %i" % graceful_timeout)
         output.append("max_age = %i" % max_age)
@@ -132,7 +133,8 @@ def make_watcher_conf(plugin_configuration_file):
                       "r") as f2:
                 content = f2.read()
             new_content = envtpl.render_string(content,
-                                               {"PLUGIN_NAME": plugin_name})
+                                               {"PLUGIN_NAME": plugin_name},
+                                               keep_multi_blank_lines=False)
             f.write(new_content)
 
     for extra_daemon in extra_daemons:
@@ -188,13 +190,14 @@ def make_watcher_conf(plugin_configuration_file):
             output.append("rlimit_core = %i" % rlimit_core)
         if rlimit_fsize:
             output.append("rlimit_fsize = %i" % rlimit_fsize)
-    return envtpl.render_string("\n".join(output))
+    return envtpl.render_string("\n".join(output),
+                                keep_multi_blank_lines=False)
 
 
 circus_ini_file = os.path.join(os.environ['MODULE_HOME'], 'config',
                                'circus.ini')
 with open(circus_ini_file, "r") as f:
-    content = envtpl.render_string(f.read())
+    content = envtpl.render_string(f.read(), keep_multi_blank_lines=False)
 
 for config_file in glob.glob(MFDATA_PLUGIN_HOME + "/*/config.ini"):
     content = content + make_watcher_conf(config_file)

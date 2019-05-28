@@ -10,7 +10,7 @@ if test "${UUID}" = ""; then
 fi
 export UUID
 
-cat "${MODULE_HOME}/config/nginx.conf" |envtpl >"${TMPFILE}"
+cat "${MODULE_HOME}/config/nginx.conf" |envtpl --reduce-multi-blank-lines >"${TMPFILE}"
 nginxfmt.py "${TMPFILE}"
 # FIXME: ugly hack to circumvent nginxfmt problem with JSON
 cat -s "${TMPFILE}" |sed 's/~~~1/{/g' |sed 's/~~~2/}/g'
