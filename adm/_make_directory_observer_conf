@@ -59,4 +59,4 @@ with open(directory_observer_ini_file, "r") as f:
 for config_file in glob.glob(MFDATA_PLUGIN_HOME + "/*/config.ini"):
     content = content + make_directory_observer_conf(config_file)
 
-print(envtpl.render_string(content))
+print(envtpl.render_string(content, keep_multi_blank_lines=False))
