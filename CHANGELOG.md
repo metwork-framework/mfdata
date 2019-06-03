@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- use envtpl new option --reduce-multi-blank-lines
 - add optional mqtt 3.1.1 incoming messages support
 - port "extra_daemon" feature from mfserv to mfdata
 - incase of failure during failure policy, delete file and tags
