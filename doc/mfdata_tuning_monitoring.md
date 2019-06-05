@@ -78,6 +78,7 @@ In order to do this, you have to:
 
 - install Metwork MFADMIN and MFSYSMON modules
 - in the `[admin]` section of the `config/config.ini` in the root directory of MFDATA, set the `hostname` parameter value with the host name or IP address where MFADMIN is running:
+
 ```cfg
 [admin]
 # null => no monitoring
@@ -96,15 +97,15 @@ service metwork restart mfdata
 ### Dashboards
 Dashboards are available from MFADMIN Grafana GUI Interface which is displayed through HTTP on `http://{your_mfadmin_host}:15602`(default login is `admin/admin`), e.g. http://localhost:15602.
 
-![Grafana login](./images/grafana_login.jpg)
+![Grafana login](./_images/grafana_login.jpg)
 
 Then, click `mfdata` to open MFDATA dashboards.
 
-![Grafana home](./images/grafana_home.jpg)
+![Grafana home](./_images/grafana_home.jpg)
 
 MFDATA dashboards are displayed. Check MFADMIN documentation for more details.
 
-![MFDATA dashboards](./images/grafana_mfdata_dashboard.jpg)
+![MFDATA dashboards](./_images/grafana_mfdata_dashboard.jpg)
 
 You may want to implement your own dashboard with specific metrics. In order to do this, you may refer to MFADMIN documentation and the :ref:`mfdata_additional_tutorials:Implement custom monitoring and metrics in a plugin`.
 

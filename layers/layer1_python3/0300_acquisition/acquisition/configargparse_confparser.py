@@ -49,10 +49,12 @@ class StepConfigFileParser(configargparse.ConfigFileParser):
                 continue
             if(sys.version_info < (3, 0)):
                 result[key.replace('arg_', '', 1)] = envtpl.render_string(
-                    config_parser.get(section, key)).encode('utf-8')
+                    config_parser.get(section, key),
+                    keep_multi_blank_lines=False).encode('utf-8')
             else:
                 result[key.replace('arg_', '', 1)] = envtpl.render_string(
-                    config_parser.get(section, key))
+                    config_parser.get(section, key),
+                    keep_multi_blank_lines=False)
         return result
 
     def get_syntax_description(self):

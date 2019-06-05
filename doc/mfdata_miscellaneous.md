@@ -338,20 +338,21 @@ A plugin can access a database through Python ORMs, like [SQLAlchemy](https://ww
 
 Metwork supplies :index:`PostgreSQL`/:index:`PostGIS` database through the MFBASE storage module. If you want to easily and quickly install a Postgres database, check the :doc:`MFBASE documentation <mfbase:index>`.
 
-
+.. index:: circus, redis, telegraf, influxdb
 ## MFDATA - How it works ?
 
 
 [Circus](https://circus.readthedocs.io/en/latest/) is a Python program in order to monitor and control processes and sockets.
 
-
 [Redis](https://redis.io/) is an in-memory data structure store, used as a database, cache and message broker.
+
+[Telegraf](https://docs.influxdata.com/telegraf/) is a plugin-driven server agent for collecting and sending metrics and events from databases, systems, and IoT sensors.
 
 `directory_observer` is a Metwork tool that allows you to monitor activity on various directories and push the corresponding events to a Redis queue (a list). For example, you may create a file inside one of your monitored directories, the creation event will be pushed to the Redis queue.
 
 `conf_monitor` is a Metwork tool in order to monitor the configuration files.
 
-![MFDATA Overall architecture](./images/overall_architecture.jpg)
+![MFDATA Overall architecture](./_images/overall_architecture.jpg)
 
 Circus acts as a process watcher and runner. You may check the full `circus.ini` configuration file in the `/home/mfdata/tmp/config_auto/` directory. Check the [Circus architecture](https://circus.readthedocs.io/en/latest/design/architecture/)
 
@@ -378,7 +379,7 @@ Once the monitoring of the directories is started, any action on the monitored d
 
 Depending on the event, the corresponding plugin step is executed. The event is popped from the Redis queue.
 
-
+If the MFDATA plugin is :ref:`configured for monitoring <mfdata_tuning_monitoring:Monitor a plugin>`, the metrics are send via [Telegraf](https://docs.influxdata.com/telegraf/) to the [InfluxDB](https://docs.influxdata.com/influxdb/) database on the MFADMIN server.
 
 
 
