@@ -1,25 +1,26 @@
 # release_0.7 CHANGELOG
 
 
-## [Unreleased]
+
+## v0.7.0 (2019-05-24)
 
 ### New Features
-- add optional mqtt 3.1.1 incoming messages support
-- port "extra_daemon" feature from mfserv to mfdata
-- incase of failure during failure policy, delete file and tags
-- add missing initialization and description of some atributes
-- port redis_service feature of mfserv to mfdata
-- add keep-tags and keep-tags-suffix when failure-policy is move
 - introduce log management with mfadmin
+- add keep-tags and keep-tags-suffix when failure-policy is move
+- port redis_service feature of mfserv to mfdata
+- add missing initialization and description of some atributes
+- incase of failure during failure policy, delete file and tags
+- port "extra_daemon" feature from mfserv to mfdata
+- add optional mqtt 3.1.1 incoming messages support
 
 
 ### Bug Fixes
-- fix bug CHANGELOGS not generated when CHANGELOGS.md doesn't exist (for the first time)
-- fix typo
-- fix issue 'bad magic file in a plugin can break the switch plugin'
-- fix building issues with proxy
-- don't clean nginx upload tmp directory
 - catch some magic exception with some exotic files
+- don't clean nginx upload tmp directory
+- fix building issues with proxy
+- fix issue 'bad magic file in a plugin can break the switch plugin'
+- fix typo
+- fix bug CHANGELOGS not generated when CHANGELOGS.md doesn't exist (for the first time)
 
 
 
