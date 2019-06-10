@@ -16,6 +16,7 @@ MFDATA documentation
    mfdata_create_plugins
    mfdata_debug_plugin
    mfdata_deploy_plugin
+   mfdata_how_it_works
    mfdata_additional_tutorials
    plugins_guide
    mfdata_and_magic
