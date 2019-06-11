@@ -45,6 +45,8 @@ def get_old_switch_conf():
 def restart_directory_observer(old_conf, new_conf):
     os.unlink(old_conf)
     os.rename(new_conf, old_conf)
+    # because it is not called by circus in this case
+    BashWrapper("before_start_directory_observer")
     x = BashWrapper("_directory_observer.stop")
     if not x:
         LOGGER.warning(x)
@@ -54,6 +56,8 @@ def restart_directory_observer(old_conf, new_conf):
 def restart_switch(old_conf, new_conf):
     os.unlink(old_conf)
     os.rename(new_conf, old_conf)
+    # because it is not called by circus in this case
+    BashWrapper("before_start_step.switch.main")
     x = BashWrapper("_switch.stop")
     if not x:
         LOGGER.warning(x)
