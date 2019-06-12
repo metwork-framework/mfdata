@@ -47,3 +47,4 @@ doc/plugins_guide.rst
 doc/CHANGELOG*.md
 doc/CHANGELOG*.rst
 doc/changelogs.rst
+.idea
