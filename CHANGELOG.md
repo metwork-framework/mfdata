@@ -8,6 +8,9 @@
 - use envtpl new option --reduce-multi-blank-lines
 
 
+### Bug Fixes
+- create a missing directory during hot reload after a new plugin install
+
 
 
 
