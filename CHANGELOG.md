@@ -1,6 +1,17 @@
 # release_0.6 CHANGELOG
 
 
+## [Unreleased]
+
+### New Features
+
+
+### Bug Fixes
+- create a missing directory during hot reload after a new plugin install
+
+
+
+
 
 ## v0.6.1 (2019-04-26)
 
