@@ -8,15 +8,7 @@ import os
 import mflog
 import mfutil
 import xattrfile
-
-
-def get_logger():
-    """
-    Get an object that can be used for logging.
-    :return: an instance of logger
-    """
-    logger_name = "mfdata.%s.%s" % (ExtraDaemonAmqpConsumer.plugin_name, ExtraDaemonAmqpConsumer.daemon_name)
-    return mflog.getLogger(logger_name)
+from acquisition.acquisition_base import AcquisitionBase
 
 
 def parse_args(parser, commands):
@@ -84,11 +76,11 @@ def get_arguments():
         return args
     else:
         os.system('%s --help' % sys.argv[0])
-        get_logger().error('%s: error: a string specifying the subscription exchange type is required' % sys.argv[0])
+        self.error('%s: error: a string specifying the subscription exchange type is required' % sys.argv[0])
         exit(0)
 
 
-class ExtraDaemonAmqpConsumer(object):
+class ExtraDaemonAmqpConsumer(AcquisitionBase):
 
     plugin_name = "amqp_listener"
     daemon_name = "extra_daemon_amqp_consumer"
@@ -118,7 +110,7 @@ class ExtraDaemonAmqpConsumer(object):
         signal.signal(signal.SIGINT, self.__sigterm_handler)
 
     def __sigterm_handler(self, *args):
-        get_logger().info("SIGTERM signal handled => schedulling shutdown")
+        self.info("SIGTERM signal handled => schedulling shutdown")
         if self.delete_queue_after_stop:
             self.channel.queue_delete(self.subscription_queue)
         self.channel.close()
@@ -146,10 +138,10 @@ class ExtraDaemonAmqpConsumer(object):
             self.channel.exchange_declare(exchange=self.subscription_exchange,
                                           exchange_type=self.subscription_exchange_type)
         except Exception as e:
-            get_logger().error(format(e))
+            self.error(format(e))
             return False
         except:
-            get_logger().error("Error unknown")
+            self.error("Error unknown")
             return False
         else:
             return True
@@ -169,31 +161,31 @@ class ExtraDaemonAmqpConsumer(object):
         :return:
         """
         basename = mfutil.get_unique_hexa_identifier()
-        get_logger().debug("basename: %s" % (basename))
+        self.debug("basename: %s" % (basename))
         filepath = os.path.join(self.dest_dir, basename)
         tmp_filepath = '.'.join((filepath, self.tmp_suffix))
-        get_logger().debug("Created tmp file name : %s" % (tmp_filepath))
+        self.debug("Created tmp file name : %s" % (tmp_filepath))
         with open(tmp_filepath, "w") as fichier:
             fichier.write(str(body))
         xaf = xattrfile.XattrFile(tmp_filepath)
-        xaf.tags['amqp_listener.subscription_exchange'] = self.subscription_exchange
-        xaf.tags['amqp_listener_subscription_exchange_type'] = self.subscription_exchange_type
+        self.set_tag(xaf, 'amqp_listener.subscription_exchange', self.subscription_exchange)
+        self.set_tag(xaf, 'amqp_listener_subscription_exchange_type', self.subscription_exchange_type)
         if self.subscription_exchange_type == 'topic':
-            xaf.tags['amqp_listener_subscription_routing_keys'] = self.routing_topic_keys
-            xaf.tags['amqp_listener_received_routing_key'] = basic_deliver.routing_key
+            self.set_tag(xaf, 'amqp_listener_subscription_routing_keys', self.routing_topic_keys)
+            self.set_tag(xaf, 'amqp_listener_received_routing_key', basic_deliver.routing_key)
         elif self.subscription_exchange_type == 'fanout':
-            xaf.tags['amqp_listener_subscription_queue'] = self.subscription_queue
-        xaf.tags['amqp_listener_broker_hostname'] = self.broker_hostname
-        xaf.tags['amqp_listener_broker_port'] = str(self.broker_port)
+            self.set_tag(xaf, 'amqp_listener_subscription_queue', self.subscription_queue)
+        self.set_tag(xaf, 'amqp_listener_broker_hostname', self.broker_hostname)
+        self.set_tag(xaf, 'amqp_listener_broker_port', str(self.broker_port))
         xaf.rename(filepath)
-        get_logger().debug("Created file name : %s" % (filepath))
-        get_logger().info('Received message %s from %s : %s' % (basic_deliver.delivery_tag, properties.app_id, body))
+        self.debug("Created file name : %s" % (filepath))
+        self.info('Received message %s from %s : %s' % (basic_deliver.delivery_tag, properties.app_id, body))
 
     def consume(self):
         if self.subscription_exchange_type == u'fanout':
             result = self.channel.queue_declare(self.subscription_queue, exclusive=False)
             self.channel.queue_bind(queue=self.subscription_queue, exchange=self.subscription_exchange)
-            get_logger().info(' [*] Waiting for %s on queue %s. To exit press CTRL+C' % (
+            self.info(' [*] Waiting for %s on queue %s. To exit press CTRL+C' % (
                 self.subscription_exchange,
                 self.subscription_queue))
         elif self.subscription_exchange_type == 'topic':
@@ -202,7 +194,7 @@ class ExtraDaemonAmqpConsumer(object):
             for key in self.routing_topic_keys:
                 self.channel.queue_bind(exchange=self.subscription_exchange, queue=self.subscription_queue,
                                         routing_key=key)
-            get_logger().info(' [*] Waiting for %s on queue %s and topics %s. To exit press CTRL+C' % (
+            self.info(' [*] Waiting for %s on queue %s and topics %s. To exit press CTRL+C' % (
                 self.subscription_exchange,
                 self.subscription_queue,
                 self.routing_topic_keys))
