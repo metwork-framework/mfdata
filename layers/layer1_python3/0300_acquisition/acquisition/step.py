@@ -11,14 +11,14 @@ import re
 import six
 import signal
 from functools import partial
-
+from acquisition.acquisition_base import AcquisitionBase
 import mflog
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from mfutil import get_utc_unix_timestamp
 from mfutil.plugins import MFUtilPluginBaseNotInitialized
 from mfutil.plugins import get_installed_plugins
 from acquisition.utils import _set_custom_environment, \
-    get_plugin_step_directory_path, MODULE_RUNTIME_HOME, _get_tmp_filepath, \
+    get_plugin_step_directory_path, _get_tmp_filepath, \
     _make_config_file_parser_class, _get_or_make_trash_dir
 from acquisition.stats import get_stats_client
 
@@ -33,14 +33,13 @@ except MFUtilPluginBaseNotInitialized:
     DEBUG_PLUGIN_INSTALLED = False
 
 
-class AcquisitionStep(object):
+class AcquisitionStep(AcquisitionBase):
     """Abstract class to describe an acquisition step.
 
     You have to override this class.
 
     Attributes:
         debug_mode_allowed (boolean): if True, the debug mode is allowed.
-        stop_flag (boolean): if True, stop the daemon as soon as possible.
         unit_tests (boolean): if True, we are in unit tests mode.
         failure_policy (string): failure policy.
         failure_policy_move_dest_dir (string): destination directory when
@@ -50,12 +49,10 @@ class AcquisitionStep(object):
         failure_policy_move_keep_tags_suffix (string): suffix to add to the
             filename to keep tags when failure policy is move
         args (Namespace): argparser Namespace object with parsed cli args.
-        __logger (Logger): Logger object.
         __last_ping (Datetime): Datetime object of the last ping() call.
 
     """
 
-    stop_flag = False
     debug_mode_allowed = True
     unit_tests = False
     unit_tests_args = None
@@ -65,23 +62,16 @@ class AcquisitionStep(object):
     failure_policy_move_keep_tags_suffix = None
     step_limit = DEFAULT_STEP_LIMIT
     args = None
-    __logger = None
     __last_ping = None
     _shadow = False
     _debug_mode = False
 
     def __init__(self):
-        """Constructor."""
-        step_name = self.step_name
-        plugin_name = self.plugin_name
-        regexp = "^[A-Za-z0-9_]+$"
-        if not re.match(regexp, step_name):
-            self.error_and_die("step_name: %s must match with %s",
-                               step_name, regexp)
-        if not re.match(regexp, plugin_name):
-            self.error_and_die("plugin_name: %s must match with %s",
-                               plugin_name, regexp)
-        _set_custom_environment(plugin_name, step_name)
+        super(AcquisitionStep, self).__init__()
+
+    def __sigterm_handler(self, *args):
+        self.debug("SIGTERM signal handled => schedulling shutdown")
+        self.stop_flag = True
 
     def _init(self):
         parser = self.__get_argument_parser()
@@ -106,25 +96,6 @@ class AcquisitionStep(object):
                 self.args.failure_policy_move_keep_tags_suffix
         signal.signal(signal.SIGTERM, self.__sigterm_handler)
         self.init()
-
-    def __sigterm_handler(self, *args):
-        self.debug("SIGTERM signal handled => schedulling shutdown")
-        self.stop_flag = True
-
-    def __get_logger(self):
-        if not self.__logger:
-            logger_name = "mfdata.%s.%s" % (self.plugin_name, self.step_name)
-            self.__logger = mflog.getLogger(logger_name)
-        return self.__logger
-
-    def get_tmp_filepath(self):
-        """Get a full temporary filepath (including unique filename).
-
-        Returns:
-            (string) full temporary filepath (including unique filename).
-
-        """
-        return _get_tmp_filepath(self.plugin_name, self.step_name)
 
     def _exception_safe_call(self, func, args, kwargs, label,
                              return_value_if_exception):
@@ -212,8 +183,16 @@ class AcquisitionStep(object):
             self.__set_original_uid_if_necessary(xaf)
             self.__set_original_dirname_if_necessary(xaf)
 
-    def _current_utc_datetime_with_ms(self):
-        return datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S:%f')
+    @property
+    def step_name(self):
+        """Get the name of the step. (for compatibility)
+        This method is called if there is no "step_name" property defined.
+        This said property SHOULD be defined.
+        The name must match with `^[A-Za-z0-9_]+$` regexp.
+        Returns:
+            (string) the name of the step.
+        """
+        return "main"
 
     def _trash(self, xaf):
         if self.failure_policy == "delete":
@@ -391,45 +370,6 @@ class AcquisitionStep(object):
         return get_stats_client(self.plugin_name, self.step_name,
                                 extra_tags)
 
-    @property
-    def step_name(self):
-        """Get the name of the step.
-
-        This method is called if there is no "step_name" property defined.
-        This said property SHOULD be defined.
-        The name must match with `^[A-Za-z0-9_]+$` regexp.
-
-        Returns:
-            (string) the name of the step.
-
-        """
-        return "main"
-
-    @property
-    def plugin_name(self):
-        """Return the name of the plugin.
-
-        This method is called if there is no "step_name" property defined.
-        This said property MUST be defined.
-        The name must match with `^[A-Za-z0-9_]+$` regexp.
-
-        Returns:
-            (string) the name of the plugin.
-
-        """
-        raise NotImplementedError("The plugin_name property is not defined."
-                                  " Please define a plugin_name property.")
-
-    def get_plugin_directory_path(self):
-        """Return the plugin directory (fullpath).
-
-        Returns:
-            (string) the fullpath of the plugin directory.
-
-        """
-        return os.path.join(MODULE_RUNTIME_HOME,
-                            'var', 'plugins', self.plugin_name)
-
     def move_to_plugin_step(self, xaf, plugin_name, step_name):
         """Move a XattrFile to another plugin/step.
 
@@ -553,103 +493,6 @@ class AcquisitionStep(object):
                                       self.args.redis_unix_socket_path)
         self._destroy()
 
-    def warning(self, msg, *args, **kwargs):
-        """Log a warning message."""
-        logger = self.__get_logger()
-        logger.warning(msg, *args, **kwargs)
-
-    def debug(self, msg, *args, **kwargs):
-        """Log a debug message."""
-        logger = self.__get_logger()
-        logger.debug(msg, *args, **kwargs)
-
-    def info(self, msg, *args, **kwargs):
-        """Log an info message."""
-        logger = self.__get_logger()
-        logger.info(msg, *args, **kwargs)
-
-    def critical(self, msg, *args, **kwargs):
-        """Log a critical message."""
-        logger = self.__get_logger()
-        logger.critical(msg, *args, **kwargs)
-
-    def error(self, msg, *args, **kwargs):
-        """Log an error message."""
-        logger = self.__get_logger()
-        logger.error(msg, *args, **kwargs)
-
-    def error_and_die(self, msg, *args, **kwargs):
-        """Log an error message and exit immediatly."""
-        self.error(msg, *args, **kwargs)
-        sys.stderr.write("exiting...\n")
-        os._exit(2)
-
-    def exception(self, msg, *args, **kwargs):
-        """Log an error message with current exception stacktrace.
-
-        This method should only be called from an exception handler.
-
-        """
-        logger = self.__get_logger()
-        logger.exception(str(msg), *args, **kwargs)
-
-    def __get_tag_name(self, name, counter_str_value='latest',
-                       force_step_name=None, force_plugin_name=None):
-        plugin_name = self.plugin_name
-        step_name = self.step_name
-        if force_step_name is not None:
-            step_name = force_step_name
-        if force_plugin_name is not None:
-            plugin_name = force_plugin_name
-        if plugin_name == "core":
-            return "%s.%s.%s" % (counter_str_value, plugin_name, name)
-        else:
-            return "%s.%s.%s.%s" % (counter_str_value, plugin_name,
-                                    step_name, name)
-
-    def _set_tag_latest(self, xaf, name, value):
-        tag_name = self.__get_tag_name(name, 'latest')
-        self.__set_tag(xaf, tag_name, value)
-
-    def set_tag(self, xaf, name, value, add_latest=True):
-        """Set a tag on a file with good prefixes.
-
-        Args:
-            xaf (XattrFile): file to add/set tag on.
-            name (string): name of the tag (without prefixes)
-            value (string): value of the tag
-            add_latest (boolean): add latest prefix
-        """
-        counter_str_value = str(self._get_counter_tag_value(xaf))
-        tag_name = self.__get_tag_name(name, counter_str_value)
-        self.__set_tag(xaf, tag_name, value)
-        if add_latest:
-            self._set_tag_latest(xaf, name, value)
-
-    def get_tag(self, xaf, name, not_found_value=None,
-                counter_str_value='latest', force_step_name=None,
-                force_plugin_name=None):
-        """Read a tag on a file with good prefixes.
-
-        Args:
-            xaf (XattrFile): file to read.
-            name (string): name of the tag (without prefixes).
-            not_found_value: returned value if the tag is not found.
-            counter_str_value (string): counter string value.
-            force_step_name: tagger step name (if None, current
-                step name is taken)
-            force_plugin_name: tagger plugin name (if None, current
-                plugin name is taken)
-        """
-        tag_name = self.__get_tag_name(name, counter_str_value,
-                                       force_step_name, force_plugin_name)
-        return xaf.tags.get(tag_name, not_found_value)
-
-    def _get_counter_tag_value(self, xaf, not_found_value='0'):
-        tag_name = self.__get_tag_name("step_counter",
-                                       force_plugin_name="core")
-        return int(xaf.tags.get(tag_name, not_found_value))
-
     def __increment_and_set_counter_tag_value(self, xaf):
         tag_name = self.__get_tag_name("step_counter",
                                        force_plugin_name="core")
@@ -657,9 +500,6 @@ class AcquisitionStep(object):
         value = six.b("%i" % (counter_value + 1))
         self.__set_tag(xaf, tag_name, value)
 
-    def __set_tag(self, xaf, name, value):
-        self.debug("Setting tag %s = %s" % (name, value))
-        xaf.tags[name] = value
 
     def __get_original_basename_tag_name(self):
         return self.__get_tag_name("original_basename",
@@ -746,3 +586,21 @@ class AcquisitionStep(object):
         """
         tag_name = self.__get_original_dirname_tag_name()
         return xaf.tags.get(tag_name, b"unknown").decode("utf8")
+
+    def __get_tag_name(self, name, counter_str_value='latest',
+                       force_process_name=None, force_plugin_name=None):
+        plugin_name = self.plugin_name
+        process_name = self.process_name
+        if force_process_name is not None:
+            process_name = force_process_name
+        if force_plugin_name is not None:
+            plugin_name = force_plugin_name
+        if plugin_name == "core":
+            return "%s.%s.%s" % (counter_str_value, plugin_name, process_name)
+        else:
+            return "%s.%s.%s.%s" % (counter_str_value, plugin_name,
+                                    process_name, name)
+
+    def __set_tag(self, xaf, name, value):
+        self.debug("Setting tag %s = %s" % (name, value))
+        xaf.tags[name] = value
