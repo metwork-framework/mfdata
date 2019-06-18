@@ -14,7 +14,7 @@
 
 [jsonlog2elasticsearch](https://github.com/metwork-framework/jsonlog2elasticsearch) is a daemon to send json logs read from a log file to elasticsearch.
 
-`mflog2mfadmin` (based on [jsonlog2elasticsearch](https://github.com/metwork-framework/jsonlog2elasticsearch)) on is a daemon to send [mflog](https://github.com/metwork-framework/mflog) to elasticsearch.
+`mflog2mfadmin` (based on [jsonlog2elasticsearch](https://github.com/metwork-framework/jsonlog2elasticsearch)) on is a daemon to send [mflog](https://github.com/metwork-framework/mflog) logs to elasticsearch.
 
 
 ![MFDATA Overall architecture](./_images/overall_architecture.svg)
@@ -31,7 +31,7 @@ You may check the full `directory_observer.ini` configuration file in the `/home
 
 `directory_observer` scans the directories configured in the `directory_observer.ini` file.
 
-`step-xxx` is the a step defines in your plugin.  There is as many `step-xxx` as plugins steps.
+`step-xxx` is the step defines in your plugin.  There is as many `step-xxx` as plugins steps.
 
 
 Once the monitoring of the directories is started, any action on the monitored directory is noticed and pushed to the Redis queue. The message contains:
@@ -48,7 +48,8 @@ If the MFDATA plugin is :ref:`configured for monitoring <mfdata_tuning_monitorin
 
 .. seealso::
     | :doc:`MFADMIN Documentation <mfadmin:index>`
-    | :doc:`mfadmin:mfadmin_monitoring_plugins`.
+    | :doc:`mfadmin:mfadmin_monitoring_plugins`
+    | :ref:`mfadmin:mfadmin_miscellaneous:Circus hooks` 
 
 <!--
 Intentional comment to prevent m2r from generating bad rst statements when the file ends with a block .. xxx ::
