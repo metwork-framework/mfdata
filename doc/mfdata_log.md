@@ -26,6 +26,9 @@ self.exception(...)
 
 Check :py:class:`AcquisitionStep <acquisition.step.AcquisitionStep>` for more details.
 
+.. seealso::
+    :ref:`mfadmin:mfadmin_miscellaneous:Exporting logs`
+
 ## Custom logs files
 
 ### Classic Python logger
