@@ -25,7 +25,7 @@ service metwork restart mfdata
 
 ## Run the plugin as an independent unit
 
-In some cases, you would like to run only you plugin as an independent unit, i.e without going through others plugins, like the `switch` plugin for instance.
+In some cases, you would like to run only your plugin as an independent unit, i.e without going through others plugins, like the `switch` plugin for instance.
 
 In order to do this, run the command `plugin_env` from the root directory of the plugin.
 
