@@ -36,7 +36,7 @@ Let's assume the plugin step script is `main.py`. Enter:
 python main.py --help
 ```
 
-This display information about you plugin, including the required or optional parameters defined in the `main.py`.
+This display information about your plugin, including the required or optional parameters defined in the `main.py`.
 
 Let's assume the input of your plugin is as JPEG file. Then, run the command:
 ```bash
