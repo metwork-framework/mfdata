@@ -4,6 +4,7 @@
 # Create and install plugin foobar2 archiving PNG images
 # Inject one gzipped PNG file
 # Check PNG file and his tags on archive
+# Check no tags left in redis
 
 plugins.uninstall ungzip >/dev/null 2>&1
 plugins.uninstall foobar2 >/dev/null 2>&1
@@ -64,5 +65,16 @@ cat ${DEST_DIR}/Example.png.tags | grep first.core.original_basename | grep Exam
 plugins.uninstall foobar2
 plugins.uninstall ungzip
 
+nb3=`redis-cli -s ${MODULE_RUNTIME_HOME}/var/redis.socket keys "*" |grep xattr |wc -l`
+if [ $nb3 -ne 0 ]; then
+    echo $nb3 "tags left in redis"
+    cat ${MODULE_RUNTIME_HOME}/log/*.stderr
+    exit 1
+else
+    echo "no tags left in redis : ok"
+fi
+
 rm -R foobar2*
 rm -R ${DEST_DIR}
+
+exit 0

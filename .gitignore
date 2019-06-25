@@ -31,6 +31,7 @@ doc/configure_metwork_repo.rst
 doc/install_a_metwork_package.md
 doc/install_a_metwork_package.rst
 doc/mfdata_additional_tutorials.rst
+doc/mfdata_how_it_works.rst
 doc/mfdata_and_magic.rst
 doc/mfdata_create_plugins.rst
 doc/mfdata_debug_plugin.rst

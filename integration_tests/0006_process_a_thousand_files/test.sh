@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Create and install plugin foobar3 archiving PNG images
+# Create and install plugin foobar6 archiving PNG images
 # Inject 1000 PNG files
 # Check number of PNG file and corresponding tags files on archive
 # Check no tags left in redis
 
-plugins.uninstall foobar3 >/dev/null 2>&1
-rm -R foobar3* >/dev/null 2>&1
+plugins.uninstall foobar6 >/dev/null 2>&1
+rm -R foobar6* >/dev/null 2>&1
 
 DEST_DIR=${MODULE_RUNTIME_HOME}/var/archive/`date +%Y%m%d`
 rm -R ${DEST_DIR} >/dev/null 2>&1
@@ -14,8 +14,8 @@ rm -R ${DEST_DIR} >/dev/null 2>&1
 set -x
 set -e
 
-bootstrap_plugin.py create --no-input --template=archive foobar3
-cd foobar3
+bootstrap_plugin.py create --no-input --template=archive foobar6
+cd foobar6
 
 cat config.ini | sed "s/switch_logical_condition = True/switch_logical_condition = ( x['latest.switch.main.system_magic'].startswith(b'PNG image'))/" > config.ini.1
 cat config.ini.1 | sed "s/arg_strftime-template = %Y%m%d\/{RANDOM_ID}/arg_strftime-template = %Y%m%d\/{ORIGINAL_BASENAME}/" > config.ini
@@ -89,7 +89,7 @@ echo "1000 tags files : ok"
 
 nb3=`redis-cli -s ${MODULE_RUNTIME_HOME}/var/redis.socket keys "*" |grep xattr |wc -l`
 if [ $nb3 -ne 0 ]; then
-    echo nb3 "tags left in redis"
+    echo $nb3 "tags left in redis"
     cat ${MODULE_RUNTIME_HOME}/log/*.stderr
     exit 1
 else
@@ -97,7 +97,7 @@ else
 fi
 set -x
 
-plugins.uninstall foobar3
+plugins.uninstall foobar6
 
-rm -R foobar3*
+rm -R foobar6*
 rm -R ${DEST_DIR}

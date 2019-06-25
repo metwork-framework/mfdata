@@ -30,7 +30,7 @@ The magic file contains lines describing magic numbers, which identify particula
 
 In order to identify type which are not in the default `magic` file or if the `file` identification doesn't suit you, you may:
 
-- either create your own `magic` file with your identification rule(s) and put it in you plugin directory. This will be available only in your plugin context.** This is the recommended way in order to manage custom magic file**.
+- either create your own `magic` file with your identification rule(s) and put it in your plugin directory. This will be available only in your plugin context.** This is the recommended way in order to manage custom magic file**.
 - or add the your identification rule(s) in the `/etc/magic` file. This will be available in the Linux system.
 
 ## Example:

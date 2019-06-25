@@ -1,4 +1,1 @@
-{% if cookiecutter.virtualenv_support == "yes" %}
-# {{cookiecutter.python_version}} requirements.txt file
-# see https://pip.readthedocs.io/en/1.1/requirements.html
-{% endif %}
+../../../_common/{{cookiecutter.python_version}}_virtualenv_sources/requirements-to-freeze.txt
