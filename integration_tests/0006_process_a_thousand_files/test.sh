@@ -41,7 +41,7 @@ done
 nb=0
 while [ ! -z "$(ls -A ${MODULE_RUNTIME_HOME}/var/in/incoming)" ]; do
     nb=$(($nb + 1))
-    if [ $nb -eq 60 ]; then
+    if [ $nb -eq 80 ]; then
         exit 1
     fi
     echo "incoming not empty " $nb ", sleep 1s"
