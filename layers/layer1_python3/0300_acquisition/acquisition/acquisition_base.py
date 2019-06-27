@@ -1,9 +1,11 @@
-import mflog
-from acquisition.utils import MODULE_RUNTIME_HOME, _set_custom_environment, _get_tmp_filepath
+from acquisition.utils import MODULE_RUNTIME_HOME
+from acquisition.utils import _set_custom_environment
+from acquisition.utils import _get_tmp_filepath
 import re
 import os
 import sys
 import datetime
+import mflog
 
 
 class AcquisitionBase(object):
@@ -20,6 +22,8 @@ class AcquisitionBase(object):
     stop_flag = False
     args = None
     __logger = None
+    step_name = None
+    daemon_name = None
 
     def __init__(self):
         """Constructor."""
@@ -38,7 +42,8 @@ class AcquisitionBase(object):
     def process_name(self):
         """Get the name of the process (step or daemon).
 
-        This method is called if there is no "process_name" property defined she return s as name step_name or daemon_name
+        This method is called if there is no "process_name" property defined
+        she returns as name step_name or daemon_name
         if one of them is defined
 
         This said property SHOULD be defined.
@@ -48,9 +53,9 @@ class AcquisitionBase(object):
             (string) the name.
 
         """
-        if 'step_name' in dir(self):
+        if 'step_name' in dir(self) and self.step_name is not None:
             return self.step_name
-        elif 'daemon_name' in dir(self):
+        elif 'daemon_name' in dir(self) and self.daemon_name is not None:
             return self.daemon_name
         else:
             return "main"
@@ -96,7 +101,8 @@ class AcquisitionBase(object):
     def __get_logger(self):
         """Get a logger."""
         if not self.__logger:
-            logger_name = "mfdata.%s.%s" % (self.plugin_name, self.process_name)
+            logger_name = "mfdata.%s.%s" % (self.plugin_name,
+                                            self.process_name)
             self.__logger = mflog.getLogger(logger_name)
         return self.__logger
 
@@ -206,4 +212,3 @@ class AcquisitionBase(object):
         tag_name = self.__get_tag_name("step_counter",
                                        force_plugin_name="core")
         return int(xaf.tags.get(tag_name, not_found_value))
-

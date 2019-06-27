@@ -3,22 +3,18 @@ import os
 import xattrfile
 import redis
 import json
-import sys
 import configargparse
 import datetime
 import time
-import re
 import six
 import signal
 from functools import partial
 from acquisition.acquisition_base import AcquisitionBase
-import mflog
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from mfutil import get_utc_unix_timestamp
 from mfutil.plugins import MFUtilPluginBaseNotInitialized
 from mfutil.plugins import get_installed_plugins
-from acquisition.utils import _set_custom_environment, \
-    get_plugin_step_directory_path, _get_tmp_filepath, \
+from acquisition.utils import get_plugin_step_directory_path,\
     _make_config_file_parser_class, _get_or_make_trash_dir
 from acquisition.stats import get_stats_client
 
@@ -134,9 +130,9 @@ class AcquisitionStep(AcquisitionBase):
         if not after_status:
             self.warning("Bad processing status for file: %s",
                          xaf._original_filepath)
-            logger = self.__get_logger()
-            if logger.isEnabledFor(10):  # DEBUG
-                xaf.dump_tags_on_logger(logger, 10)  # DEBUG
+            log = self._AcquisitionBase__get_logger()  # pylint: disable=E1101
+            if log.isEnabledFor(10):  # DEBUG
+                xaf.dump_tags_on_logger(log, 10)  # DEBUG
         return after_status
 
     def _conditional_copy_to_debug_plugin(self, xaf):
@@ -186,6 +182,7 @@ class AcquisitionStep(AcquisitionBase):
     @property
     def step_name(self):
         """Get the name of the step. (for compatibility)
+
         This method is called if there is no "step_name" property defined.
         This said property SHOULD be defined.
         The name must match with `^[A-Za-z0-9_]+$` regexp.
@@ -307,7 +304,8 @@ class AcquisitionStep(AcquisitionBase):
 
     def __run_in_debug_mode(self, filepath):
         self.info("Start the debug mode with filepath=%s", filepath)
-        self.__get_logger().setLevel(0)
+        logger = self._AcquisitionBase__get_logger()  # pylint: disable=E1101
+        logger.setLevel(0)
         self._debug_mode = True
         self._ping()
         tmp_filepath = self.get_tmp_filepath()
@@ -499,7 +497,6 @@ class AcquisitionStep(AcquisitionBase):
         counter_value = self._get_counter_tag_value(xaf, not_found_value='-1')
         value = six.b("%i" % (counter_value + 1))
         self.__set_tag(xaf, tag_name, value)
-
 
     def __get_original_basename_tag_name(self):
         return self.__get_tag_name("original_basename",
