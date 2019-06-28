@@ -1,11 +1,14 @@
 from acquisition.utils import MODULE_RUNTIME_HOME
 from acquisition.utils import _set_custom_environment
 from acquisition.utils import _get_tmp_filepath
+from acquisition.utils import _make_config_file_parser_class
 import re
 import os
 import sys
 import datetime
 import mflog
+import configargparse
+from functools import partial
 
 
 class AcquisitionBase(object):
@@ -37,6 +40,51 @@ class AcquisitionBase(object):
             self.error_and_die("plugin_name: %s must match with %s",
                                plugin_name, regexp)
         _set_custom_environment(plugin_name, process_name)
+
+    def _init(self):
+        pass
+
+    def init(self):
+        """Method called after CLI parsing but before processing any files."""
+        pass
+
+    def _destroy(self):
+        pass
+
+    def destroy(self):
+        """Destroy what you want just before exiting.
+
+        No file will be processed after calling this method.
+
+        """
+        pass
+
+    def _get_argument_parser(self):
+        """Make and return an ArgumentParser object.
+
+        If you want to add some extra options, you have to override
+        the add_extra_arguments() method.
+
+        Returns:
+            an ArgumentParser object with all options added.
+
+        """
+        description = "%s/%s acquisition %s" % (self.plugin_name,
+                                                self.process_name,
+                                                self.__class__.__name__)
+        parser = configargparse.ArgumentParser(
+            description=description,
+            add_env_var_help=False,
+            ignore_unknown_config_file_keys=True,
+            args_for_setting_config_path=["-c", "--config-file"],
+            config_file_parser_class=partial(_make_config_file_parser_class,
+                                             self.plugin_name,
+                                             self.process_name)
+        )
+        self._add_extra_arguments_before(parser)
+        self.add_extra_arguments(parser)
+        self._add_extra_arguments_after(parser)
+        return parser
 
     @property
     def process_name(self):
@@ -212,3 +260,4 @@ class AcquisitionBase(object):
         tag_name = self.__get_tag_name("step_counter",
                                        force_plugin_name="core")
         return int(xaf.tags.get(tag_name, not_found_value))
+

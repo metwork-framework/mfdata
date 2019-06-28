@@ -463,20 +463,9 @@ class AcquisitionStep(AcquisitionBase):
         """
         pass
 
-    def init(self):
-        """Method called after CLI parsing but before processing any files."""
-        pass
-
     def _destroy(self):
         self.destroy()
 
-    def destroy(self):
-        """Destroy what you want just before exiting.
-
-        No file will be processed after calling this method.
-
-        """
-        pass
 
     def run(self):
         self._init()

@@ -7,7 +7,7 @@ import sys
 import os
 import mfutil
 import xattrfile
-from acquisition.acquisition_base import AcquisitionBase
+from acquisition.listener import AcquisitionListener
 
 
 def parse_args(parser, commands):
@@ -79,7 +79,7 @@ def get_arguments():
         exit(0)
 
 
-class ExtraDaemonAmqpConsumer(AcquisitionBase):
+class ExtraDaemonAmqpConsumer(AcquisitionListener):
 
     plugin_name = "amqp_listener"
     daemon_name = "extra_daemon_amqp_consumer"
@@ -201,7 +201,7 @@ class ExtraDaemonAmqpConsumer(AcquisitionBase):
 
         self.channel.start_consuming()
 
-    def run(self):
+    def listen(self):
         args = get_arguments()
         if args.fanout is not None:
             self.subscription_exchange_type = 'fanout'
