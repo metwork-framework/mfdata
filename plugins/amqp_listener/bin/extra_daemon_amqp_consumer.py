@@ -5,7 +5,6 @@ import pika
 import signal
 import sys
 import os
-import mflog
 import mfutil
 import xattrfile
 from acquisition.acquisition_base import AcquisitionBase
@@ -114,7 +113,6 @@ class ExtraDaemonAmqpConsumer(AcquisitionBase):
         if self.delete_queue_after_stop:
             self.channel.queue_delete(self.subscription_queue)
         self.channel.close()
-
 
     def connect(self):
         """"This method connects to RabbitMQ, returning true when the connection
