@@ -41,7 +41,7 @@ done
 nb=0
 while [ ! -z "$(ls -A ${MODULE_RUNTIME_HOME}/var/in/incoming)" ]; do
     nb=$(($nb + 1))
-    if [ $nb -eq 80 ]; then
+    if [ $nb -eq 60 ]; then
         exit 1
     fi
     echo "incoming not empty " $nb ", sleep 1s"
@@ -63,7 +63,7 @@ nb=0
 nb1=`ls -l ${DEST_DIR}/Example*.png | wc -l`
 while [ $nb1 -lt 1000 ]; do
     nb=$(($nb + 1))
-    if [ $nb -eq 10 ]; then
+    if [ $nb -eq 20 ]; then
         echo "Data files are missing, only " $nb1
         cat ${MODULE_RUNTIME_HOME}/log/*.stderr
         exit 1
