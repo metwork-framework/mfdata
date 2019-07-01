@@ -42,7 +42,7 @@ bootstrap_plugin.py list
 ```
 
 ```
-List of availabel plugin templates:
+List of available plugin templates:
      * archive
      * default
      * delete
