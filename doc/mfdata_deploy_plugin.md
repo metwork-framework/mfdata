@@ -4,7 +4,7 @@
 
 Releasing a plugin consists in keeping all the plugin related files together in one `.plugin`file and makes the plugin production-ready, ready to be deployed.
 
-In order to release a plugin, To do this, go to the `move_image` plugin directory and enter the run the following command from the root directory of the plugin:
+In order to release a plugin, go to the plugin directory and enter the run the following command from the root directory of the plugin:
 ```bash
 make release
 ```
