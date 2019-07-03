@@ -1,35 +1,35 @@
 #!/usr/bin/env python3
 
-import argparse
 import pika
 import signal
-import sys
 import os
 import mfutil
 import xattrfile
 from acquisition.listener import AcquisitionListener
 
 
-class ExtraDaemonAmqpConsumerFanout(AcquisitionListener):
-
+class ExtraDaemonAmqpConsumerTopic(AcquisitionListener):
     plugin_name = "amqp_listener"
-    daemon_name = "extra_daemon_amqp_consumer_fanout"
-    subscription_exchange_type = 'fanout'
+    daemon_name = "extra_daemon_amqp_consumer_topic"
+
     channel = None
     connection = None
     message_number = 1
+
+    subscription_exchange_type = 'topic'
+    subscription_queue = None
 
     def __init__(self):
         """
         Create a new instance of the consumer class
         """
-        super(ExtraDaemonAmqpConsumerFanout, self).__init__()
+        super(ExtraDaemonAmqpConsumerTopic, self).__init__()
         signal.signal(signal.SIGTERM, self.__sigterm_handler)
         signal.signal(signal.SIGINT, self.__sigterm_handler)
 
     def __sigterm_handler(self, *args):
         self.info("SIGTERM signal handled => schedulling shutdown")
-        if self.args.delete_queue_after_stop:
+        if self.delete_queue_after_stop:
             self.channel.queue_delete(self.subscription_queue)
         self.channel.close()
 
@@ -48,16 +48,18 @@ class ExtraDaemonAmqpConsumerFanout(AcquisitionListener):
                             help='The password to authenticate with.')
         parser.add_argument('--subscription-exchange', action='store',
                             help='string specifying the subscription exchange.')
-        parser.add_argument('--subscription-queue', action='store',
-                            help='string specifying the subscription queue.')
         parser.add_argument('--delete-queue-after-stop', action='store_true',
                             help='delete the queue after stop process.')
         parser.add_argument(
-            '--dest-dir',
-            action='store',
+            '--dest-dir', action='store',
             help='destination directory of the file made from the MQTT message')
         parser.add_argument('--tmp-suffix', action='store', default='t',
                             help='temporary file suffix. Default t')
+        parser.add_argument(
+            '--subscription-routing-topic-keys', action='store',
+            default=['*'], nargs='+',
+            help='if exchange is topic this argument represent thr topic-key.'
+                 'Default all topics')
 
     def connect(self):
         """"This method connects to RabbitMQ, returning true when the connection
@@ -65,7 +67,7 @@ class ExtraDaemonAmqpConsumerFanout(AcquisitionListener):
 
         :return: True if Ok else False
         """
-        if self.args.credential_username is not None and\
+        if self.args.credential_username is not None and \
                 self.args.credential_password is not None:
             credentials = pika.PlainCredentials(self.args.credential_username,
                                                 self.args.credential_password)
@@ -107,17 +109,23 @@ class ExtraDaemonAmqpConsumerFanout(AcquisitionListener):
         :return:
         """
         basename = mfutil.get_unique_hexa_identifier()
-        self.debug("basename: %s" % (basename))
+        self.debug("basename: %s" % basename)
         filename = os.path.join(self.args.dest_dir, basename)
-        tmp_filename = '.'.join((filename, self.args.tmp_suffix))
-        self.debug("Created tmp file name : %s" % tmp_filename)
-        with open(tmp_filename, "w") as fichier:
+        temp_filename = '.'.join((filename, self.args.tmp_suffix))
+        self.debug("Created tmp file name : %s" % temp_filename)
+        with open(temp_filename, "w") as fichier:
             fichier.write(str(body))
-        xaf = xattrfile.XattrFile(tmp_filename)
+        xaf = xattrfile.XattrFile(temp_filename)
         self.set_tag(xaf, 'amqp_listener.subscription_exchange',
                      self.args.subscription_exchange)
+        self.set_tag(xaf, 'amqp_listener_subscription_exchange_type',
+                     self.subscription_exchange_type)
         self.set_tag(xaf, 'amqp_listener_subscription_queue',
-                     self.args.subscription_queue)
+                     self.subscription_queue)
+        self.set_tag(xaf, 'amqp_listener_subscription_routing_keys',
+                     str(self.args.subscription_routing_topic_keys))
+        self.set_tag(xaf, 'amqp_listener_received_routing_key',
+                     basic_deliver.routing_key)
         self.set_tag(xaf, 'amqp_listener_broker_hostname',
                      self.args.broker_hostname)
         self.set_tag(xaf, 'amqp_listener_broker_port',
@@ -128,15 +136,19 @@ class ExtraDaemonAmqpConsumerFanout(AcquisitionListener):
             basic_deliver.delivery_tag, properties.app_id, body))
 
     def consume(self):
-        result = self.channel.queue_declare(self.args.subscription_queue,
-                                            exclusive=False)
-        self.channel.queue_bind(queue=self.args.subscription_queue,
-                                exchange=self.args.subscription_exchange)
-        self.info(' [*] Waiting for %s on queue %s. To exit press CTRL+C' % (
-            self.args.subscription_exchange,
-            self.args.subscription_queue))
+        result = self.channel.queue_declare('', exclusive=False)
+        self.subscription_queue = result.method.queue
+        for key in self.args.subscription_routing_topic_keys:
+            self.channel.queue_bind(exchange=self.args.subscription_exchange,
+                                    queue=self.subscription_queue,
+                                    routing_key=key)
+            self.info(' [*] Waiting for %s on queue %s and topics %s.'
+                      'To exit press CTRL+C' % (
+                          self.args.subscription_exchange,
+                          self.subscription_queue,
+                          self.args.subscription_routing_topic_keys))
 
-        self.channel.basic_consume(queue=self.args.subscription_queue,
+        self.channel.basic_consume(queue=self.subscription_queue,
                                    on_message_callback=self.on_message,
                                    auto_ack=True)
 
@@ -149,5 +161,5 @@ class ExtraDaemonAmqpConsumerFanout(AcquisitionListener):
 
 
 if __name__ == "__main__":
-    x = ExtraDaemonAmqpConsumerFanout()
+    x = ExtraDaemonAmqpConsumerTopic()
     x.run()
