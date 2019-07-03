@@ -86,6 +86,15 @@ class AcquisitionBase(object):
         self._add_extra_arguments_after(parser)
         return parser
 
+    def _add_extra_arguments_before(self, parser):
+        pass
+
+    def add_extra_arguments(self, parser):
+        pass
+
+    def _add_extra_arguments_after(self, parser):
+        pass
+
     @property
     def process_name(self):
         """Get the name of the process (step or daemon).
@@ -260,4 +269,3 @@ class AcquisitionBase(object):
         tag_name = self.__get_tag_name("step_counter",
                                        force_plugin_name="core")
         return int(xaf.tags.get(tag_name, not_found_value))
-

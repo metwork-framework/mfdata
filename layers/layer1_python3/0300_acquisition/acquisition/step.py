@@ -466,7 +466,6 @@ class AcquisitionStep(AcquisitionBase):
     def _destroy(self):
         self.destroy()
 
-
     def run(self):
         self._init()
         if self.args.FULL_FILEPATH_OR_QUEUE_NAME.startswith('/'):
