@@ -95,7 +95,7 @@ For a more detailed description of nginx configuration, check the  `/home/mfdata
 
 A plugin may one or more step.
 
-In most cases, when you create a plugin with `bootstrap_plugin.py`, only one step called `main` is created with yhe corresponding Python script (i.e. `main.py`).
+In most cases, when you create a plugin with `bootstrap_plugin.py`, only one step called `main` is created with the corresponding Python script (i.e. `main.py`).
 
 However, you may create a plugin with more than one step.
 
