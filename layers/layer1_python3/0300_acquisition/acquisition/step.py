@@ -3,9 +3,11 @@ import os
 import xattrfile
 import redis
 import json
+import sys
 import configargparse
 import datetime
 import time
+import re
 import six
 import signal
 from functools import partial
@@ -14,7 +16,8 @@ from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from mfutil import get_utc_unix_timestamp
 from mfutil.plugins import MFUtilPluginBaseNotInitialized
 from mfutil.plugins import get_installed_plugins
-from acquisition.utils import get_plugin_step_directory_path,\
+from acquisition.utils import _set_custom_environment, \
+    get_plugin_step_directory_path, MODULE_RUNTIME_HOME, _get_tmp_filepath, \
     _make_config_file_parser_class, _get_or_make_trash_dir
 from acquisition.stats import get_stats_client
 
@@ -486,6 +489,10 @@ class AcquisitionStep(AcquisitionBase):
         value = six.b("%i" % (counter_value + 1))
         self.__set_tag(xaf, tag_name, value)
 
+    def __set_tag(self, xaf, name, value):
+        self.debug("Setting tag %s = %s" % (name, value))
+        xaf.tags[name] = value
+
     def __get_original_basename_tag_name(self):
         return self.__get_tag_name("original_basename",
                                    force_plugin_name="core",
@@ -572,20 +579,4 @@ class AcquisitionStep(AcquisitionBase):
         tag_name = self.__get_original_dirname_tag_name()
         return xaf.tags.get(tag_name, b"unknown").decode("utf8")
 
-    def __get_tag_name(self, name, counter_str_value='latest',
-                       force_process_name=None, force_plugin_name=None):
-        plugin_name = self.plugin_name
-        process_name = self.process_name
-        if force_process_name is not None:
-            process_name = force_process_name
-        if force_plugin_name is not None:
-            plugin_name = force_plugin_name
-        if plugin_name == "core":
-            return "%s.%s.%s" % (counter_str_value, plugin_name, process_name)
-        else:
-            return "%s.%s.%s.%s" % (counter_str_value, plugin_name,
-                                    process_name, name)
 
-    def __set_tag(self, xaf, name, value):
-        self.debug("Setting tag %s = %s" % (name, value))
-        xaf.tags[name] = value
