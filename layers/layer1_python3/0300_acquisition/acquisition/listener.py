@@ -10,9 +10,7 @@ class AcquisitionListener(AcquisitionBase):
 
     """
     def _init(self):
-        parser = self._get_argument_parser()
-        self.args, unknown = parser.parse_known_args()
-        self.init()
+        self._init_parser()
 
     def _destroy(self):
         self.destroy()

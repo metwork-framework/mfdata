@@ -4,22 +4,17 @@ import xattrfile
 import redis
 import json
 import sys
-import configargparse
 import datetime
 import time
-import re
 import six
 import signal
-from functools import partial
-
-import mflog
+from acquisition.acquisition_base import AcquisitionBase
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from mfutil import get_utc_unix_timestamp
 from mfutil.plugins import MFUtilPluginBaseNotInitialized
 from mfutil.plugins import get_installed_plugins
-from acquisition.utils import _set_custom_environment, \
-    get_plugin_step_directory_path, MODULE_RUNTIME_HOME, _get_tmp_filepath, \
-    _make_config_file_parser_class, _get_or_make_trash_dir
+from acquisition.utils import get_plugin_step_directory_path,\
+    MODULE_RUNTIME_HOME, _get_or_make_trash_dir
 from acquisition.stats import get_stats_client
 
 DEFAULT_STEP_LIMIT = 1000
@@ -33,7 +28,7 @@ except MFUtilPluginBaseNotInitialized:
     DEBUG_PLUGIN_INSTALLED = False
 
 
-class AcquisitionStep(object):
+class AcquisitionStep(AcquisitionBase):
     """Abstract class to describe an acquisition step.
 
     You have to override this class.
@@ -55,40 +50,21 @@ class AcquisitionStep(object):
 
     """
 
-    stop_flag = False
     debug_mode_allowed = True
-    unit_tests = False
-    unit_tests_args = None
     failure_policy = None
     failure_policy_move_dest_dir = None
     failure_policy_move_keep_tags = True
     failure_policy_move_keep_tags_suffix = None
     step_limit = DEFAULT_STEP_LIMIT
-    args = None
-    __logger = None
     __last_ping = None
     _shadow = False
     _debug_mode = False
 
     def __init__(self):
-        """Constructor."""
-        step_name = self.step_name
-        plugin_name = self.plugin_name
-        regexp = "^[A-Za-z0-9_]+$"
-        if not re.match(regexp, step_name):
-            self.error_and_die("step_name: %s must match with %s",
-                               step_name, regexp)
-        if not re.match(regexp, plugin_name):
-            self.error_and_die("plugin_name: %s must match with %s",
-                               plugin_name, regexp)
-        _set_custom_environment(plugin_name, step_name)
+        super(AcquisitionStep, self).__init__()
 
     def _init(self):
-        parser = self.__get_argument_parser()
-        if self.unit_tests and self.unit_tests_args:
-            self.args = parser.parse_args(self.unit_tests_args)
-        else:
-            self.args = parser.parse_args()
+        self._init_parser()
         self.failure_policy = self.args.failure_policy
         if self.failure_policy not in ('keep', 'delete', 'move'):
             self.error_and_die("unknown failure policy: %s",
@@ -110,21 +86,6 @@ class AcquisitionStep(object):
     def __sigterm_handler(self, *args):
         self.debug("SIGTERM signal handled => schedulling shutdown")
         self.stop_flag = True
-
-    def __get_logger(self):
-        if not self.__logger:
-            logger_name = "mfdata.%s.%s" % (self.plugin_name, self.step_name)
-            self.__logger = mflog.getLogger(logger_name)
-        return self.__logger
-
-    def get_tmp_filepath(self):
-        """Get a full temporary filepath (including unique filename).
-
-        Returns:
-            (string) full temporary filepath (including unique filename).
-
-        """
-        return _get_tmp_filepath(self.plugin_name, self.step_name)
 
     def _exception_safe_call(self, func, args, kwargs, label,
                              return_value_if_exception):
@@ -160,10 +121,11 @@ class AcquisitionStep(object):
         self.info("End of the %s processing after %i ms",
                   xaf._original_filepath,
                   timer.ms)
+        logger = self._AcquisitionBase__get_logger()  # pylint: disable=E1101
+
         if not after_status:
             self.warning("Bad processing status for file: %s",
                          xaf._original_filepath)
-            logger = self.__get_logger()
             if logger.isEnabledFor(10):  # DEBUG
                 xaf.dump_tags_on_logger(logger, 10)  # DEBUG
         return after_status
@@ -328,7 +290,8 @@ class AcquisitionStep(object):
 
     def __run_in_debug_mode(self, filepath):
         self.info("Start the debug mode with filepath=%s", filepath)
-        self.__get_logger().setLevel(0)
+        logger = self._AcquisitionBase__get_logger()  # pylint: disable=E1101
+        logger.setLevel(0)
         self._debug_mode = True
         self._ping()
         tmp_filepath = self.get_tmp_filepath()
@@ -336,27 +299,7 @@ class AcquisitionStep(object):
         xaf = original_xaf.copy(tmp_filepath)
         return self._process(xaf)
 
-    def __get_argument_parser(self):
-        """Make and return an ArgumentParser object.
-
-        If you want to add some extra options, you have to override
-        the add_extra_arguments() method.
-
-        Returns:
-            an ArgumentParser object with all options added.
-
-        """
-        description = "%s/%s acquisition step" % (self.plugin_name,
-                                                  self.step_name)
-        parser = configargparse.ArgumentParser(
-            description=description,
-            add_env_var_help=False,
-            ignore_unknown_config_file_keys=True,
-            args_for_setting_config_path=["-c", "--config-file"],
-            config_file_parser_class=partial(_make_config_file_parser_class,
-                                             self.plugin_name,
-                                             self.step_name)
-        )
+    def _add_extra_arguments_before(self, parser):
         parser.add_argument('--redis-host', action='store',
                             default='127.0.0.1',
                             help='redis host to connect to (in daemon mode)')
@@ -379,13 +322,13 @@ class AcquisitionStep(object):
                             action='store', default=".tags",
                             help='suffix to add to the filename in case of '
                             'move failure policy keep tags')
-        self.add_extra_arguments(parser)
+
+    def _add_extra_arguments_after(self, parser):
         parser.add_argument('FULL_FILEPATH_OR_QUEUE_NAME',
                             action='store',
                             help='if starts with /, we consider we are '
                             'in debug mode, if not, we consider we are in '
                             'daemon mode')
-        return parser
 
     def get_stats_client(self, extra_tags={}):
         return get_stats_client(self.plugin_name, self.step_name,
@@ -553,45 +496,11 @@ class AcquisitionStep(object):
                                       self.args.redis_unix_socket_path)
         self._destroy()
 
-    def warning(self, msg, *args, **kwargs):
-        """Log a warning message."""
-        logger = self.__get_logger()
-        logger.warning(msg, *args, **kwargs)
-
-    def debug(self, msg, *args, **kwargs):
-        """Log a debug message."""
-        logger = self.__get_logger()
-        logger.debug(msg, *args, **kwargs)
-
-    def info(self, msg, *args, **kwargs):
-        """Log an info message."""
-        logger = self.__get_logger()
-        logger.info(msg, *args, **kwargs)
-
-    def critical(self, msg, *args, **kwargs):
-        """Log a critical message."""
-        logger = self.__get_logger()
-        logger.critical(msg, *args, **kwargs)
-
-    def error(self, msg, *args, **kwargs):
-        """Log an error message."""
-        logger = self.__get_logger()
-        logger.error(msg, *args, **kwargs)
-
     def error_and_die(self, msg, *args, **kwargs):
         """Log an error message and exit immediatly."""
         self.error(msg, *args, **kwargs)
         sys.stderr.write("exiting...\n")
         os._exit(2)
-
-    def exception(self, msg, *args, **kwargs):
-        """Log an error message with current exception stacktrace.
-
-        This method should only be called from an exception handler.
-
-        """
-        logger = self.__get_logger()
-        logger.exception(str(msg), *args, **kwargs)
 
     def __get_tag_name(self, name, counter_str_value='latest',
                        force_step_name=None, force_plugin_name=None):

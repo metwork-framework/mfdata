@@ -24,6 +24,8 @@ class AcquisitionBase(object):
     """
     stop_flag = False
     args = None
+    unit_tests = False
+    unit_tests_args = None
     __logger = None
     step_name = None
     daemon_name = None
@@ -41,7 +43,15 @@ class AcquisitionBase(object):
                                plugin_name, regexp)
         _set_custom_environment(plugin_name, process_name)
 
+    def _init_parser(self):
+        parser = self.__get_argument_parser()
+        if self.unit_tests and self.unit_tests_args:
+            self.args, unknown = parser.parse_known_args(self.unit_tests_args)
+        else:
+            self.args, unknown = parser.parse_known_args()
+
     def _init(self):
+        """Method called after CLI parsing but before processing any files."""
         pass
 
     def init(self):
@@ -59,7 +69,7 @@ class AcquisitionBase(object):
         """
         pass
 
-    def _get_argument_parser(self):
+    def __get_argument_parser(self):
         """Make and return an ArgumentParser object.
 
         If you want to add some extra options, you have to override
