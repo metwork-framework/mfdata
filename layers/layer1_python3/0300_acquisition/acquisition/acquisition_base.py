@@ -220,6 +220,11 @@ class AcquisitionBase(object):
             return "%s.%s.%s.%s" % (counter_str_value, plugin_name,
                                     process_name, name)
 
+    def _get_tag_name(self, name, counter_str_value='latest',
+                      force_process_name=None, force_plugin_name=None):
+        return self.__get_tag_name(name, counter_str_value, force_process_name,
+                                   force_plugin_name)
+
     def _set_tag_latest(self, xaf, name, value):
         tag_name = self.__get_tag_name(name, 'latest')
         self.__set_tag(xaf, tag_name, value)
@@ -264,6 +269,9 @@ class AcquisitionBase(object):
     def __set_tag(self, xaf, name, value):
         self.debug("Setting tag %s = %s" % (name, value))
         xaf.tags[name] = value
+
+    def _set_tag(self, xaf, name, value):
+        self.__set_tag(xaf, name, value)
 
     def _get_counter_tag_value(self, xaf, not_found_value='0'):
         tag_name = self.__get_tag_name("step_counter",

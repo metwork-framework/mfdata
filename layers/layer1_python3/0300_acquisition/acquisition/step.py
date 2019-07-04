@@ -3,22 +3,17 @@ import os
 import xattrfile
 import redis
 import json
-import sys
-import configargparse
 import datetime
 import time
-import re
 import six
 import signal
-from functools import partial
 from acquisition.acquisition_base import AcquisitionBase
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from mfutil import get_utc_unix_timestamp
 from mfutil.plugins import MFUtilPluginBaseNotInitialized
 from mfutil.plugins import get_installed_plugins
-from acquisition.utils import _set_custom_environment, \
-    get_plugin_step_directory_path, MODULE_RUNTIME_HOME, _get_tmp_filepath, \
-    _make_config_file_parser_class, _get_or_make_trash_dir
+from acquisition.utils import get_plugin_step_directory_path, \
+    _get_or_make_trash_dir
 from acquisition.stats import get_stats_client
 
 DEFAULT_STEP_LIMIT = 1000
@@ -73,7 +68,7 @@ class AcquisitionStep(AcquisitionBase):
         self.stop_flag = True
 
     def _init(self):
-        parser = self.__get_argument_parser()
+        parser = self._get_argument_parser()
         if self.unit_tests and self.unit_tests_args:
             self.args = parser.parse_args(self.unit_tests_args)
         else:
@@ -316,27 +311,7 @@ class AcquisitionStep(AcquisitionBase):
         xaf = original_xaf.copy(tmp_filepath)
         return self._process(xaf)
 
-    def __get_argument_parser(self):
-        """Make and return an ArgumentParser object.
-
-        If you want to add some extra options, you have to override
-        the add_extra_arguments() method.
-
-        Returns:
-            an ArgumentParser object with all options added.
-
-        """
-        description = "%s/%s acquisition step" % (self.plugin_name,
-                                                  self.step_name)
-        parser = configargparse.ArgumentParser(
-            description=description,
-            add_env_var_help=False,
-            ignore_unknown_config_file_keys=True,
-            args_for_setting_config_path=["-c", "--config-file"],
-            config_file_parser_class=partial(_make_config_file_parser_class,
-                                             self.plugin_name,
-                                             self.step_name)
-        )
+    def _add_extra_arguments_before(self, parser):
         parser.add_argument('--redis-host', action='store',
                             default='127.0.0.1',
                             help='redis host to connect to (in daemon mode)')
@@ -359,13 +334,13 @@ class AcquisitionStep(AcquisitionBase):
                             action='store', default=".tags",
                             help='suffix to add to the filename in case of '
                             'move failure policy keep tags')
-        self.add_extra_arguments(parser)
+
+    def _add_extra_arguments_after(self, parser):
         parser.add_argument('FULL_FILEPATH_OR_QUEUE_NAME',
                             action='store',
                             help='if starts with /, we consider we are '
                             'in debug mode, if not, we consider we are in '
                             'daemon mode')
-        return parser
 
     def get_stats_client(self, extra_tags={}):
         return get_stats_client(self.plugin_name, self.step_name,
@@ -455,17 +430,6 @@ class AcquisitionStep(AcquisitionBase):
         """
         return
 
-    def add_extra_arguments(self, parser):
-        """Add some extra argument to commande line parsing.
-
-        If you have to add some, you have to override this method.
-
-        Args:
-            parser: an ArgumentParser object (with default options added).
-
-        """
-        pass
-
     def _destroy(self):
         self.destroy()
 
@@ -483,30 +447,25 @@ class AcquisitionStep(AcquisitionBase):
         self._destroy()
 
     def __increment_and_set_counter_tag_value(self, xaf):
-        tag_name = self.__get_tag_name("step_counter",
-                                       force_plugin_name="core")
+        tag_name = self._get_tag_name("step_counter", force_plugin_name="core")
         counter_value = self._get_counter_tag_value(xaf, not_found_value='-1')
         value = six.b("%i" % (counter_value + 1))
-        self.__set_tag(xaf, tag_name, value)
-
-    def __set_tag(self, xaf, name, value):
-        self.debug("Setting tag %s = %s" % (name, value))
-        xaf.tags[name] = value
+        self._set_tag(xaf, tag_name, value)
 
     def __get_original_basename_tag_name(self):
-        return self.__get_tag_name("original_basename",
-                                   force_plugin_name="core",
-                                   counter_str_value="first")
+        return self._get_tag_name("original_basename",
+                                  force_plugin_name="core",
+                                  counter_str_value="first")
 
     def __get_original_uid_tag_name(self):
-        return self.__get_tag_name("original_uid",
-                                   force_plugin_name="core",
-                                   counter_str_value="first")
+        return self._get_tag_name("original_uid",
+                                  force_plugin_name="core",
+                                  counter_str_value="first")
 
     def __get_original_dirname_tag_name(self):
-        return self.__get_tag_name("original_dirname",
-                                   force_plugin_name="core",
-                                   counter_str_value="first")
+        return self._get_tag_name("original_dirname",
+                                  force_plugin_name="core",
+                                  counter_str_value="first")
 
     def __set_original_basename_if_necessary(self, xaf):
         if hasattr(xaf, "_original_filepath") and xaf._original_filepath:
@@ -514,13 +473,13 @@ class AcquisitionStep(AcquisitionBase):
             if tag_name not in xaf.tags:
                 original_basename = \
                     str(os.path.basename(xaf._original_filepath))
-                self.__set_tag(xaf, tag_name, original_basename)
+                self._set_tag(xaf, tag_name, original_basename)
 
     def __set_original_uid_if_necessary(self, xaf):
         tag_name = self.__get_original_uid_tag_name()
         if tag_name not in xaf.tags:
             original_uid = get_unique_hexa_identifier()
-            self.__set_tag(xaf, tag_name, original_uid)
+            self._set_tag(xaf, tag_name, original_uid)
 
     def __set_original_dirname_if_necessary(self, xaf):
         if hasattr(xaf, "_original_filepath") and xaf._original_filepath:
@@ -529,7 +488,7 @@ class AcquisitionStep(AcquisitionBase):
                 dirname = os.path.dirname(xaf._original_filepath)
                 original_dirname = \
                     str(os.path.basename(dirname))
-                self.__set_tag(xaf, tag_name, original_dirname)
+                self._set_tag(xaf, tag_name, original_dirname)
 
     def get_original_basename(self, xaf):
         """Return the original basename of the file.
@@ -578,5 +537,3 @@ class AcquisitionStep(AcquisitionBase):
         """
         tag_name = self.__get_original_dirname_tag_name()
         return xaf.tags.get(tag_name, b"unknown").decode("utf8")
-
-
