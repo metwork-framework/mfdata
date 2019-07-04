@@ -3,17 +3,23 @@ import os
 import xattrfile
 import redis
 import json
+import sys
+import configargparse
 import datetime
 import time
+import re
 import six
 import signal
-from acquisition.acquisition_base import AcquisitionBase
+from functools import partial
+
+import mflog
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from mfutil import get_utc_unix_timestamp
 from mfutil.plugins import MFUtilPluginBaseNotInitialized
 from mfutil.plugins import get_installed_plugins
-from acquisition.utils import get_plugin_step_directory_path, \
-    _get_or_make_trash_dir
+from acquisition.utils import _set_custom_environment, \
+    get_plugin_step_directory_path, MODULE_RUNTIME_HOME, _get_tmp_filepath, \
+    _make_config_file_parser_class, _get_or_make_trash_dir
 from acquisition.stats import get_stats_client
 
 DEFAULT_STEP_LIMIT = 1000
@@ -27,13 +33,14 @@ except MFUtilPluginBaseNotInitialized:
     DEBUG_PLUGIN_INSTALLED = False
 
 
-class AcquisitionStep(AcquisitionBase):
+class AcquisitionStep(object):
     """Abstract class to describe an acquisition step.
 
     You have to override this class.
 
     Attributes:
         debug_mode_allowed (boolean): if True, the debug mode is allowed.
+        stop_flag (boolean): if True, stop the daemon as soon as possible.
         unit_tests (boolean): if True, we are in unit tests mode.
         failure_policy (string): failure policy.
         failure_policy_move_dest_dir (string): destination directory when
@@ -43,10 +50,12 @@ class AcquisitionStep(AcquisitionBase):
         failure_policy_move_keep_tags_suffix (string): suffix to add to the
             filename to keep tags when failure policy is move
         args (Namespace): argparser Namespace object with parsed cli args.
+        __logger (Logger): Logger object.
         __last_ping (Datetime): Datetime object of the last ping() call.
 
     """
 
+    stop_flag = False
     debug_mode_allowed = True
     unit_tests = False
     unit_tests_args = None
@@ -56,19 +65,26 @@ class AcquisitionStep(AcquisitionBase):
     failure_policy_move_keep_tags_suffix = None
     step_limit = DEFAULT_STEP_LIMIT
     args = None
+    __logger = None
     __last_ping = None
     _shadow = False
     _debug_mode = False
 
     def __init__(self):
-        super(AcquisitionStep, self).__init__()
-
-    def __sigterm_handler(self, *args):
-        self.debug("SIGTERM signal handled => schedulling shutdown")
-        self.stop_flag = True
+        """Constructor."""
+        step_name = self.step_name
+        plugin_name = self.plugin_name
+        regexp = "^[A-Za-z0-9_]+$"
+        if not re.match(regexp, step_name):
+            self.error_and_die("step_name: %s must match with %s",
+                               step_name, regexp)
+        if not re.match(regexp, plugin_name):
+            self.error_and_die("plugin_name: %s must match with %s",
+                               plugin_name, regexp)
+        _set_custom_environment(plugin_name, step_name)
 
     def _init(self):
-        parser = self._get_argument_parser()
+        parser = self.__get_argument_parser()
         if self.unit_tests and self.unit_tests_args:
             self.args = parser.parse_args(self.unit_tests_args)
         else:
@@ -90,6 +106,25 @@ class AcquisitionStep(AcquisitionBase):
                 self.args.failure_policy_move_keep_tags_suffix
         signal.signal(signal.SIGTERM, self.__sigterm_handler)
         self.init()
+
+    def __sigterm_handler(self, *args):
+        self.debug("SIGTERM signal handled => schedulling shutdown")
+        self.stop_flag = True
+
+    def __get_logger(self):
+        if not self.__logger:
+            logger_name = "mfdata.%s.%s" % (self.plugin_name, self.step_name)
+            self.__logger = mflog.getLogger(logger_name)
+        return self.__logger
+
+    def get_tmp_filepath(self):
+        """Get a full temporary filepath (including unique filename).
+
+        Returns:
+            (string) full temporary filepath (including unique filename).
+
+        """
+        return _get_tmp_filepath(self.plugin_name, self.step_name)
 
     def _exception_safe_call(self, func, args, kwargs, label,
                              return_value_if_exception):
@@ -128,9 +163,9 @@ class AcquisitionStep(AcquisitionBase):
         if not after_status:
             self.warning("Bad processing status for file: %s",
                          xaf._original_filepath)
-            log = self._AcquisitionBase__get_logger()  # pylint: disable=E1101
-            if log.isEnabledFor(10):  # DEBUG
-                xaf.dump_tags_on_logger(log, 10)  # DEBUG
+            logger = self.__get_logger()
+            if logger.isEnabledFor(10):  # DEBUG
+                xaf.dump_tags_on_logger(logger, 10)  # DEBUG
         return after_status
 
     def _conditional_copy_to_debug_plugin(self, xaf):
@@ -177,17 +212,8 @@ class AcquisitionStep(AcquisitionBase):
             self.__set_original_uid_if_necessary(xaf)
             self.__set_original_dirname_if_necessary(xaf)
 
-    @property
-    def step_name(self):
-        """Get the name of the step. (for compatibility)
-
-        This method is called if there is no "step_name" property defined.
-        This said property SHOULD be defined.
-        The name must match with `^[A-Za-z0-9_]+$` regexp.
-        Returns:
-            (string) the name of the step.
-        """
-        return "main"
+    def _current_utc_datetime_with_ms(self):
+        return datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S:%f')
 
     def _trash(self, xaf):
         if self.failure_policy == "delete":
@@ -302,8 +328,7 @@ class AcquisitionStep(AcquisitionBase):
 
     def __run_in_debug_mode(self, filepath):
         self.info("Start the debug mode with filepath=%s", filepath)
-        logger = self._AcquisitionBase__get_logger()  # pylint: disable=E1101
-        logger.setLevel(0)
+        self.__get_logger().setLevel(0)
         self._debug_mode = True
         self._ping()
         tmp_filepath = self.get_tmp_filepath()
@@ -311,7 +336,27 @@ class AcquisitionStep(AcquisitionBase):
         xaf = original_xaf.copy(tmp_filepath)
         return self._process(xaf)
 
-    def _add_extra_arguments_before(self, parser):
+    def __get_argument_parser(self):
+        """Make and return an ArgumentParser object.
+
+        If you want to add some extra options, you have to override
+        the add_extra_arguments() method.
+
+        Returns:
+            an ArgumentParser object with all options added.
+
+        """
+        description = "%s/%s acquisition step" % (self.plugin_name,
+                                                  self.step_name)
+        parser = configargparse.ArgumentParser(
+            description=description,
+            add_env_var_help=False,
+            ignore_unknown_config_file_keys=True,
+            args_for_setting_config_path=["-c", "--config-file"],
+            config_file_parser_class=partial(_make_config_file_parser_class,
+                                             self.plugin_name,
+                                             self.step_name)
+        )
         parser.add_argument('--redis-host', action='store',
                             default='127.0.0.1',
                             help='redis host to connect to (in daemon mode)')
@@ -334,17 +379,56 @@ class AcquisitionStep(AcquisitionBase):
                             action='store', default=".tags",
                             help='suffix to add to the filename in case of '
                             'move failure policy keep tags')
-
-    def _add_extra_arguments_after(self, parser):
+        self.add_extra_arguments(parser)
         parser.add_argument('FULL_FILEPATH_OR_QUEUE_NAME',
                             action='store',
                             help='if starts with /, we consider we are '
                             'in debug mode, if not, we consider we are in '
                             'daemon mode')
+        return parser
 
     def get_stats_client(self, extra_tags={}):
         return get_stats_client(self.plugin_name, self.step_name,
                                 extra_tags)
+
+    @property
+    def step_name(self):
+        """Get the name of the step.
+
+        This method is called if there is no "step_name" property defined.
+        This said property SHOULD be defined.
+        The name must match with `^[A-Za-z0-9_]+$` regexp.
+
+        Returns:
+            (string) the name of the step.
+
+        """
+        return "main"
+
+    @property
+    def plugin_name(self):
+        """Return the name of the plugin.
+
+        This method is called if there is no "step_name" property defined.
+        This said property MUST be defined.
+        The name must match with `^[A-Za-z0-9_]+$` regexp.
+
+        Returns:
+            (string) the name of the plugin.
+
+        """
+        raise NotImplementedError("The plugin_name property is not defined."
+                                  " Please define a plugin_name property.")
+
+    def get_plugin_directory_path(self):
+        """Return the plugin directory (fullpath).
+
+        Returns:
+            (string) the fullpath of the plugin directory.
+
+        """
+        return os.path.join(MODULE_RUNTIME_HOME,
+                            'var', 'plugins', self.plugin_name)
 
     def move_to_plugin_step(self, xaf, plugin_name, step_name):
         """Move a XattrFile to another plugin/step.
@@ -430,8 +514,31 @@ class AcquisitionStep(AcquisitionBase):
         """
         return
 
+    def add_extra_arguments(self, parser):
+        """Add some extra argument to commande line parsing.
+
+        If you have to add some, you have to override this method.
+
+        Args:
+            parser: an ArgumentParser object (with default options added).
+
+        """
+        pass
+
+    def init(self):
+        """Method called after CLI parsing but before processing any files."""
+        pass
+
     def _destroy(self):
         self.destroy()
+
+    def destroy(self):
+        """Destroy what you want just before exiting.
+
+        No file will be processed after calling this method.
+
+        """
+        pass
 
     def run(self):
         self._init()
@@ -446,26 +553,128 @@ class AcquisitionStep(AcquisitionBase):
                                       self.args.redis_unix_socket_path)
         self._destroy()
 
+    def warning(self, msg, *args, **kwargs):
+        """Log a warning message."""
+        logger = self.__get_logger()
+        logger.warning(msg, *args, **kwargs)
+
+    def debug(self, msg, *args, **kwargs):
+        """Log a debug message."""
+        logger = self.__get_logger()
+        logger.debug(msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        """Log an info message."""
+        logger = self.__get_logger()
+        logger.info(msg, *args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        """Log a critical message."""
+        logger = self.__get_logger()
+        logger.critical(msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        """Log an error message."""
+        logger = self.__get_logger()
+        logger.error(msg, *args, **kwargs)
+
+    def error_and_die(self, msg, *args, **kwargs):
+        """Log an error message and exit immediatly."""
+        self.error(msg, *args, **kwargs)
+        sys.stderr.write("exiting...\n")
+        os._exit(2)
+
+    def exception(self, msg, *args, **kwargs):
+        """Log an error message with current exception stacktrace.
+
+        This method should only be called from an exception handler.
+
+        """
+        logger = self.__get_logger()
+        logger.exception(str(msg), *args, **kwargs)
+
+    def __get_tag_name(self, name, counter_str_value='latest',
+                       force_step_name=None, force_plugin_name=None):
+        plugin_name = self.plugin_name
+        step_name = self.step_name
+        if force_step_name is not None:
+            step_name = force_step_name
+        if force_plugin_name is not None:
+            plugin_name = force_plugin_name
+        if plugin_name == "core":
+            return "%s.%s.%s" % (counter_str_value, plugin_name, name)
+        else:
+            return "%s.%s.%s.%s" % (counter_str_value, plugin_name,
+                                    step_name, name)
+
+    def _set_tag_latest(self, xaf, name, value):
+        tag_name = self.__get_tag_name(name, 'latest')
+        self.__set_tag(xaf, tag_name, value)
+
+    def set_tag(self, xaf, name, value, add_latest=True):
+        """Set a tag on a file with good prefixes.
+
+        Args:
+            xaf (XattrFile): file to add/set tag on.
+            name (string): name of the tag (without prefixes)
+            value (string): value of the tag
+            add_latest (boolean): add latest prefix
+        """
+        counter_str_value = str(self._get_counter_tag_value(xaf))
+        tag_name = self.__get_tag_name(name, counter_str_value)
+        self.__set_tag(xaf, tag_name, value)
+        if add_latest:
+            self._set_tag_latest(xaf, name, value)
+
+    def get_tag(self, xaf, name, not_found_value=None,
+                counter_str_value='latest', force_step_name=None,
+                force_plugin_name=None):
+        """Read a tag on a file with good prefixes.
+
+        Args:
+            xaf (XattrFile): file to read.
+            name (string): name of the tag (without prefixes).
+            not_found_value: returned value if the tag is not found.
+            counter_str_value (string): counter string value.
+            force_step_name: tagger step name (if None, current
+                step name is taken)
+            force_plugin_name: tagger plugin name (if None, current
+                plugin name is taken)
+        """
+        tag_name = self.__get_tag_name(name, counter_str_value,
+                                       force_step_name, force_plugin_name)
+        return xaf.tags.get(tag_name, not_found_value)
+
+    def _get_counter_tag_value(self, xaf, not_found_value='0'):
+        tag_name = self.__get_tag_name("step_counter",
+                                       force_plugin_name="core")
+        return int(xaf.tags.get(tag_name, not_found_value))
+
     def __increment_and_set_counter_tag_value(self, xaf):
-        tag_name = self._get_tag_name("step_counter", force_plugin_name="core")
+        tag_name = self.__get_tag_name("step_counter",
+                                       force_plugin_name="core")
         counter_value = self._get_counter_tag_value(xaf, not_found_value='-1')
         value = six.b("%i" % (counter_value + 1))
-        self._set_tag(xaf, tag_name, value)
+        self.__set_tag(xaf, tag_name, value)
+
+    def __set_tag(self, xaf, name, value):
+        self.debug("Setting tag %s = %s" % (name, value))
+        xaf.tags[name] = value
 
     def __get_original_basename_tag_name(self):
-        return self._get_tag_name("original_basename",
-                                  force_plugin_name="core",
-                                  counter_str_value="first")
+        return self.__get_tag_name("original_basename",
+                                   force_plugin_name="core",
+                                   counter_str_value="first")
 
     def __get_original_uid_tag_name(self):
-        return self._get_tag_name("original_uid",
-                                  force_plugin_name="core",
-                                  counter_str_value="first")
+        return self.__get_tag_name("original_uid",
+                                   force_plugin_name="core",
+                                   counter_str_value="first")
 
     def __get_original_dirname_tag_name(self):
-        return self._get_tag_name("original_dirname",
-                                  force_plugin_name="core",
-                                  counter_str_value="first")
+        return self.__get_tag_name("original_dirname",
+                                   force_plugin_name="core",
+                                   counter_str_value="first")
 
     def __set_original_basename_if_necessary(self, xaf):
         if hasattr(xaf, "_original_filepath") and xaf._original_filepath:
@@ -473,13 +682,13 @@ class AcquisitionStep(AcquisitionBase):
             if tag_name not in xaf.tags:
                 original_basename = \
                     str(os.path.basename(xaf._original_filepath))
-                self._set_tag(xaf, tag_name, original_basename)
+                self.__set_tag(xaf, tag_name, original_basename)
 
     def __set_original_uid_if_necessary(self, xaf):
         tag_name = self.__get_original_uid_tag_name()
         if tag_name not in xaf.tags:
             original_uid = get_unique_hexa_identifier()
-            self._set_tag(xaf, tag_name, original_uid)
+            self.__set_tag(xaf, tag_name, original_uid)
 
     def __set_original_dirname_if_necessary(self, xaf):
         if hasattr(xaf, "_original_filepath") and xaf._original_filepath:
@@ -488,7 +697,7 @@ class AcquisitionStep(AcquisitionBase):
                 dirname = os.path.dirname(xaf._original_filepath)
                 original_dirname = \
                     str(os.path.basename(dirname))
-                self._set_tag(xaf, tag_name, original_dirname)
+                self.__set_tag(xaf, tag_name, original_dirname)
 
     def get_original_basename(self, xaf):
         """Return the original basename of the file.
