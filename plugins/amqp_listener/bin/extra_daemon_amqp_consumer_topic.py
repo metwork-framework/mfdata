@@ -29,8 +29,7 @@ class ExtraDaemonAmqpConsumerTopic(AcquisitionListener):
 
     def __sigterm_handler(self, *args):
         self.info("SIGTERM signal handled => schedulling shutdown")
-        if self.delete_queue_after_stop:
-            self.channel.queue_delete(self.subscription_queue)
+        self.channel.queue_delete(self.subscription_queue)
         self.channel.close()
 
     def add_extra_arguments(self, parser):

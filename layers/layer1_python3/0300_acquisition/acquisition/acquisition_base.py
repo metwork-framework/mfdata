@@ -165,7 +165,7 @@ class AcquisitionBase(object):
         """
         return _get_tmp_filepath(self.plugin_name, self.process_name)
 
-    def __get_logger(self):
+    def _get_logger(self):
         """Get a logger."""
         if not self.__logger:
             logger_name = "mfdata.%s.%s" % (self.plugin_name,
@@ -173,36 +173,36 @@ class AcquisitionBase(object):
             self.__logger = mflog.getLogger(logger_name)
         return self.__logger
 
-    def warning(self, msg, *args, **kwargs):
-        """Log a warning message."""
-        logger = self.__get_logger()
-        logger.warning(msg, *args, **kwargs)
-
-    def debug(self, msg, *args, **kwargs):
-        """Log a debug message."""
-        logger = self.__get_logger()
-        logger.debug(msg, *args, **kwargs)
-
-    def info(self, msg, *args, **kwargs):
-        """Log an info message."""
-        logger = self.__get_logger()
-        logger.info(msg, *args, **kwargs)
-
-    def critical(self, msg, *args, **kwargs):
-        """Log a critical message."""
-        logger = self.__get_logger()
-        logger.critical(msg, *args, **kwargs)
-
-    def error(self, msg, *args, **kwargs):
-        """Log an error message."""
-        logger = self.__get_logger()
-        logger.error(msg, *args, **kwargs)
-
     def error_and_die(self, msg, *args, **kwargs):
         """Log an error message and exit immediatly."""
         self.error(msg, *args, **kwargs)
         sys.stderr.write("exiting...\n")
         os._exit(2)
+
+    def warning(self, msg, *args, **kwargs):
+        """Log a warning message."""
+        logger = self._get_logger()
+        logger.warning(msg, *args, **kwargs)
+
+    def debug(self, msg, *args, **kwargs):
+        """Log a debug message."""
+        logger = self._get_logger()
+        logger.debug(msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        """Log an info message."""
+        logger = self._get_logger()
+        logger.info(msg, *args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        """Log a critical message."""
+        logger = self._get_logger()
+        logger.critical(msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        """Log an error message."""
+        logger = self._get_logger()
+        logger.error(msg, *args, **kwargs)
 
     def exception(self, msg, *args, **kwargs):
         """Log an error message with current exception stacktrace.
@@ -210,14 +210,14 @@ class AcquisitionBase(object):
         This method should only be called from an exception handler.
 
         """
-        logger = self.__get_logger()
+        logger = self._get_logger()
         logger.exception(str(msg), *args, **kwargs)
 
     def _current_utc_datetime_with_ms(self):
         return datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S:%f')
 
-    def __get_tag_name(self, name, counter_str_value='latest',
-                       force_process_name=None, force_plugin_name=None):
+    def _get_tag_name(self, name, counter_str_value='latest',
+                      force_process_name=None, force_plugin_name=None):
         plugin_name = self.plugin_name
         process_name = self.process_name
         if force_process_name is not None:
@@ -230,14 +230,13 @@ class AcquisitionBase(object):
             return "%s.%s.%s.%s" % (counter_str_value, plugin_name,
                                     process_name, name)
 
-    def _get_tag_name(self, name, counter_str_value='latest',
-                      force_process_name=None, force_plugin_name=None):
-        return self.__get_tag_name(name, counter_str_value, force_process_name,
-                                   force_plugin_name)
-
     def _set_tag_latest(self, xaf, name, value):
-        tag_name = self.__get_tag_name(name, 'latest')
-        self.__set_tag(xaf, tag_name, value)
+        tag_name = self._get_tag_name(name, 'latest')
+        self._set_tag(xaf, tag_name, value)
+
+    def _set_tag(self, xaf, name, value):
+        self.debug("Setting tag %s = %s" % (name, value))
+        xaf.tags[name] = value
 
     def set_tag(self, xaf, name, value, add_latest=True):
         """Set a tag on a file with good prefixes.
@@ -249,8 +248,8 @@ class AcquisitionBase(object):
             add_latest (boolean): add latest prefix
         """
         counter_str_value = str(self._get_counter_tag_value(xaf))
-        tag_name = self.__get_tag_name(name, counter_str_value)
-        self.__set_tag(xaf, tag_name, value)
+        tag_name = self._get_tag_name(name, counter_str_value)
+        self._set_tag(xaf, tag_name, value)
         if add_latest:
             self._set_tag_latest(xaf, name, value)
 
@@ -272,15 +271,11 @@ class AcquisitionBase(object):
         """
         if 'force_step_name' in kwargs.keys():
             force_process_name = kwargs['force_step_name']
-        tag_name = self.__get_tag_name(name, counter_str_value,
-                                       force_process_name, force_plugin_name)
+        tag_name = self._get_tag_name(name, counter_str_value,
+                                      force_process_name, force_plugin_name)
         return xaf.tags.get(tag_name, not_found_value)
 
-    def __set_tag(self, xaf, name, value):
-        self.debug("Setting tag %s = %s" % (name, value))
-        xaf.tags[name] = value
-
     def _get_counter_tag_value(self, xaf, not_found_value='0'):
-        tag_name = self.__get_tag_name("step_counter",
-                                       force_plugin_name="core")
+        tag_name = self._get_tag_name("step_counter",
+                                      force_plugin_name="core")
         return int(xaf.tags.get(tag_name, not_found_value))

@@ -120,7 +120,7 @@ class AcquisitionStep(AcquisitionBase):
         self.info("End of the %s processing after %i ms",
                   xaf._original_filepath,
                   timer.ms)
-        logger = self._AcquisitionBase__get_logger()  # pylint: disable=E1101
+        logger = self._get_logger()
 
         if not after_status:
             self.warning("Bad processing status for file: %s",
@@ -289,7 +289,7 @@ class AcquisitionStep(AcquisitionBase):
 
     def __run_in_debug_mode(self, filepath):
         self.info("Start the debug mode with filepath=%s", filepath)
-        logger = self._AcquisitionBase__get_logger()  # pylint: disable=E1101
+        logger = self._get_logger()
         logger.setLevel(0)
         self._debug_mode = True
         self._ping()
@@ -496,35 +496,31 @@ class AcquisitionStep(AcquisitionBase):
         self._destroy()
 
     def _get_counter_tag_value(self, xaf, not_found_value='0'):
-        tg_name = self._AcquisitionBase__get_tag_name(  # pylint: disable=E1101
-            "step_counter", force_plugin_name="core")
-        return int(xaf.tags.get(tg_name, not_found_value))
+        tag_name = self._get_tag_name("step_counter",
+                                      force_plugin_name="core")
+        return int(xaf.tags.get(tag_name, not_found_value))
 
     def __increment_and_set_counter_tag_value(self, xaf):
-        tg_name = self._AcquisitionBase__get_tag_name(  # pylint: disable=E1101
-            "step_counter", force_plugin_name="core")
+        tag_name = self._get_tag_name("step_counter",
+                                      force_plugin_name="core")
         counter_value = self._get_counter_tag_value(xaf, not_found_value='-1')
         value = six.b("%i" % (counter_value + 1))
-        self._AcquisitionBase__set_tag(xaf,  # pylint: disable=E1101
-                                       tg_name, value)
+        self._set_tag(xaf, tag_name, value)
 
     def __get_original_basename_tag_name(self):
-        return self._AcquisitionBase__get_tag_name(  # pylint: disable=E1101
-            "original_basename",
-            force_plugin_name="core",
-            counter_str_value="first")
+        return self._get_tag_name("original_basename",
+                                  force_plugin_name="core",
+                                  counter_str_value="first")
 
     def __get_original_uid_tag_name(self):
-        return self._AcquisitionBase__get_tag_name(  # pylint: disable=E1101
-            "original_uid",
-            force_plugin_name="core",
-            counter_str_value="first")
+        return self._get_tag_name("original_uid",
+                                  force_plugin_name="core",
+                                  counter_str_value="first")
 
     def __get_original_dirname_tag_name(self):
-        return self._AcquisitionBase__get_tag_name(  # pylint: disable=E1101
-            "original_dirname",
-            force_plugin_name="core",
-            counter_str_value="first")
+        return self._get_tag_name("original_dirname",
+                                  force_plugin_name="core",
+                                  counter_str_value="first")
 
     def __set_original_basename_if_necessary(self, xaf):
         if hasattr(xaf, "_original_filepath") and xaf._original_filepath:
@@ -532,15 +528,13 @@ class AcquisitionStep(AcquisitionBase):
             if tag_name not in xaf.tags:
                 original_basename = \
                     str(os.path.basename(xaf._original_filepath))
-                self._AcquisitionBase__set_tag(xaf,  # pylint: disable=E1101
-                                               tag_name, original_basename)
+                self._set_tag(xaf, tag_name, original_basename)
 
     def __set_original_uid_if_necessary(self, xaf):
         tag_name = self.__get_original_uid_tag_name()
         if tag_name not in xaf.tags:
             original_uid = get_unique_hexa_identifier()
-            self._AcquisitionBase__set_tag(xaf,  # pylint: disable=E1101
-                                           tag_name, original_uid)
+            self._set_tag(xaf, tag_name, original_uid)
 
     def __set_original_dirname_if_necessary(self, xaf):
         if hasattr(xaf, "_original_filepath") and xaf._original_filepath:
@@ -549,8 +543,7 @@ class AcquisitionStep(AcquisitionBase):
                 dirname = os.path.dirname(xaf._original_filepath)
                 original_dirname = \
                     str(os.path.basename(dirname))
-                self._AcquisitionBase__set_tag(xaf,  # pylint: disable=E1101
-                                               tag_name, original_dirname)
+                self._set_tag(xaf, tag_name, original_dirname)
 
     def get_original_basename(self, xaf):
         """Return the original basename of the file.

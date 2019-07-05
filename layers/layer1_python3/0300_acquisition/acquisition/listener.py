@@ -11,6 +11,7 @@ class AcquisitionListener(AcquisitionBase):
     """
     def _init(self):
         self._init_parser()
+        self.init()
 
     def _destroy(self):
         self.destroy()
