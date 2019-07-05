@@ -280,9 +280,6 @@ class AcquisitionBase(object):
         self.debug("Setting tag %s = %s" % (name, value))
         xaf.tags[name] = value
 
-    def _set_tag(self, xaf, name, value):
-        self.__set_tag(xaf, name, value)
-
     def _get_counter_tag_value(self, xaf, not_found_value='0'):
         tag_name = self.__get_tag_name("step_counter",
                                        force_plugin_name="core")

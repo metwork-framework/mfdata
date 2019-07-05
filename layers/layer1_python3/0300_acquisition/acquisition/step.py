@@ -3,7 +3,6 @@ import os
 import xattrfile
 import redis
 import json
-import sys
 import datetime
 import time
 import six
@@ -496,94 +495,36 @@ class AcquisitionStep(AcquisitionBase):
                                       self.args.redis_unix_socket_path)
         self._destroy()
 
-    def error_and_die(self, msg, *args, **kwargs):
-        """Log an error message and exit immediatly."""
-        self.error(msg, *args, **kwargs)
-        sys.stderr.write("exiting...\n")
-        os._exit(2)
-
-    def __get_tag_name(self, name, counter_str_value='latest',
-                       force_step_name=None, force_plugin_name=None):
-        plugin_name = self.plugin_name
-        step_name = self.step_name
-        if force_step_name is not None:
-            step_name = force_step_name
-        if force_plugin_name is not None:
-            plugin_name = force_plugin_name
-        if plugin_name == "core":
-            return "%s.%s.%s" % (counter_str_value, plugin_name, name)
-        else:
-            return "%s.%s.%s.%s" % (counter_str_value, plugin_name,
-                                    step_name, name)
-
-    def _set_tag_latest(self, xaf, name, value):
-        tag_name = self.__get_tag_name(name, 'latest')
-        self.__set_tag(xaf, tag_name, value)
-
-    def set_tag(self, xaf, name, value, add_latest=True):
-        """Set a tag on a file with good prefixes.
-
-        Args:
-            xaf (XattrFile): file to add/set tag on.
-            name (string): name of the tag (without prefixes)
-            value (string): value of the tag
-            add_latest (boolean): add latest prefix
-        """
-        counter_str_value = str(self._get_counter_tag_value(xaf))
-        tag_name = self.__get_tag_name(name, counter_str_value)
-        self.__set_tag(xaf, tag_name, value)
-        if add_latest:
-            self._set_tag_latest(xaf, name, value)
-
-    def get_tag(self, xaf, name, not_found_value=None,
-                counter_str_value='latest', force_step_name=None,
-                force_plugin_name=None):
-        """Read a tag on a file with good prefixes.
-
-        Args:
-            xaf (XattrFile): file to read.
-            name (string): name of the tag (without prefixes).
-            not_found_value: returned value if the tag is not found.
-            counter_str_value (string): counter string value.
-            force_step_name: tagger step name (if None, current
-                step name is taken)
-            force_plugin_name: tagger plugin name (if None, current
-                plugin name is taken)
-        """
-        tag_name = self.__get_tag_name(name, counter_str_value,
-                                       force_step_name, force_plugin_name)
-        return xaf.tags.get(tag_name, not_found_value)
-
     def _get_counter_tag_value(self, xaf, not_found_value='0'):
-        tag_name = self.__get_tag_name("step_counter",
-                                       force_plugin_name="core")
-        return int(xaf.tags.get(tag_name, not_found_value))
+        tg_name = self._AcquisitionBase__get_tag_name(  # pylint: disable=E1101
+            "step_counter", force_plugin_name="core")
+        return int(xaf.tags.get(tg_name, not_found_value))
 
     def __increment_and_set_counter_tag_value(self, xaf):
-        tag_name = self.__get_tag_name("step_counter",
-                                       force_plugin_name="core")
+        tg_name = self._AcquisitionBase__get_tag_name(  # pylint: disable=E1101
+            "step_counter", force_plugin_name="core")
         counter_value = self._get_counter_tag_value(xaf, not_found_value='-1')
         value = six.b("%i" % (counter_value + 1))
-        self.__set_tag(xaf, tag_name, value)
-
-    def __set_tag(self, xaf, name, value):
-        self.debug("Setting tag %s = %s" % (name, value))
-        xaf.tags[name] = value
+        self._AcquisitionBase__set_tag(xaf,  # pylint: disable=E1101
+                                       tg_name, value)
 
     def __get_original_basename_tag_name(self):
-        return self.__get_tag_name("original_basename",
-                                   force_plugin_name="core",
-                                   counter_str_value="first")
+        return self._AcquisitionBase__get_tag_name(  # pylint: disable=E1101
+            "original_basename",
+            force_plugin_name="core",
+            counter_str_value="first")
 
     def __get_original_uid_tag_name(self):
-        return self.__get_tag_name("original_uid",
-                                   force_plugin_name="core",
-                                   counter_str_value="first")
+        return self._AcquisitionBase__get_tag_name(  # pylint: disable=E1101
+            "original_uid",
+            force_plugin_name="core",
+            counter_str_value="first")
 
     def __get_original_dirname_tag_name(self):
-        return self.__get_tag_name("original_dirname",
-                                   force_plugin_name="core",
-                                   counter_str_value="first")
+        return self._AcquisitionBase__get_tag_name(  # pylint: disable=E1101
+            "original_dirname",
+            force_plugin_name="core",
+            counter_str_value="first")
 
     def __set_original_basename_if_necessary(self, xaf):
         if hasattr(xaf, "_original_filepath") and xaf._original_filepath:
@@ -591,13 +532,15 @@ class AcquisitionStep(AcquisitionBase):
             if tag_name not in xaf.tags:
                 original_basename = \
                     str(os.path.basename(xaf._original_filepath))
-                self.__set_tag(xaf, tag_name, original_basename)
+                self._AcquisitionBase__set_tag(xaf,  # pylint: disable=E1101
+                                               tag_name, original_basename)
 
     def __set_original_uid_if_necessary(self, xaf):
         tag_name = self.__get_original_uid_tag_name()
         if tag_name not in xaf.tags:
             original_uid = get_unique_hexa_identifier()
-            self.__set_tag(xaf, tag_name, original_uid)
+            self._AcquisitionBase__set_tag(xaf,  # pylint: disable=E1101
+                                           tag_name, original_uid)
 
     def __set_original_dirname_if_necessary(self, xaf):
         if hasattr(xaf, "_original_filepath") and xaf._original_filepath:
@@ -606,7 +549,8 @@ class AcquisitionStep(AcquisitionBase):
                 dirname = os.path.dirname(xaf._original_filepath)
                 original_dirname = \
                     str(os.path.basename(dirname))
-                self.__set_tag(xaf, tag_name, original_dirname)
+                self._AcquisitionBase__set_tag(xaf,  # pylint: disable=E1101
+                                               tag_name, original_dirname)
 
     def get_original_basename(self, xaf):
         """Return the original basename of the file.
