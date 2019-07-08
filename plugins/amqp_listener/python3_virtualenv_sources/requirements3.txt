@@ -1,0 +1,2 @@
+certifi==2018.10.15
+-e git+https://github.com/pika/pika.git@f7c106743fa4d7cf8f2ee8e9f4aec4664f554e61#egg=pika
