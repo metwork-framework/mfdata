@@ -167,16 +167,13 @@ In this tutorial:
 - we will save the "tags attributes" set by the switch plugin to a "tags" file in the same directory as the NetCDF file one
 - we will read some data of the NetCDF file from Python code with the `NetCDF4` Python library
 
-**Important**: 
-- if you are behind a proxy, you have to set `http_proxy` and `https_proxy` environment varaibles in order to be able to download any Python package you may need.
-- you may also need to disable your Linux firewall:
-
-    ```bash
-    systemctl status firewalld
-    systemctl stop firewalld.service
-    systemctl disable firewalld
-
-    ```
+.. important:: 
+    | - if you are behind a proxy, you have to set `http_proxy` and `https_proxy` environment variables in order to be able to download any Python package you may need.
+    | - you may also need to disable your Linux firewall:
+    |   `systemctl status firewalld`
+    |   `systemctl stop firewalld.service`
+    |   `systemctl disable firewalld`
+   
 
 ### Create the plugin
 

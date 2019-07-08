@@ -31,7 +31,7 @@ You may check the full `directory_observer.ini` configuration file in the `/home
 
 `directory_observer` scans the directories configured in the `directory_observer.ini` file.
 
-`step-xxx` is the step defines in your plugin.  There is as many `step-xxx` as plugins steps.
+`step-xxx` is the step defines in your plugin.  There are as many `step-xxx` as plugins steps.
 
 
 Once the monitoring of the directories is started, any action on the monitored directory is noticed and pushed to the Redis queue. The message contains:
