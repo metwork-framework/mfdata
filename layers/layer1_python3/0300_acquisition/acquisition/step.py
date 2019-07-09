@@ -509,21 +509,6 @@ class AcquisitionStep(AcquisitionBase):
                                       self.args.redis_unix_socket_path)
         self._destroy()
 
-    def set_tag(self, xaf, name, value, add_latest=True):
-        """Set a tag on a file with good prefixes.
-
-        Args:
-            xaf (XattrFile): file to add/set tag on.
-            name (string): name of the tag (without prefixes)
-            value (string): value of the tag
-            add_latest (boolean): add latest prefix
-        """
-        counter_str_value = str(self._get_counter_tag_value(xaf))
-        tag_name = self._get_tag_name(name, counter_str_value)
-        self.__set_tag(xaf, tag_name, value)
-        if add_latest:
-            self._set_tag_latest(xaf, name, value)
-
     def _get_counter_tag_value(self, xaf, not_found_value='0'):
         tag_name = self._get_tag_name("step_counter",
                                       force_plugin_name="core")
@@ -534,11 +519,7 @@ class AcquisitionStep(AcquisitionBase):
                                       force_plugin_name="core")
         counter_value = self._get_counter_tag_value(xaf, not_found_value='-1')
         value = six.b("%i" % (counter_value + 1))
-        self.__set_tag(xaf, tag_name, value)
-
-    def __set_tag(self, xaf, name, value):
-        self.debug("Setting tag %s = %s" % (name, value))
-        xaf.tags[name] = value
+        self._set_tag(xaf, tag_name, value)
 
     def __get_original_basename_tag_name(self):
         return self._get_tag_name("original_basename",
@@ -561,13 +542,13 @@ class AcquisitionStep(AcquisitionBase):
             if tag_name not in xaf.tags:
                 original_basename = \
                     str(os.path.basename(xaf._original_filepath))
-                self.__set_tag(xaf, tag_name, original_basename)
+                self._set_tag(xaf, tag_name, original_basename)
 
     def __set_original_uid_if_necessary(self, xaf):
         tag_name = self.__get_original_uid_tag_name()
         if tag_name not in xaf.tags:
             original_uid = get_unique_hexa_identifier()
-            self.__set_tag(xaf, tag_name, original_uid)
+            self._set_tag(xaf, tag_name, original_uid)
 
     def __set_original_dirname_if_necessary(self, xaf):
         if hasattr(xaf, "_original_filepath") and xaf._original_filepath:
@@ -576,7 +557,7 @@ class AcquisitionStep(AcquisitionBase):
                 dirname = os.path.dirname(xaf._original_filepath)
                 original_dirname = \
                     str(os.path.basename(dirname))
-                self.__set_tag(xaf, tag_name, original_dirname)
+                self._set_tag(xaf, tag_name, original_dirname)
 
     def get_original_basename(self, xaf):
         """Return the original basename of the file.
