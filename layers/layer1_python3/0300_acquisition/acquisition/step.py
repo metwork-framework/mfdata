@@ -509,24 +509,6 @@ class AcquisitionStep(AcquisitionBase):
                                       self.args.redis_unix_socket_path)
         self._destroy()
 
-    def __get_tag_name(self, name, counter_str_value='latest',
-                       force_step_name=None, force_plugin_name=None):
-        plugin_name = self.plugin_name
-        step_name = self.step_name
-        if force_step_name is not None:
-            step_name = force_step_name
-        if force_plugin_name is not None:
-            plugin_name = force_plugin_name
-        if plugin_name == "core":
-            return "%s.%s.%s" % (counter_str_value, plugin_name, name)
-        else:
-            return "%s.%s.%s.%s" % (counter_str_value, plugin_name,
-                                    step_name, name)
-
-    def _set_tag_latest(self, xaf, name, value):
-        tag_name = self.__get_tag_name(name, 'latest')
-        self.__set_tag(xaf, tag_name, value)
-
     def set_tag(self, xaf, name, value, add_latest=True):
         """Set a tag on a file with good prefixes.
 
@@ -537,38 +519,19 @@ class AcquisitionStep(AcquisitionBase):
             add_latest (boolean): add latest prefix
         """
         counter_str_value = str(self._get_counter_tag_value(xaf))
-        tag_name = self.__get_tag_name(name, counter_str_value)
+        tag_name = self._get_tag_name(name, counter_str_value)
         self.__set_tag(xaf, tag_name, value)
         if add_latest:
             self._set_tag_latest(xaf, name, value)
 
-    def get_tag(self, xaf, name, not_found_value=None,
-                counter_str_value='latest', force_step_name=None,
-                force_plugin_name=None):
-        """Read a tag on a file with good prefixes.
-
-        Args:
-            xaf (XattrFile): file to read.
-            name (string): name of the tag (without prefixes).
-            not_found_value: returned value if the tag is not found.
-            counter_str_value (string): counter string value.
-            force_step_name: tagger step name (if None, current
-                step name is taken)
-            force_plugin_name: tagger plugin name (if None, current
-                plugin name is taken)
-        """
-        tag_name = self.__get_tag_name(name, counter_str_value,
-                                       force_step_name, force_plugin_name)
-        return xaf.tags.get(tag_name, not_found_value)
-
     def _get_counter_tag_value(self, xaf, not_found_value='0'):
-        tag_name = self.__get_tag_name("step_counter",
-                                       force_plugin_name="core")
+        tag_name = self._get_tag_name("step_counter",
+                                      force_plugin_name="core")
         return int(xaf.tags.get(tag_name, not_found_value))
 
     def __increment_and_set_counter_tag_value(self, xaf):
-        tag_name = self.__get_tag_name("step_counter",
-                                       force_plugin_name="core")
+        tag_name = self._get_tag_name("step_counter",
+                                      force_plugin_name="core")
         counter_value = self._get_counter_tag_value(xaf, not_found_value='-1')
         value = six.b("%i" % (counter_value + 1))
         self.__set_tag(xaf, tag_name, value)
@@ -578,19 +541,19 @@ class AcquisitionStep(AcquisitionBase):
         xaf.tags[name] = value
 
     def __get_original_basename_tag_name(self):
-        return self.__get_tag_name("original_basename",
-                                   force_plugin_name="core",
-                                   counter_str_value="first")
+        return self._get_tag_name("original_basename",
+                                  force_plugin_name="core",
+                                  counter_str_value="first")
 
     def __get_original_uid_tag_name(self):
-        return self.__get_tag_name("original_uid",
-                                   force_plugin_name="core",
-                                   counter_str_value="first")
+        return self._get_tag_name("original_uid",
+                                  force_plugin_name="core",
+                                  counter_str_value="first")
 
     def __get_original_dirname_tag_name(self):
-        return self.__get_tag_name("original_dirname",
-                                   force_plugin_name="core",
-                                   counter_str_value="first")
+        return self._get_tag_name("original_dirname",
+                                  force_plugin_name="core",
+                                  counter_str_value="first")
 
     def __set_original_basename_if_necessary(self, xaf):
         if hasattr(xaf, "_original_filepath") and xaf._original_filepath:

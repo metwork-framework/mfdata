@@ -225,7 +225,7 @@ class AcquisitionBase(object):
         if force_plugin_name is not None:
             plugin_name = force_plugin_name
         if plugin_name == "core":
-            return "%s.%s.%s" % (counter_str_value, plugin_name, process_name)
+            return "%s.%s.%s" % (counter_str_value, plugin_name, name)
         else:
             return "%s.%s.%s.%s" % (counter_str_value, plugin_name,
                                     process_name, name)
