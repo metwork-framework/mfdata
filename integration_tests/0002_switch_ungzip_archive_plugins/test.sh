@@ -60,6 +60,7 @@ done
 
 ls -l ${DEST_DIR}
 diff ${DEST_DIR}/Example.png ../data/Example.png
+cat ${DEST_DIR}/Example.png.tags
 cat ${DEST_DIR}/Example.png.tags | grep first.core.original_basename | grep Example.png.gz
 
 plugins.uninstall foobar2
