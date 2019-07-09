@@ -213,15 +213,6 @@ class AcquisitionBase(object):
         logger = self._get_logger()
         logger.exception(str(msg), *args, **kwargs)
 
-    def get_tmp_filepath(self):
-        """Get a full temporary filepath (including unique filename).
-
-        Returns:
-            (string) full temporary filepath (including unique filename).
-
-        """
-        return _get_tmp_filepath(self.plugin_name, self.step_name)
-
     def _current_utc_datetime_with_ms(self):
         return datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S:%f')
 

@@ -167,16 +167,13 @@ In this tutorial:
 - we will save the "tags attributes" set by the switch plugin to a "tags" file in the same directory as the NetCDF file one
 - we will read some data of the NetCDF file from Python code with the `NetCDF4` Python library
 
-**Important**: 
-- if you are behind a proxy, you have to set `http_proxy` and `https_proxy` environment varaibles in order to be able to download any Python package you may need.
-- you may also need to disable your Linux firewall:
-
-    ```bash
-    systemctl status firewalld
-    systemctl stop firewalld.service
-    systemctl disable firewalld
-
-    ```
+.. important:: 
+    | - if you are behind a proxy, you have to set `http_proxy` and `https_proxy` environment variables in order to be able to download any Python package you may need.
+    | - you may also need to disable your Linux firewall:
+    |   `systemctl status firewalld`
+    |   `systemctl stop firewalld.service`
+    |   `systemctl disable firewalld`
+   
 
 ### Create the plugin
 
@@ -577,7 +574,7 @@ _ _ _
 
 We are going to improve our plugin to be able to customize the configuration of the `grib_to_netcdf` command. As we saw previously, the `grib_to_netcdf` command has optional parameter, we hard-coded (i.e `"-k 3 -d 0 -D NC_FLOAT"`).
 
-We could set an `arg_grib-to-netcdf-options` parameter in  the `convert_grib2/config.ini`, but here, we set this parameter in the MFDATA configuration file `/home/mfdata/config.ini`. This configuration file can contain a section per plugin. The secton name must be named `[plugin_{plugin_name}]`. Edit `/home/mfdata/config.ini` and add the following section and parameter at the ne of the file:
+We could set an `arg_grib-to-netcdf-options` parameter in  the `convert_grib2/config.ini`, but here, we set this parameter in the MFDATA configuration file `/home/mfdata/config/config.ini`. This configuration file can contain a section per plugin. The section must be named `[plugin_{plugin_name}]`. Edit `/home/mfdata/config/config.ini` and add the following section and parameter at the ne of the file:
 ```cfg
 [plugin_convert_grib2]
 grib_to_netcdf_options=-k 3 -d 0 -D NC_FLOAT
@@ -653,7 +650,7 @@ class Convert_grib2MainStep(AcquisitionStep):
 
 ```
 
-This works, but you have to relead the context at the first time and ecach time the variable value is changed in the `/home/mfdata/config.ini`, by stopping en starting again MFDATA:
+This works, but you have to reload the context at the first time and each time the variable value is changed in the `/home/mfdata/config/config.ini`, by stopping en starting again MFDATA:
 ```cfg
 mfdata.stop
 ```
@@ -716,7 +713,7 @@ arg_failure-policy-move-dest-dir = /tmp/convert-grib2-failure
 So, we have to override the value to `move`.
 
 
-To be  bable to raise an error in our plugin process, you may decrease the value of the `rlimit_fsize` option in the `[step_main]` section of the `convert_grib2/config.ini` file, e.g.:
+To be able to raise an error in our plugin process, you may decrease the value of the `rlimit_fsize` option in the `[step_main]` section of the `convert_grib2/config.ini` file, e.g.:
 
 ```cfg
 ...

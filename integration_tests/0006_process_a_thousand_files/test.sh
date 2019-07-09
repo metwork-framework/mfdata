@@ -63,7 +63,7 @@ nb=0
 nb1=`ls -l ${DEST_DIR}/Example*.png | wc -l`
 while [ $nb1 -lt 1000 ]; do
     nb=$(($nb + 1))
-    if [ $nb -eq 10 ]; then
+    if [ $nb -eq 20 ]; then
         echo "Data files are missing, only " $nb1
         cat ${MODULE_RUNTIME_HOME}/log/*.stderr
         exit 1
