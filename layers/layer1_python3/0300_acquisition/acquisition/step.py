@@ -124,15 +124,6 @@ class AcquisitionStep(AcquisitionBase):
         self.debug("SIGTERM signal handled => schedulling shutdown")
         self.stop_flag = True
 
-    def get_tmp_filepath(self):
-        """Get a full temporary filepath (including unique filename).
-
-        Returns:
-            (string) full temporary filepath (including unique filename).
-
-        """
-        return _get_tmp_filepath(self.plugin_name, self.step_name)
-
     def _exception_safe_call(self, func, args, kwargs, label,
                              return_value_if_exception):
         try:

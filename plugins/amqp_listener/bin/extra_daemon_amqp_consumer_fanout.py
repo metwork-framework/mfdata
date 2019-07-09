@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
-import argparse
 import pika
 import signal
-import sys
 import os
 import mfutil
 import xattrfile
