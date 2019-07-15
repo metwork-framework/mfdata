@@ -46,7 +46,7 @@ python3@mfdata
 ```
 means the plugin will use Python3 from the python3 package supplied in MFDATA.
 
-For more details on `layerapi2`, check :doc:`MFEXT layerapi2 <mfext:layerapi2>` and :ref:`MFEXT layerapi2 syntax <mfext:layerapi2:general>` documentation.
+For more details on `layerapi2`, check :doc:`MFEXT layerapi2 <mfext:layerapi2>` and :ref:`MFEXT layerapi2 syntax <mfext:layerapi2_syntax>` documentation.
 
 Let's assume you need a module or package which is available in the MFEXT 'scientific' package, you have to add this dependencies to the `.layerapi2_dependencies` file:
 ```cfg
@@ -68,7 +68,7 @@ The `.layerapi2_extra_env` file allows you to defined environment variable only 
 By default, this `.layerapi2_extra_env` doesn't exist. If you need to add extra environment variables, create this file in the plugin root directory.
 
 .. seealso::
-    :ref:`MFEXT layerapi2 syntax <mfext:layerapi2:general>` documentation.
+    :ref:`MFEXT layerapi2 syntax <mfext:layerapi2_syntax>` documentation.
 
 .. index:: http, curl
 ## Inject data files in HTTP

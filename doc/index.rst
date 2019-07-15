@@ -30,7 +30,6 @@ MFDATA documentation
    layer_python3
    layer_default
    layer_python
-   todo
    changelogs
 
 Indices and tables
