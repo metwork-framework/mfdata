@@ -1,5 +1,5 @@
 local upload = require("resty.upload")
-local synutil = require("synutil")
+local mfutil = require("mfutil")
 local data_in_dir = os.getenv("MFDATA_DATA_IN_DIR")
 
 local switch_directories = os.getenv("MFDATA_INTERNAL_PLUGINS_SWITCH_DIRECTORIES")
@@ -12,7 +12,7 @@ local function exit_with_ngx_error(code, message)
 end
 
 local function make_unique_id()
-    return synutil.get_unique_hexa_identifier()
+    return mfutil.get_unique_hexa_identifier()
 end
 
 local function get_target_filepath(directory, filename)
@@ -67,7 +67,7 @@ local function process()
         if filepath == nil then
             exit_with_ngx_error(400, string.format("no body in the request"))
         end
-        local linkres = synutil.link(filepath, targetpath)
+        local linkres = mfutil.link(filepath, targetpath)
         if linkres ~= 0 then
             exit_with_ngx_error(500, string.format("can't make a hard link %s => %s different filesystem ?", targetpath, filepath))
         end
