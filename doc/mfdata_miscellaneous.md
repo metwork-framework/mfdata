@@ -90,6 +90,266 @@ You may change some configuration fields of the nginx server (including the port
 
 For a more detailed description of nginx configuration, check the  `/home/mfdata/config/config.ini` file.
 
+.. index:: MQTT, Mosquitto MQTT broker, mqtt_listener plugin 
+## Trigger MFDATA plugins with MQTT messages 
+
+You can now trigger your MFDATA plugins with [MQTT](https://github.com/mqtt/mqtt.github.io) messages.
+
+In order to use MQTT protocol with MFDATA, you have to install the Metwork **mqtt_listener** plugin by setting `install_mqtt_listener=1` in the `[internal_plugins]` section of the MFDATA configuration file (`/home/mfdata/config/config.ini`).
+Then, restart MFDATA service by entering `service metwork restart mfdata` command (as root user).
+
+Check the `mqtt_listener` plugin is installed, by entering the `plugins.list` command.
+
+When this plugin is installed, it connects to a configured MQTT broker, listens for a configured topic (can be a wildcard) and write a file in a configured directory (“incoming” directory by default) for each message received.
+
+Check (and configure) the MQTT configuration (`mqtt_*` arguments) in the MQTT part in the `[internal_plugins]` section of the MFDATA configuration file (`/home/mfdata/config/config.ini`), e.g.:
+```cfg
+####################
+#####   MQTT   #####
+####################
+# the hostname or IP address of the remote broker
+mqtt_listener_broker_hostname=localhost
+
+# the network port of the server host to connect to. Defaults to 1883.
+mqtt_listener_broker_port=1883
+
+# a string specifying the subscription topic to subscribe to.Default to # (all)
+mqtt_listener_subscription_topic=#
+```
+
+Logs are recorded in the `extra_daemon_mqtt_listener_plugin_mqtt_listener.log` file of the MFDATA `log` directory.
+
+.. seealso::
+    | `Eclipse Mosquitto MQTT broker <https://mosquitto.org>`_
+    | **mqtt_listener plugin configuration** file in the `./var/plugins/mqtt_listener` MFDATA home directory.
+    | `extra_daemon_mqtt_listener.py` (**mqtt_listener plugin source code**) in the `./var/plugins/mqtt_listener/bin` MFDATA home directory.
+
+
+You can do a simple test by sending a MQTT message with [mosquitto_pub](https://mosquitto.org/man/mosquitto_pub-1.html) (you need to install [Mosquitto MQTT Broker](https://mosquitto.org), e.g. `yum install mosquitto` as  root user).    
+
+For this test, set `minimal_level=DEBUG` in the `[log]` section  and `switch_no_match_policy=keep` in `[internal_plugins]` section of the MFDATA configuration file (`/home/mfdata/config/config.ini`) and restart MFDATA.
+
+Check the `extra_daemon_mqtt_listener_plugin_mqtt_listener.log` file:
+```cfg
+2019-08-20T09:21:32.312765Z     [INFO] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#71834) Start daemon extra_daemon_mqtt_listener
+2019-08-20T09:21:32.314009Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#71834) broker_hostname: localhost
+2019-08-20T09:21:32.314094Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#71834) broker_port: 1883
+2019-08-20T09:21:32.314140Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#71834) keep_alive: 60
+2019-08-20T09:21:32.314182Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#71834) dest_dir: /home/mfdata/var/in/incoming
+2019-08-20T09:21:32.314222Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#71834) subscription-topic: #
+2019-08-20T09:21:32.314261Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#71834) user_data: None
+2019-08-20T09:21:32.318131Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#71834) Waiting for connection ...
+2019-08-20T09:21:32.322292Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#71834) the client is connecting to the broker.
+```
+
+Now, publish a message, by entering the command:
+```bash
+ mosquitto_pub -m "message from mosquitto_pub client" -t "test" -d
+```
+
+```
+Client mosqpub|77111-AND-MF-ME sending CONNECT
+Client mosqpub|77111-AND-MF-ME received CONNACK (0)
+Client mosqpub|77111-AND-MF-ME sending PUBLISH (d0, q0, r0, m1, 'test', ... (33 bytes))
+Client mosqpub|77111-AND-MF-ME sending DISCONNECT
+```
+
+Check in the `extra_daemon_mqtt_listener_plugin_mqtt_listener.log` file, the message has been received:
+
+```cfg
+...
+2019-08-20T14:10:04.859351Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#92651) message received: message from mosquitto_pub client
+2019-08-20T14:10:04.859456Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#92651) message topic: test
+2019-08-20T14:10:04.859510Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#92651) message qos: 0
+2019-08-20T14:10:04.859559Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#92651) message retain flag: 0
+2019-08-20T14:10:04.859604Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#92651) message info: (0, 0)
+2019-08-20T14:10:04.859667Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#92651) userdata: None
+2019-08-20T14:10:04.859784Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#92651) basename: 539841478e8544d28886decc6f7bec15
+2019-08-20T14:10:04.859851Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#92651) Created tmp file name : /home/mfdata/var/in/incoming/539841478e8544d28886decc6f7bec15.t
+2019-08-20T14:10:04.861961Z    [DEBUG] (xattrfile#92651) /home/mfdata/var/in/incoming/539841478e8544d28886decc6f7bec15.t moved to /home/mfdata/var/in/incoming/539841478e8544d28886decc6f7bec15
+2019-08-20T14:10:04.862073Z    [DEBUG] (mfdata.mqtt_listener.extra_daemon_mqtt_listener#92651) Created file name : /home/mfdata/var/in/incoming/539841478e8544d28886decc6f7bec15
+...
+```
+Check also the `step_switch_main.stdout` log file:
+```cfg
+...
+2019-08-20T14:10:04.878991Z     [INFO] (mfdata.switch.main#92752) /home/mfdata/var/in/tmp/switch.main/e1af594f4d1a4811a52289622b2a1db8 moved into /home/mfdata/var/in/trash/switch.nomatch/e1af594f4d1a4811a52289622b2a1db8
+2019-08-20T14:10:04.879643Z     [INFO] (mfdata.switch.main#92752) End of the /home/mfdata/var/in/incoming/539841478e8544d28886decc6f7bec15 processing after 9 ms
+...
+```
+
+May be the content of the message doesn't suite any of your MFDATA plugins (if you have some installed), so and because we set `switch_no_match_policy=keep`,  
+the file containing your message and created by MFDATA has been kept in the  `/home/mfdata/var/in/trash/switch.nomatch` directory. In this case, you will find the following files (according to the example above):
+- e1af594f4d1a4811a52289622b2a1db8 (it contains your message)
+- e1af594f4d1a4811a52289622b2a1db8.tags (it contains the tags attributes set by the switch plugin)
+
+
+.. index:: AMQP, RabbitMQ, amqp_listener plugin
+## AMQP incoming messages support
+
+MFDATA has [AMQP (0.9.1)](http://www.amqp.org/specification/0-9-1/amqp-org-download) incoming messages support.
+
+In order to use AMQP with MFDATA, you have to install the Metwork **amqp_listener** plugin by setting set `install_amqp_listener=1` in the `[internal_plugins]` section of the MFDATA configuration file (`/home/mfdata/config/config.ini`).
+Then, restart MFDATA service by entering `service metwork restart mfdata` command (as root user).
+
+Check the `amqp_listener` plugin is installed, by entering the `plugins.list` command.
+
+Check (and configure) the AMQP configuration (`amqp*` arguments) in the AMQP part in the `[internal_plugins]` section of the MFDATA configuration file (`/home/mfdata/config/config.ini`), e.g.:
+```cfg
+####################
+#####   AMQP   #####
+####################
+# the hostname or IP address of the remote broker
+amqp_consumer_broker_hostname=localhost
+
+# the network port of the server host to connect to
+amqp_consumer_broker_port=5672
+
+# The username to use to connect to the broker
+amqp_consumer_credential_user=guest
+
+# The password to use to connect to the broker (use \ to escape special chars)
+amqp_consumer_credential_password=\$guest
+
+# The subscription exchange name
+amqp_consumer_subscription_exchange=test
+
+# The subscription exchange type (fanout or topic)
+amqp_consumer_subscription_exchange_type=fanout
+
+# The subscription queue (for "fanout" mode)
+amqp_consumer_subscription_queue=my_queue
+
+# The subscription routing key (wildcards allowed) (for "topic" mode)
+amqp_consumer_subscription_routing_topic_keys = "*"
+
+```
+
+Logs are recorded in the `extra_daemon_amqp_consumer_plugin_amqp_listener.log` file of the MFDATA `log` directory.
+
+.. seealso::
+    | `RabbitMQ Tutorials <https://www.rabbitmq.com/getstarted.html>`_
+    | `Python implementation of the AMQP 0-9-1 with Pika <https://github.com/pika/pika>`_
+    | `AMQP 1.0 support for RabbitMQ <https://github.com/rabbitmq/rabbitmq-amqp1.0/blob/v3.7.x/README.md>`_
+    | `Qpid Proton - AMQP messaging toolkit <https://github.com/apache/qpid-proton>`_
+    | **amqp_listener plugin configuration** file in the `./var/plugins/amqp_listener` MFDATA home directory.
+    | `extra_daemon_amqp_consumer.py` (**amqp_listener plugin source code**) in the `./var/plugins/amqp_listener/bin` MFDATA home directory.
+
+    
+**Let's now create a simple test with RabbitMQ.**
+
+You have to [install RabbitMQ](https://www.rabbitmq.com/download.html).
+
+Then enable [rabbitmq_management](https://www.rabbitmq.com/management.html) by entering the following command as root user:
+```bash
+rabbitmq-plugins enable rabbitmq_management
+```
+
+Once RabbitMQ is installed, create an `admin` account with administrator permissions by entering the following commands:
+```bash
+rabbitmqctl add_user admin admin
+rabbitmqctl set_user_tags admin administrator
+rabbitmqctl set_permissions admin ".*" ".*" ".*"
+```
+
+From your browser, you are now able to log in with the `admin` account to the [RabbitMQ Management UI Access](https://www.rabbitmq.com/management.html#usage-ui), e.g. `http://{hostname}:15672/`. 
+
+**Then, check and change the MFDATA AMQP configuration** (`/home/mfdata/config/config.ini`) **to set the correct account:**
+```cfg
+# The username to use to connect to the broker
+amqp_consumer_credential_user=admin
+
+# The password to use to connect to the broker (use \ to escape special chars)
+amqp_consumer_credential_password=admin
+```
+
+Check also the hostname or IP address of the remote broker (RabbitMQ):
+```cfg
+amqp_consumer_broker_hostname=localhost
+```
+
+For this test, set `minimal_level=DEBUG` in the `[log]` section  and `switch_no_match_policy=keep` in `[internal_plugins]` section of the MFDATA configuration file (`/home/mfdata/config/config.ini`).
+
+Once the MFDATA configuration is changed, don't forget to restart MFDATA service by entering `service metwork restart mfdata` command (as root user).
+
+**Then, write** :download:`a simple Python code </_downloads/amqp/amqp_publish.py>` **in order to publish an AMQP message with AMQP** [Pika](https://pika.readthedocs.io/en/stable/) Python library:
+```python
+import pika
+
+# Set credentials
+credentials = pika.PlainCredentials('admin', 'admin')
+# connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host_serv, credentials=credentials))
+
+connection = None
+
+try:
+    # Connect to RabbitMQ broker
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host="and-mf-metgate-ci.akka.eu", port=5672, credentials=credentials))
+
+    channel = connection.channel()
+
+    # Create the queue declared in the amqp_consumer_subscription_queue MFDATA configuration, e.g. 'my_queue'
+    channel.queue_declare(queue='my_queue', exclusive=False)
+
+    # Enabled delivery confirmations
+    # - see https://pika.readthedocs.io/en/stable/examples/blocking_publish_mandatory.html
+    # - see https://pika.readthedocs.io/en/stable/examples/blocking_delivery_confirmations.html
+    channel.confirm_delivery()
+
+    # Set the exchange name declare in the amqp_consumer_subscription_exchange MFDATA configuration, e.g. 'test'
+    exchange = "test"
+    # Set the content of the message, in this example, we want to send an xml content
+    message = "<notification>message from AMQP 0.9.1 client</notification>"
+    # Publish th message 
+    # (see https://pika.readthedocs.io/en/stable/modules/channel.html?highlight=basic_publish#pika.channel.Channel.basic_publish)
+    return_code = channel.basic_publish(exchange=exchange,
+                                        routing_key='my_queue',
+                                        body=message,
+                                        properties=pika.BasicProperties(content_type='application/xml',
+                                                                        delivery_mode=1),
+                                        mandatory=True)
+    if return_code:
+        print('Message was published (ACK)')
+    else:
+        print('Message was returned (NACK)')
+
+except Exception as e:
+    print(e)
+finally:
+    if connection is not None:
+        connection.close()
+
+```
+
+Check in the `extra_daemon_amqp_consumer_plugin_amqp_listener.log` file, the message has been received:
+
+```cfg
+...
+2019-08-20T14:14:52.856793Z    [DEBUG] (pika.adapters.utils.io_services_utils#97504) Recv would block on <socket.socket fd=7, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('172.25.254.137', 54876), raddr=('172.25.254.138', 5672)>
+2019-08-20T14:14:52.857675Z    [DEBUG] (mfdata.amqp_listener.extra_daemon_amqp_consumer#97504) basename: 3b4539b7f78745768e5e38ddd5356d2e
+2019-08-20T14:14:52.858120Z    [DEBUG] (mfdata.amqp_listener.extra_daemon_amqp_consumer#97504) Created tmp file name : /home/mfdata/var/in/incoming/3b4539b7f78745768e5e38ddd5356d2e.t
+2019-08-20T14:14:52.862111Z    [DEBUG] (xattrfile#97504) /home/mfdata/var/in/incoming/3b4539b7f78745768e5e38ddd5356d2e.t moved to /home/mfdata/var/in/incoming/3b4539b7f78745768e5e38ddd5356d2e
+2019-08-20T14:14:52.862464Z    [DEBUG] (mfdata.amqp_listener.extra_daemon_amqp_consumer#97504) Created file name : /home/mfdata/var/in/incoming/3b4539b7f78745768e5e38ddd5356d2e
+2019-08-20T14:14:52.862788Z     [INFO] (mfdata.amqp_listener.extra_daemon_amqp_consumer#97504) Received message 1 from None : b'<notification>   <product_id>product167</product_id>   <instance_id>product167_201810220600000</instance_id>   <ref_date>2018-12-14T06:00:00</ref_date>   <node_id>national_node_107</node_id>   <service>WFS</service>   <operation>C</operation> </notification>'
+...
+```
+
+
+Check also the `step_switch_main.stdout` log file:
+```cfg
+...
+2019-08-20T14:14:52.882382Z     [INFO] (mfdata.switch.main#97601) /home/mfdata/var/in/tmp/switch.main/5fec2670f30f45d98bd094d72030669d moved into /home/mfdata/var/in/trash/switch.nomatch/5fec2670f30f45d98bd094d72030669d
+2019-08-20T14:14:52.883024Z     [INFO] (mfdata.switch.main#97601) End of the /home/mfdata/var/in/incoming/3b4539b7f78745768e5e38ddd5356d2e processing after 10 ms
+...
+```
+
+May be the content of the message doesn't suite any of your MFDATA plugins (if you have some installed), so and because we set `switch_no_match_policy=keep`,  
+the file containing your message and created by MFDATA has been kept in the  `/home/mfdata/var/in/trash/switch.nomatch` directory. In this case, you will find the following files (according to the example above):
+- 5fec2670f30f45d98bd094d72030669d (it contains your message)
+- 5fec2670f30f45d98bd094d72030669d.tags (it contains the tags attributes set by the switch plugin)
+
+    
 .. index:: multiple steps
 ## Plugins with more than one step
 
