@@ -124,7 +124,7 @@ class ExtraDaemonMqttListener(mqtt.Client):
                 self.get_logger().info("Stop daemon %s" % self.daemon_name)
                 self.disconnect()
             except Exception:
-                self.warning("Daemon stopped on mqtt error")
+                self.get_logger().warning("Daemon stopped on mqtt error")
 
 
 if __name__ == "__main__":
