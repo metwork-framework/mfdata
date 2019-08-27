@@ -2,6 +2,18 @@
 
 
 
+## v0.8.1 (2019-08-26)
+
+### New Features
+
+
+### Bug Fixes
+- fix amqp listener plugin configuration
+
+
+
+
+
 ## v0.8.0 (2019-08-14)
 
 ### New Features
