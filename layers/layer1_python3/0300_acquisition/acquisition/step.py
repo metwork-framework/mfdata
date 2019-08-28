@@ -372,7 +372,7 @@ class AcquisitionStep(object):
                             default=None,
                             help='dest-dir in case of move failure policy')
         parser.add_argument('--failure-policy-move-keep-tags', action='store',
-                            type=bool, default=True,
+                            type=int, default=1,
                             help='keep tags into another file in case of '
                             'move failure policy ?')
         parser.add_argument('--failure-policy-move-keep-tags-suffix',
