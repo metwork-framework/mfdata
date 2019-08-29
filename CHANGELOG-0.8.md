@@ -1,6 +1,17 @@
 # release_0.8 CHANGELOG
 
 
+## [Unreleased]
+
+### New Features
+
+
+### Bug Fixes
+- important fix about failure_policy_move_keep_tags
+
+
+
+
 
 ## v0.8.1 (2019-08-26)
 
