@@ -1,7 +1,8 @@
 # release_0.8 CHANGELOG
 
 
-## [Unreleased]
+
+## v0.8.2 (2019-08-29)
 
 ### New Features
 
