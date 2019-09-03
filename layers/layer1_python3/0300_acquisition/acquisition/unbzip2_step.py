@@ -1,8 +1,8 @@
-import gzip
+import bz2
 from acquisition.uncompress_step import AcquisitionUncompressStep
 
 
-class AcquisitionUngzipStep(AcquisitionUncompressStep):
+class AcquisitionUnbzip2Step(AcquisitionUncompressStep):
 
     def _get_compression_module(self):
-        return gzip
+        return bz2
