@@ -119,7 +119,8 @@ class AcquisitionSwitchStep(AcquisitionStep):
     def _hardlink_or_copy(self, xaf, directory):
         old_filepath = xaf.filepath
         target_path = os.path.join(directory, get_unique_hexa_identifier())
-        result, hardlinked = xaf.hardlink_or_copy(target_path)
+        result, hardlinked = xaf.hardlink_or_copy(target_path,
+                                                  keep_original_file=True)
         if not result:
             self.warning("Can't hardlink or copy %s to %s" %
                          (old_filepath, target_path))
