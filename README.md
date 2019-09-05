@@ -22,8 +22,13 @@
 
 ## Reference documentation
 
-- (for **master** version), see [this dedicated site](http://metwork-framework.org/pub/metwork/continuous_integration/docs/master/mfdata/) for reference documentation.
-- (for **release_0.8** version), see [this dedicated site](http://metwork-framework.org/pub/metwork/releases/docs/release_0.8/mfdata/) for reference documentation.
+- (for **master (development)** version), see [this dedicated site](http://metwork-framework.org/pub/metwork/continuous_integration/docs/master/mfdata/) for reference documentation.
+- (for **latest released stable** version), see [this dedicated site](http://metwork-framework.org/pub/metwork/releases/docs/stable/mfdata/) for reference documentation.
+
+For very specific use cases, you might be interested in
+[reference documentation for integration branch](http://metwork-framework.org/pub/metwork/continuous_integration/docs/integration/mfdata/).
+
+And if you are looking for an old released version, you can search [here](http://metwork-framework.org/pub/metwork/releases/docs/).
 
 ## Installation guide
 
