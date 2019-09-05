@@ -243,6 +243,28 @@ class BasicTestCase(TestCase):
             tmp_data_file_path2).tags['key1'], b'value1')
         make_xattrfile(tmp_data_file_path2).delete()
 
+    def test_14_hardlink_or_copy3(self):
+        test_data_file_path = os.path.join(self.test_data_dir_path,
+                                           u'test_file.json')
+        tmp_data_file_path = os.path.join(self.test_data_dir_path,
+                                          u'test_file.tmp')
+        tmp_data_file_path2 = os.path.join(self.test_data_dir_path,
+                                           u'test_file.tmp2')
+        x = make_xattrfile(test_data_file_path)
+        x.tags['key1'] = b'value1'
+        x.copy(tmp_data_file_path)
+        y = make_xattrfile(tmp_data_file_path)
+        r1, r2 = y.hardlink_or_copy(tmp_data_file_path2,
+                                    keep_original_file=True)
+        self.assertTrue(r1)
+        self.assertTrue(r2)
+        self.assertTrue(os.path.isfile(tmp_data_file_path))
+        self.assertTrue(os.path.isfile(tmp_data_file_path2))
+        self.assertEquals(make_xattrfile(
+            tmp_data_file_path2).tags['key1'], b'value1')
+        make_xattrfile(tmp_data_file_path2).delete()
+        make_xattrfile(tmp_data_file_path).delete()
+
     def test_15_read_tags(self):
         # Set tag manually in Redis, read tags and test if correctly read
         test_data_file_path = os.path.join(self.test_data_dir_path,
