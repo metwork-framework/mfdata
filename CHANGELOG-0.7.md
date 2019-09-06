@@ -2,6 +2,18 @@
 
 
 
+## v0.7.4 (2019-09-05)
+
+### New Features
+
+
+### Bug Fixes
+- fix some warnings on switch plugin with hardlinking
+
+
+
+
+
 ## v0.7.3 (2019-08-29)
 
 ### New Features
