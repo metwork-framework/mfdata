@@ -2,6 +2,19 @@
 
 
 
+## v0.8.3 (2019-09-05)
+
+### New Features
+- introduce a bunzip2 plugin
+
+
+### Bug Fixes
+- fix some warnings on switch plugin with hardlinking
+
+
+
+
+
 ## v0.8.2 (2019-08-29)
 
 ### New Features
