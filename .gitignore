@@ -50,3 +50,8 @@ doc/CHANGELOG*.md
 doc/CHANGELOG*.rst
 doc/changelogs.rst
 .idea
+doc/components.md
+doc/components.rst
+doc/installation_guide.md
+doc/installation_guide.rst
+
