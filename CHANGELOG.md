@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- add some optional dependencies for plugins
 - introduce a bunzip2 plugin
 
 
