@@ -41,9 +41,9 @@ yum install metwork-mfext-layer-python3_scientific
 
 # To install python2 support
 # (including corresponding scientific and devtools addons)
-yum install metwork-mfext-python2
-yum install metwork-mfext-python2_scientific
-yum install metwork-mfext-python2_devtools
+yum install metwork-mfext-layer-python2
+yum install metwork-mfext-layer-python2_scientific
+yum install metwork-mfext-layer-python2_devtools
 ```
 
 
@@ -54,7 +54,7 @@ yum install metwork-mfext-python2_devtools
 ```bash
 # To install python2 support
 # (see above to install full scientific and devtools support)
-yum install metwork-mfdata-python2
+yum install metwork-mfdata-layer-python2
 ```
 
 
