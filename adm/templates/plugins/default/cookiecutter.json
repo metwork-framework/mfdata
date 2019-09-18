@@ -1,6 +1,6 @@
 {
     "python_version": ["python3", "python2"],
-    "version": "{% raw %}{{MODULE_VERSION}}{% endraw %}",
+    "version": "{% raw %}{{MFMODULE_VERSION}}{% endraw %}",
     "one_line_summary": "one line summary about your plugin",
     "license": ["Proprietary", "BSD", "MIT", "GPL", "Specific"],
     "url": "http://yourpluginhomepage",

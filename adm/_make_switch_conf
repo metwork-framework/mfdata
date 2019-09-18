@@ -5,7 +5,7 @@ import glob
 import envtpl
 from configparser_extended import ExtendedConfigParser
 
-MFDATA_PLUGIN_HOME = os.path.join(os.environ["MODULE_RUNTIME_HOME"],
+MFDATA_PLUGIN_HOME = os.path.join(os.environ["MFMODULE_RUNTIME_HOME"],
                                   "var", "plugins")
 CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
 

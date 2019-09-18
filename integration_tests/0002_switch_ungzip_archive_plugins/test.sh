@@ -10,7 +10,7 @@ plugins.uninstall ungzip >/dev/null 2>&1
 plugins.uninstall foobar2 >/dev/null 2>&1
 rm -R foobar2* >/dev/null 2>&1
 
-DEST_DIR=${MODULE_RUNTIME_HOME}/var/archive/`date +%Y%m%d`
+DEST_DIR=${MFMODULE_RUNTIME_HOME}/var/archive/`date +%Y%m%d`
 rm -R ${DEST_DIR} >/dev/null 2>&1
 
 set -x
@@ -34,19 +34,19 @@ mfdata.start
 plugins.list
 _circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status
 
-cp ../data/Example.png.gz ${MODULE_RUNTIME_HOME}/var/in/incoming
-ls -l ${MODULE_RUNTIME_HOME}/var/in/incoming
+cp ../data/Example.png.gz ${MFMODULE_RUNTIME_HOME}/var/in/incoming
+ls -l ${MFMODULE_RUNTIME_HOME}/var/in/incoming
 
 # We wait 10s maximum for the gzipped PNG file to be processed
 nb=0
-while [ ! -z "$(ls -A ${MODULE_RUNTIME_HOME}/var/in/incoming)" ]; do
+while [ ! -z "$(ls -A ${MFMODULE_RUNTIME_HOME}/var/in/incoming)" ]; do
     nb=$(($nb + 1))
     if [ $nb -eq 10 ]; then
         exit 1
     fi
     sleep 1
 done
-ls -l ${MODULE_RUNTIME_HOME}/var/in/incoming
+ls -l ${MFMODULE_RUNTIME_HOME}/var/in/incoming
 
 # We wait 10s maximum for creation of the archive directory
 nb=0
@@ -65,10 +65,10 @@ cat ${DEST_DIR}/Example.png.tags | grep first.core.original_basename | grep Exam
 plugins.uninstall foobar2
 plugins.uninstall ungzip
 
-nb3=`redis-cli -s ${MODULE_RUNTIME_HOME}/var/redis.socket keys "*" |grep xattr |wc -l`
+nb3=`redis-cli -s ${MFMODULE_RUNTIME_HOME}/var/redis.socket keys "*" |grep xattr |wc -l`
 if [ $nb3 -ne 0 ]; then
     echo $nb3 "tags left in redis"
-    cat ${MODULE_RUNTIME_HOME}/log/*.stderr
+    cat ${MFMODULE_RUNTIME_HOME}/log/*.stderr
     exit 1
 else
     echo "no tags left in redis : ok"

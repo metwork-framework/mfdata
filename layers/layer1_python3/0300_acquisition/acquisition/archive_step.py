@@ -46,7 +46,8 @@ class AcquisitionArchiveStep(AcquisitionStep):
 
     def init(self):
         if self.args.dest_dir is None:
-            module_runtime_home = os.environ.get('MODULE_RUNTIME_HOME', '/tmp')
+            module_runtime_home = os.environ.get('MFMODULE_RUNTIME_HOME',
+                                                 '/tmp')
             self.archive_dir = os.path.join(module_runtime_home,
                                             'var', 'archive')
         else:

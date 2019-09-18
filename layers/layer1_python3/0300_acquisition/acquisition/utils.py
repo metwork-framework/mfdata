@@ -2,10 +2,10 @@ import os
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from acquisition.configargparse_confparser import StepConfigFileParser
 
-MODULE_RUNTIME_HOME = os.environ.get('MODULE_RUNTIME_HOME', '/tmp')
-IN_DIR = os.path.join(MODULE_RUNTIME_HOME, "var", "in")
-TMP_DIR = os.path.join(MODULE_RUNTIME_HOME, "var", "in", "tmp")
-TRASH_DIR = os.path.join(MODULE_RUNTIME_HOME, "var", "in", "trash")
+MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', '/tmp')
+IN_DIR = os.path.join(MFMODULE_RUNTIME_HOME, "var", "in")
+TMP_DIR = os.path.join(MFMODULE_RUNTIME_HOME, "var", "in", "tmp")
+TRASH_DIR = os.path.join(MFMODULE_RUNTIME_HOME, "var", "in", "trash")
 
 
 def get_plugin_step_directory_path(plugin_name, step_name):
@@ -13,7 +13,7 @@ def get_plugin_step_directory_path(plugin_name, step_name):
 
 
 def _set_custom_environment(plugin_name, step_name):
-    module_runtime_home = MODULE_RUNTIME_HOME
+    module_runtime_home = MFMODULE_RUNTIME_HOME
     os.environ['MFDATA_CURRENT_PLUGIN_NAME'] = plugin_name
     os.environ['MFDATA_CURRENT_STEP_NAME'] = step_name
     os.environ['MFDATA_CURRENT_PLUGIN_DIR'] = \

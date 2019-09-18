@@ -400,8 +400,8 @@ Edit the `config.ini` plugin configuration file and rename `[step_main]` section
 cmd = {{MFDATA_CURRENT_PLUGIN_DIR}}/archive_image.py
 # Arguments for the cmd
 args = --config-file={{MFDATA_CURRENT_CONFIG_INI_PATH}} {{MFDATA_CURRENT_STEP_QUEUE}}
-arg_redis-unix-socket-path = {{MODULE_RUNTIME_HOME}}/var/redis.socket
-arg_dest-dir = {{MODULE_RUNTIME_HOME}}/var/archive
+arg_redis-unix-socket-path = {{MFMODULE_RUNTIME_HOME}}/var/redis.socket
+arg_dest-dir = {{MFMODULE_RUNTIME_HOME}}/var/archive
 # Arguments above this line should not be modified
 # Arguments below are asked for value when running
 #   bootstrap_plugin2.py create --template archive [--make [--install] [--delete] ] name
@@ -469,7 +469,7 @@ cmd = {{MFDATA_CURRENT_PLUGIN_DIR}}/convert_png.py
 
 # Arguments for the cmd
 args = --config-file={{MFDATA_CURRENT_CONFIG_INI_PATH}} {{MFDATA_CURRENT_STEP_QUEUE}}
-arg_redis-unix-socket-path = {{MODULE_RUNTIME_HOME}}/var/redis.socket
+arg_redis-unix-socket-path = {{MFMODULE_RUNTIME_HOME}}/var/redis.socket
 # Arguments above this line should not be modified
 # Arguments below are asked for value when running
 # command-template : command template to execute on each file
@@ -558,9 +558,9 @@ In order to (re)load the contab file:
 If you need to execute your `cron` command in the Metwork context, you should use the cron wrapper script `${MFDATA_HOME}/bin/cronwrap.sh`, e.g. :
 ```cfg
 {% raw %}
-{{MFDATA_HOME}}/bin/cronwrap.sh --lock --low "find {{MODULE_RUNTIME_HOME}}/var/archive/ -type f -mtime +5 -exec rm -f {} \;" >/dev/null 2>&1
+{{MFDATA_HOME}}/bin/cronwrap.sh --lock --low "find {{MFMODULE_RUNTIME_HOME}}/var/archive/ -type f -mtime +5 -exec rm -f {} \;" >/dev/null 2>&1
 
-{{MFDATA_HOME}}/bin/cronwrap.sh -- plugin_wrapper [your_plugin_name]  [your_sh_command] >{{MODULE_RUNTIME_HOME}}/log/[your_log_filename] 2>&1
+{{MFDATA_HOME}}/bin/cronwrap.sh -- plugin_wrapper [your_plugin_name]  [your_sh_command] >{{MFMODULE_RUNTIME_HOME}}/log/[your_log_filename] 2>&1
 {% endraw %}
 ```
 

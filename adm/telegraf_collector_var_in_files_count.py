@@ -6,9 +6,9 @@ from telegraf_unixsocket_client import TelegrafUnixSocketClient
 from mfutil import BashWrapper
 from mflog import getLogger
 
-MODULE_RUNTIME_HOME = os.environ["MODULE_RUNTIME_HOME"]
-VAR_IN_PATH = os.path.join(MODULE_RUNTIME_HOME, "var", "in")
-SOCKET_PATH = os.path.join(MODULE_RUNTIME_HOME, "var",
+MFMODULE_RUNTIME_HOME = os.environ["MFMODULE_RUNTIME_HOME"]
+VAR_IN_PATH = os.path.join(MFMODULE_RUNTIME_HOME, "var", "in")
+SOCKET_PATH = os.path.join(MFMODULE_RUNTIME_HOME, "var",
                            "telegraf.socket")
 LOGGER = getLogger("telegraf_collector_var_in_files_count")
 

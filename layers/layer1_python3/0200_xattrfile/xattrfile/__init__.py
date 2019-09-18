@@ -17,8 +17,8 @@ RED = None
 
 UNITTESTS_RED = None
 
-#: MODULE_RUNTIME_HOME value
-MODULE_RUNTIME_HOME = os.environ.get('MODULE_RUNTIME_HOME', None)
+#: MFMODULE_RUNTIME_HOME value
+MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', None)
 
 
 def unittests_get_redis_callable():
@@ -33,7 +33,7 @@ def metwork_get_redis_callable():
     """Create or return a redis instance in a metwork module context.
 
     To create an instance, we use a unix socket connection on
-    ${MODULE_RUNTIME_HOME}/var/redis.socket
+    ${MFMODULE_RUNTIME_HOME}/var/redis.socket
 
     Returns:
         redis connection (redis.Redis object).
@@ -42,10 +42,10 @@ def metwork_get_redis_callable():
     global RED
     # If the connection is not initialized, create a new one
     if RED is None:
-        if MODULE_RUNTIME_HOME is None:
+        if MFMODULE_RUNTIME_HOME is None:
             RED = unittests_get_redis_callable()
         else:
-            socket_path = os.path.join(MODULE_RUNTIME_HOME, "var",
+            socket_path = os.path.join(MFMODULE_RUNTIME_HOME, "var",
                                        "redis.socket")
             RED = redis.Redis(unix_socket_path=socket_path)
     return RED
