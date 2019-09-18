@@ -2,15 +2,15 @@
 
 set -eu
 
-TMPFILE="${MODULE_RUNTIME_HOME}/tmp/nginx_conf.$$"
+TMPFILE="${MFMODULE_RUNTIME_HOME}/tmp/nginx_conf.$$"
 
-UUID=$(cat "${MODULE_RUNTIME_HOME}/var/uuid" 2>/dev/null)
+UUID=$(cat "${MFMODULE_RUNTIME_HOME}/var/uuid" 2>/dev/null)
 if test "${UUID}" = ""; then
     UUID="unknown"
 fi
 export UUID
 
-cat "${MODULE_HOME}/config/nginx.conf" |envtpl --reduce-multi-blank-lines >"${TMPFILE}"
+cat "${MFMODULE_HOME}/config/nginx.conf" |envtpl --reduce-multi-blank-lines >"${TMPFILE}"
 nginxfmt.py "${TMPFILE}"
 # FIXME: ugly hack to circumvent nginxfmt problem with JSON
 cat -s "${TMPFILE}" |sed 's/~~~1/{/g' |sed 's/~~~2/}/g'

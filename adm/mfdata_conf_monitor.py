@@ -7,12 +7,12 @@ from mfutil import BashWrapper, BashWrapperOrRaise
 from conf_monitor import ConfMonitorRunner, md5sumfile
 
 LOGGER = getLogger("conf_monitor")
-MODULE_RUNTIME_HOME = os.environ['MODULE_RUNTIME_HOME']
+MFMODULE_RUNTIME_HOME = os.environ['MFMODULE_RUNTIME_HOME']
 
 
 def make_new_directory_observer_conf():
     new_directory_observer_conf = \
-        "%s/tmp/tmp_directory_observer_conf2" % MODULE_RUNTIME_HOME
+        "%s/tmp/tmp_directory_observer_conf2" % MFMODULE_RUNTIME_HOME
     cmd = "_make_directory_observer_conf >%s" % new_directory_observer_conf
     BashWrapperOrRaise(cmd)
     return (new_directory_observer_conf,
@@ -21,7 +21,7 @@ def make_new_directory_observer_conf():
 
 def make_new_switch_conf():
     new_switch_conf = \
-        "%s/tmp/tmp_switch_conf2" % MODULE_RUNTIME_HOME
+        "%s/tmp/tmp_switch_conf2" % MFMODULE_RUNTIME_HOME
     cmd = "_make_switch_conf >%s" % new_switch_conf
     BashWrapperOrRaise(cmd)
     return (new_switch_conf,
@@ -30,14 +30,14 @@ def make_new_switch_conf():
 
 def get_old_directory_observer_conf():
     old_directory_observer_conf = \
-        "%s/tmp/config_auto/directory_observer.ini" % MODULE_RUNTIME_HOME
+        "%s/tmp/config_auto/directory_observer.ini" % MFMODULE_RUNTIME_HOME
     return (old_directory_observer_conf,
             md5sumfile(old_directory_observer_conf))
 
 
 def get_old_switch_conf():
     old_switch_conf = \
-        "%s/tmp/config_auto/switch.ini" % MODULE_RUNTIME_HOME
+        "%s/tmp/config_auto/switch.ini" % MFMODULE_RUNTIME_HOME
     return (old_switch_conf,
             md5sumfile(old_switch_conf))
 

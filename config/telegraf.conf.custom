@@ -18,16 +18,16 @@
 {% endif %}
 
 [[inputs.redis]]
-  servers = ["unix://{{MODULE_RUNTIME_HOME}}/var/redis.socket"]
+  servers = ["unix://{{MFMODULE_RUNTIME_HOME}}/var/redis.socket"]
 
 [[inputs.procstat]]
-  pattern = "python.*circus.*plugins.*{{MODULE_RUNTIME_HOME}}/var/circus.socket.*CircusAutorestart"
-  user = "{{MODULE_RUNTIME_USER}}"
+  pattern = "python.*circus.*plugins.*{{MFMODULE_RUNTIME_HOME}}/var/circus.socket.*CircusAutorestart"
+  user = "{{MFMODULE_RUNTIME_USER}}"
   process_name = "circus_plugin_autorestart"
 
 [[inputs.procstat]]
-  pattern = "redis-server.*{{MODULE_RUNTIME_HOME}}/tmp/config_auto/redis.conf"
-  user = "{{MODULE_RUNTIME_USER}}"
+  pattern = "redis-server.*{{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/redis.conf"
+  user = "{{MFMODULE_RUNTIME_USER}}"
   process_name = "redis"
 
 {% endraw %}

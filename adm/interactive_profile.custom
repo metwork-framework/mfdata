@@ -1,4 +1,4 @@
 {% extends "interactive_profile" %}
 {% block custom %}
-alias redis="redis-cli -s ${MODULE_RUNTIME_HOME}/var/redis.socket"
+alias redis="redis-cli -s ${MFMODULE_RUNTIME_HOME}/var/redis.socket"
 {% endblock %}

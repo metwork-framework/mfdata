@@ -9,9 +9,9 @@ except ImportError:
 from statsd import StatsClient
 
 HOSTNAME = os.environ.get("MFCOM_HOSTNAME", "unknown")
-MODULE = os.environ["MODULE"]
-ADMIN_HOSTNAME_IP = os.environ.get("%s_ADMIN_HOSTNAME_IP" % MODULE, "null")
-STATSD_PORT = int(os.environ.get("%s_TELEGRAF_STATSD_PORT" % MODULE, "0"))
+MFMODULE = os.environ["MFMODULE"]
+ADMIN_HOSTNAME_IP = os.environ.get("%s_ADMIN_HOSTNAME_IP" % MFMODULE, "null")
+STATSD_PORT = int(os.environ.get("%s_TELEGRAF_STATSD_PORT" % MFMODULE, "0"))
 
 __CACHE = {}
 
@@ -81,7 +81,7 @@ class AcquisitionStatsDClient(object):
 
     def _get_suffix(self):
         if self.__suffix_cache is None:
-            tmp = ["", "module=%s" % MODULE.lower(), "host=%s" % HOSTNAME]
+            tmp = ["", "module=%s" % MFMODULE.lower(), "host=%s" % HOSTNAME]
             if self.plugin_name is not None:
                 tmp.append("plugin=%s" % self.plugin_name)
             if self.step_name is not None:

@@ -8,7 +8,7 @@ from mflog import getLogger
 
 SWITCH_DIRECTORIES =\
     os.environ.get("MFDATA_INTERNAL_PLUGINS_SWITCH_DIRECTORIES")
-MODULE_RUNTIME_HOME = os.environ['MODULE_RUNTIME_HOME']
+MFMODULE_RUNTIME_HOME = os.environ['MFMODULE_RUNTIME_HOME']
 log = getLogger('before_start_step.switch.main')
 
 for directory in SWITCH_DIRECTORIES.split(';'):
@@ -21,7 +21,7 @@ for directory in SWITCH_DIRECTORIES.split(';'):
         os.chmod(path, st.st_mode | stat.S_IWGRP)
 
 x = BashWrapper("_make_switch_conf >%s/tmp/config_auto/switch.ini" %
-                MODULE_RUNTIME_HOME)
+                MFMODULE_RUNTIME_HOME)
 if not x:
     log.warning("%s" % x)
     sys.exit(1)
