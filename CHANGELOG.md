@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- replace MODULE* environment variables names by MFMODULE* (MODULE_HOME becomes MFMODULE_HOME and so on)
 - add some optional dependencies for plugins
 - introduce a bunzip2 plugin
 
