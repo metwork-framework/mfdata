@@ -1,6 +1,15 @@
 # release_0.8 CHANGELOG
 
 
+## [Unreleased]
+
+### New Features
+- increase default file size limit for plugins
+
+
+
+
+
 
 ## v0.8.3 (2019-09-05)
 
