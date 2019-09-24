@@ -17,8 +17,8 @@ RED = None
 
 UNITTESTS_RED = None
 
-#: MODULE_RUNTIME_HOME value
-MODULE_RUNTIME_HOME = os.environ.get('MODULE_RUNTIME_HOME', None)
+#: MFMODULE_RUNTIME_HOME value
+MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', None)
 
 
 def unittests_get_redis_callable():
@@ -33,7 +33,7 @@ def metwork_get_redis_callable():
     """Create or return a redis instance in a metwork module context.
 
     To create an instance, we use a unix socket connection on
-    ${MODULE_RUNTIME_HOME}/var/redis.socket
+    ${MFMODULE_RUNTIME_HOME}/var/redis.socket
 
     Returns:
         redis connection (redis.Redis object).
@@ -42,10 +42,10 @@ def metwork_get_redis_callable():
     global RED
     # If the connection is not initialized, create a new one
     if RED is None:
-        if MODULE_RUNTIME_HOME is None:
+        if MFMODULE_RUNTIME_HOME is None:
             RED = unittests_get_redis_callable()
         else:
-            socket_path = os.path.join(MODULE_RUNTIME_HOME, "var",
+            socket_path = os.path.join(MFMODULE_RUNTIME_HOME, "var",
                                        "redis.socket")
             RED = redis.Redis(unix_socket_path=socket_path)
     return RED
@@ -506,13 +506,16 @@ class XattrFile(object):
                 f.write("\n")
 
     def _hardlink_move_or_copy(self, new_filepath, hardlink_mode=True,
-                               tmp_suffix=".t", chmod_mode_int=None):
+                               tmp_suffix=".t", chmod_mode_int=None,
+                               keep_original_file=False):
+        # Note: keep_original_file is only used with hardlink_mode=True
         old_filepath = self.filepath
         if chmod_mode_int is None:
             try:
                 if hardlink_mode:
                     self.hard_link(new_filepath)
-                    self.delete()
+                    if not keep_original_file:
+                        self.delete()
                 else:
                     self.rename(new_filepath)
                 return (True, True)
@@ -521,7 +524,8 @@ class XattrFile(object):
         try:
             self.copy(new_filepath, tmp_suffix=tmp_suffix,
                       chmod_mode_int=chmod_mode_int)
-            self.delete()
+            if not keep_original_file:
+                self.delete()
             self.__set_filepath(new_filepath)
             self._read_tags()
             return (True, False)
@@ -558,17 +562,18 @@ class XattrFile(object):
                                            hardlink_mode=False)
 
     def hardlink_or_copy(self, new_filepath, tmp_suffix=".t",
-                         chmod_mode_int=None):
+                         chmod_mode_int=None, keep_original_file=False):
         """Hardlink or copy (only if move failed) without raising exceptions.
 
         The original file (and its tags) is deleted (whatever hardlink or copy
-        is effectively done).
+        is effectively done) if keep_original_file=False (default).
 
         Args:
             new_filepath (string): complete new filepath towards harlink/copy.
             tmp_suffix (string): temporary suffix during copy
                 (None means no temporary suffix).
             chmod_mode_int (integer): DEPRECATED (do not use).
+            keep_original_file (boolean): keep original file?
 
         Returns:
             (boolean, boolean): first boolean is True if the operation was ok,
@@ -576,9 +581,11 @@ class XattrFile(object):
                 with a hardlink, False if the operation was done with a copy.
 
         """
-        return self._hardlink_move_or_copy(new_filepath, tmp_suffix=tmp_suffix,
-                                           chmod_mode_int=chmod_mode_int,
-                                           hardlink_mode=True)
+        return self._hardlink_move_or_copy(
+            new_filepath, tmp_suffix=tmp_suffix,
+            chmod_mode_int=chmod_mode_int,
+            hardlink_mode=True,
+            keep_original_file=keep_original_file)
 
     def delete_or_nothing(self):
         """Delete the file and corresponding tags.

@@ -580,7 +580,7 @@ We could set an `arg_grib-to-netcdf-options` parameter in  the `convert_grib2/co
 grib_to_netcdf_options=-k 3 -d 0 -D NC_FLOAT
 
 ```
-Each parameter will be will transform into an environment variable whose pattern is `{MODULE}_{SECTION_NAME}_{PARAMETER_NAME}`, e.g. `MFDATA_PLUGIN_CONVERT_GRIB2_GRIB_TO_NETCDF_OPTIONS`
+Each parameter will be will transform into an environment variable whose pattern is `{MFMODULE}_{SECTION_NAME}_{PARAMETER_NAME}`, e.g. `MFDATA_PLUGIN_CONVERT_GRIB2_GRIB_TO_NETCDF_OPTIONS`
 
 .. note::
     - Environment variables are always in uppercase.
@@ -591,7 +591,7 @@ Each parameter will be will transform into an environment variable whose pattern
 
 Then, if you enter :
 ```bash
-env | grep "^${MODULE}_" | grep CONVERT
+env | grep "^${MFMODULE}_" | grep CONVERT
 ```
 
 You should see something like this:

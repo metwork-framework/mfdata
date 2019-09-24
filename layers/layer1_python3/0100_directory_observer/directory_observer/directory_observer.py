@@ -350,7 +350,7 @@ def init():
                 ficconfig = None
         else:
             ficconfig = None
-            homedir = os.environ[os.environ['MODULE'] + '_HOME']
+            homedir = os.environ[os.environ['MFMODULE'] + '_HOME']
             for directory in DEFAULT_HOME_CONFIG_DIRS:
                 ficconfig = os.path.abspath(homedir)
                 ficconfig = os.path.join(ficconfig, directory)

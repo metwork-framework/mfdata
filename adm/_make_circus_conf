@@ -6,9 +6,9 @@ import envtpl
 from configparser_extended import ExtendedConfigParser
 from acquisition.utils import _set_custom_environment
 
-MODULE_HOME = os.environ["MODULE_HOME"]
-MODULE_RUNTIME_HOME = os.environ["MODULE_RUNTIME_HOME"]
-MFDATA_PLUGIN_HOME = os.path.join(os.environ["MODULE_RUNTIME_HOME"],
+MFMODULE_HOME = os.environ["MFMODULE_HOME"]
+MFMODULE_RUNTIME_HOME = os.environ["MFMODULE_RUNTIME_HOME"]
+MFDATA_PLUGIN_HOME = os.path.join(os.environ["MFMODULE_RUNTIME_HOME"],
                                   "var", "plugins")
 CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
 
@@ -67,11 +67,11 @@ def make_watcher_conf(plugin_configuration_file):
             rlimit_fsize = parser.getint(section, "rlimit_fsize")
         if numprocesses > 1:
             std_prefix = \
-                "{{MODULE_RUNTIME_HOME}}/log/step_%s_%s_worker$(circus.wid)" % \
+                "{{MFMODULE_RUNTIME_HOME}}/log/step_%s_%s_worker$(circus.wid)" % \
                 (plugin_name, step)
 
         else:
-            std_prefix = "{{MODULE_RUNTIME_HOME}}/log/step_%s_%s" % \
+            std_prefix = "{{MFMODULE_RUNTIME_HOME}}/log/step_%s_%s" % \
                 (plugin_name, step)
         stdout = std_prefix + ".stdout"
         stderr = std_prefix + ".stderr"
@@ -105,9 +105,9 @@ def make_watcher_conf(plugin_configuration_file):
         output.append("stdout_stream.class = FileStream")
         output.append("stderr_stream.class = FileStream")
         output.append("stdout_stream.filename = "
-                      "{{MODULE_RUNTIME_HOME}}/log/circus.log")
+                      "{{MFMODULE_RUNTIME_HOME}}/log/circus.log")
         output.append("stderr_stream.filename = "
-                      "{{MODULE_RUNTIME_HOME}}/log/circus.log")
+                      "{{MFMODULE_RUNTIME_HOME}}/log/circus.log")
         if before_start:
             output.append("hooks.before_start = %s" % before_start)
 
@@ -115,21 +115,21 @@ def make_watcher_conf(plugin_configuration_file):
         output.append("")
         output.append("[watcher:redis_service_for_plugin_%s]" % plugin_name)
         output.append("cmd = redis-server")
-        output.append("args = {{MODULE_RUNTIME_HOME}}/tmp/config_auto/"
+        output.append("args = {{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/"
                       "redis_plugin_%s.conf" % plugin_name)
         output.append("numprocesses = 1")
         output.append("stdout_stream.class = FileStream")
-        output.append("stdout_stream.filename = {{MODULE_RUNTIME_HOME}}/log/"
+        output.append("stdout_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/"
                       "redis_plugin_%s.log" % plugin_name)
         output.append("stderr.class = FileStream")
-        output.append("stderr.filename = {{MODULE_RUNTIME_HOME}}/log/"
+        output.append("stderr.filename = {{MFMODULE_RUNTIME_HOME}}/log/"
                       "redis_plugin_%s.log" % plugin_name)
         output.append("copy_env = True")
         output.append("autostart = True")
         output.append("respawn = True")
         with open("%s/tmp/config_auto/redis_plugin_%s.conf" %
-                  (MODULE_RUNTIME_HOME, plugin_name), "w+") as f:
-            with open("%s/config/redis_plugin_xxx.conf" % MODULE_HOME,
+                  (MFMODULE_RUNTIME_HOME, plugin_name), "w+") as f:
+            with open("%s/config/redis_plugin_xxx.conf" % MFMODULE_HOME,
                       "r") as f2:
                 content = f2.read()
             new_content = envtpl.render_string(content,
@@ -153,11 +153,11 @@ def make_watcher_conf(plugin_configuration_file):
         output.append("autostart = True")
         output.append("respawn = True")
         output.append("stdout_stream.class = FileStream")
-        output.append("stdout_stream.filename = {{MODULE_RUNTIME_HOME}}/log/"
+        output.append("stdout_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/"
                       "extra_daemon_%s_plugin_%s.log" %
                       (extra_daemon, plugin_name))
         output.append("stderr.class = FileStream")
-        output.append("stderr_stream.filename = {{MODULE_RUNTIME_HOME}}/log/"
+        output.append("stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/"
                       "extra_daemon_%s_plugin_%s.log" %
                       (extra_daemon, plugin_name))
         rlimit_as = None
@@ -194,7 +194,7 @@ def make_watcher_conf(plugin_configuration_file):
                                 keep_multi_blank_lines=False)
 
 
-circus_ini_file = os.path.join(os.environ['MODULE_HOME'], 'config',
+circus_ini_file = os.path.join(os.environ['MFMODULE_HOME'], 'config',
                                'circus.ini')
 with open(circus_ini_file, "r") as f:
     content = envtpl.render_string(f.read(), keep_multi_blank_lines=False)

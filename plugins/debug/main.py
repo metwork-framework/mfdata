@@ -10,7 +10,7 @@ class DebugMainStep(AcquisitionArchiveStep):
     _shadow = True
 
     def init(self):
-        module_runtime_home = os.environ.get('MODULE_RUNTIME_HOME', '/tmp')
+        module_runtime_home = os.environ.get('MFMODULE_RUNTIME_HOME', '/tmp')
         self.args.dest_dir = os.path.join(module_runtime_home, 'var',
                                           'debug')
         self.args.strftime_template = \

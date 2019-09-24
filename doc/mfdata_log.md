@@ -83,7 +83,7 @@ def configure_logger(name, log_name):
 
 
 # Get the MFDATA root directory
-basedir = os.environ.get("MODULE_RUNTIME_HOME",
+basedir = os.environ.get("MFMODULE_RUNTIME_HOME",
                          os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
 # Get the MFDATA log directory

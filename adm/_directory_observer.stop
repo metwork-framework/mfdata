@@ -8,8 +8,8 @@ import signal
 from mflog import getLogger
 
 LOG = getLogger('directory_observer.stop')
-USER = os.environ.get('MODULE_RUNTIME_USER', None)
-MODULE_RUNTIME_HOME = os.environ.get('MODULE_RUNTIME_HOME', None)
+USER = os.environ.get('MFMODULE_RUNTIME_USER', None)
+MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', None)
 
 
 def get_directory_observer_master_pids():
@@ -22,7 +22,7 @@ def get_directory_observer_master_pids():
             if 'directory_observer.directory_observer' not in cmdline:
                 continue
             cwd = proc.cwd()
-            if not cwd.startswith(MODULE_RUNTIME_HOME):
+            if not cwd.startswith(MFMODULE_RUNTIME_HOME):
                 continue
             pids.append(proc.pid)
         except Exception:

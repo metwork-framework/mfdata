@@ -2,6 +2,35 @@
 
 
 
+## v0.7.4 (2019-09-05)
+
+### New Features
+
+
+### Bug Fixes
+- fix some warnings on switch plugin with hardlinking
+
+
+
+
+
+## v0.7.3 (2019-08-29)
+
+### New Features
+
+
+### Bug Fixes
+- important fix about failure_policy_move_keep_tags
+
+
+
+
+
+## v0.7.2 (2019-06-13)
+
+- No interesting change
+
+
 ## v0.7.1 (2019-06-12)
 
 ### New Features

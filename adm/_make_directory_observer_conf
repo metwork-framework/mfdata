@@ -6,7 +6,7 @@ import envtpl
 from configparser_extended import ExtendedConfigParser
 from acquisition.utils import _set_custom_environment
 
-MFDATA_PLUGIN_HOME = os.path.join(os.environ["MODULE_RUNTIME_HOME"],
+MFDATA_PLUGIN_HOME = os.path.join(os.environ["MFMODULE_RUNTIME_HOME"],
                                   "var", "plugins")
 CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
 
@@ -35,7 +35,7 @@ def make_directory_observer_conf(plugin_configuration_file):
         tmp_listened_directories = \
             tmp_listened_directories.replace('{{%s}}' % special_value,
                                              os.environ[special_value])
-        listened_directories = ["{{MODULE_RUNTIME_HOME}}/var/in/%s" % x.strip()
+        listened_directories = ["{{MFMODULE_RUNTIME_HOME}}/var/in/%s" % x.strip()
                                 for x in tmp_listened_directories.split(';')
                                 if "/" not in x]
         for i in range(0, len(listened_directories)):
@@ -51,7 +51,7 @@ def make_directory_observer_conf(plugin_configuration_file):
     return "\n".join(output)
 
 
-directory_observer_ini_file = os.path.join(os.environ['MODULE_HOME'], 'config',
+directory_observer_ini_file = os.path.join(os.environ['MFMODULE_HOME'], 'config',
                                            'directory_observer.ini')
 with open(directory_observer_ini_file, "r") as f:
     content = f.read()

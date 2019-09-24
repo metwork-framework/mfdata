@@ -2,8 +2,6 @@
 
 import os
 import sphinx_rtd_theme
-
-
 # sys.path.insert(0, os.path.abspath('.'))
 
 
@@ -11,7 +9,7 @@ def get_version():
     """
     :return: # The short X.Y version.
     """
-    return ".".join(os.environ.get('MODULE_VERSION',
+    return ".".join(os.environ.get('MFMODULE_VERSION',
                                    'unknown.unknown').split('.')[0:-1])
 
 
@@ -19,26 +17,8 @@ def get_release():
     """
     :return: the full version, including alpha/beta/rc tags
     """
-    return os.environ.get('MODULE_VERSION', 'unknown')
+    return os.environ.get('MFMODULE_VERSION', 'unknown')
 
-
-def build_intersphinx_mapping_url(current_module, module):
-    """
-    Guess and build the documentation url for a Metwork module
-    :param current_module: the current Metwork module name
-    :param module: the Metwork module name (e.g. mfext, mfdata, ...)
-    :return: the documentation url oof the module
-    """
-    current_version = get_version()
-    # By default, we choose the 'release' url
-    url = "http://metwork-framework.org/pub/metwork/releases/docs/release_{}/{}".format(current_version, module)
-    if current_version.startswith("integration"):
-        url = "http://metwork-framework.org/pub/metwork/continuous_integration/docs/integration/{}".format(module)
-    elif current_version.startswith("dev"):
-        # CAUTION: here we assume the version (i.e. git branch) of documentation development starts with 'dev'
-        url = "{}/_build/html".format(os.path.abspath(os.path.dirname(__file__))).replace(current_module, module)
-
-    return url
 
 
 # -- General configuration ------------------------------------------------
@@ -77,6 +57,7 @@ html_context = {
     'theme_vcs_pageview_mode': 'edit'
 }
 
+
 # True to prefix each section label with the name of the document it is in,
 # followed by a colon. For example, index:Introduction for a section called Introduction that appears in document index.rst.
 # Useful for avoiding ambiguity when the same section heading appears in different documents.
@@ -100,7 +81,7 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
+#source_suffix = ['.rst', '.md']
 source_suffix = '.rst'
 
 # The master toctree document.
@@ -108,7 +89,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'mfdata'
-copyright = u'2017, MetWork'
+copyright = u'2017-2019, MetWork'
 author = u'MetWork'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -117,6 +98,7 @@ author = u'MetWork'
 #
 # The short X.Y version.
 version = get_version()
+
 # The full version, including alpha/beta/rc tags.
 release = get_release()
 
@@ -163,10 +145,12 @@ html_favicon = '_images/metwork.ico'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'mfdatadoc'
+
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -197,6 +181,7 @@ latex_documents = [
      u'MetWork', 'manual'),
 ]
 
+
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
@@ -206,10 +191,6 @@ man_pages = [
      [author], 1)
 ]
 
-intersphinx_mapping = {'mfext': (build_intersphinx_mapping_url(project, 'mfext'), None),
-                       'mfadmin': (build_intersphinx_mapping_url(project, 'mfadmin'), None),
-                       'mfbase': (build_intersphinx_mapping_url(project, 'mfbase'), None),
-                       }
 
 # -- Options for Texinfo output -------------------------------------------
 
@@ -231,9 +212,30 @@ napoleon_use_admonition_for_notes = False
 napoleon_use_admonition_for_references = False
 napoleon_use_ivar = True
 napoleon_use_param = False
+autoclass_content = 'both'
 
 
-def skip(app, what, name, obj, skip, options):
-    if name == "__init__":
-        return False
-        return skip
+def build_intersphinx_mapping_url(current_module, module):
+    """
+    Guess and build the documentation url for a Metwork module
+    :param current_module: the current Metwork module name
+    :param module: the Metwork module name (e.g. mfext, mfdata, ...)
+    :return: the documentation url oof the module
+    """
+    current_version = get_version()
+    # By default, we choose the 'release' url
+    url = "http://metwork-framework.org/pub/metwork/releases/docs/release_{}/{}".format(current_version, module)
+    if current_version.startswith("integration"):
+        url = "http://metwork-framework.org/pub/metwork/continuous_integration/docs/integration/{}".format(module)
+    elif current_version.startswith("dev"):
+        # CAUTION: here we assume the version (i.e. git branch) of documentation development starts with 'dev'
+        url = "{}/_build/html".format(os.path.abspath(os.path.dirname(__file__))).replace(current_module, module)
+
+    return url
+
+
+intersphinx_mapping = {
+    'mfext': (build_intersphinx_mapping_url(project, 'mfext'), None),
+    'mfadmin': (build_intersphinx_mapping_url(project, 'mfadmin'), None),
+    'mfbase': (build_intersphinx_mapping_url(project, 'mfbase'), None),
+}

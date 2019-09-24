@@ -1,8 +1,8 @@
 #!/bin/bash
 
-_make_directory_observer_conf >"${MODULE_RUNTIME_HOME}/tmp/config_auto/directory_observer.ini"
+_make_directory_observer_conf >"${MFMODULE_RUNTIME_HOME}/tmp/config_auto/directory_observer.ini"
 
-if ! test -s "${MODULE_RUNTIME_HOME}/tmp/config_auto/directory_observer.ini"; then
+if ! test -s "${MFMODULE_RUNTIME_HOME}/tmp/config_auto/directory_observer.ini"; then
     echo "ERROR : can't make directory_observer configuration file"
     exit 1
 fi
@@ -15,7 +15,7 @@ from mfutil import mkdir_p
 config = os.environ.get('MFCONFIG', 'GENERIC')
 parser = ExtendedConfigParser(config=config, strict=False, inheritance='im', interpolation=None)
 
-parser.read("%s/tmp/config_auto/directory_observer.ini" % os.environ['MODULE_RUNTIME_HOME'])
+parser.read("%s/tmp/config_auto/directory_observer.ini" % os.environ['MFMODULE_RUNTIME_HOME'])
 
 for section in parser.sections():
     try:

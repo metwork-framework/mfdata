@@ -8,7 +8,7 @@ import redis
 REDIS_METWORK_PORT = int(os.getenv("MFDATA_REDIS_PORT"))
 REDIS_COLLECTD_INTERVAL = int(os.getenv("MFDATA_REDIS_COLLECTD_INTERVAL"))
 REDIS_SOCKET_PATH = "%s/var/redis.socket" % \
-    os.getenv("MODULE_RUNTIME_HOME")
+    os.getenv("MFMODULE_RUNTIME_HOME")
 REDIS_HOSTNAME = "%s__mfdata/redis-%s" % (os.getenv("MFCOM_HOSTNAME"),
                                           str(REDIS_METWORK_PORT))
 

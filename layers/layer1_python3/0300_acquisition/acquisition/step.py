@@ -13,7 +13,7 @@ from mfutil import get_utc_unix_timestamp
 from mfutil.plugins import MFUtilPluginBaseNotInitialized
 from mfutil.plugins import get_installed_plugins
 from acquisition.utils import get_plugin_step_directory_path, \
-    MODULE_RUNTIME_HOME, \
+    MFMODULE_RUNTIME_HOME, \
     _get_or_make_trash_dir
 from acquisition.stats import get_stats_client
 
@@ -374,7 +374,7 @@ class AcquisitionStep(AcquisitionBase):
             (string) the fullpath of the plugin directory.
 
         """
-        return os.path.join(MODULE_RUNTIME_HOME,
+        return os.path.join(MFMODULE_RUNTIME_HOME,
                             'var', 'plugins', self.plugin_name)
 
     def move_to_plugin_step(self, xaf, plugin_name, step_name):

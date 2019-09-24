@@ -4,13 +4,17 @@
 ## [Unreleased]
 
 ### New Features
-- add optional amqp 0.9.1 incoming messages support
-- use template inheritance for mfdata plugins (inspired by mfserv)
-- use envtpl new option --reduce-multi-blank-lines
+- increase default file size limit for plugins
+- replace MODULE* environment variables names by MFMODULE* (MODULE_HOME becomes MFMODULE_HOME and so on)
+- add some optional dependencies for plugins
+- introduce a bunzip2 plugin
 
 
 ### Bug Fixes
-- create a missing directory during hot reload after a new plugin install
+- fix some warnings on switch plugin with hardlinking
+- important fix about failure_policy_move_keep_tags
+- fix amqp listener plugin configuration
+- fix logging issue with mqtt_listener in some cases
 
 
 

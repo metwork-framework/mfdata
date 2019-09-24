@@ -3,6 +3,6 @@
 {% block custom %}
 {% raw %}
 # Garbage collector (files)
-* * * * * {{RUNTIME_SUFFIX}} {{MODULE_HOME}}/bin/cronwrap.sh --lock --timeout=600 --low --random-sleep=10 "garbage_collector.sh" >>{{MODULE_RUNTIME_HOME}}/log/garbage_collector.log 2>&1
+* * * * * {{RUNTIME_SUFFIX}} {{MFMODULE_HOME}}/bin/cronwrap.sh --lock --timeout=600 --low --random-sleep=10 "garbage_collector.sh" >>{{MFMODULE_RUNTIME_HOME}}/log/garbage_collector.log 2>&1
 {% endraw %}
 {% endblock %}

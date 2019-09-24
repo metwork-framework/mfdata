@@ -199,10 +199,10 @@ To do this, go to the `move_image` plugin directory and enter the command:
 make release
 ```
 
-This will create a `.plugin` file that will be used to deploy the plugin, e.g. `move_image-[version]-1.metwork.mfdata.plugin` where `[version]` is the value of the `version` parameter of the move_image `config.ini` you enter when you create the plugin (default value is `${MODULE_VERSION}`). You may change it:
+This will create a `.plugin` file that will be used to deploy the plugin, e.g. `move_image-[version]-1.metwork.mfdata.plugin` where `[version]` is the value of the `version` parameter of the move_image `config.ini` you enter when you create the plugin (default value is `${MFMODULE_VERSION}`). You may change it:
 ```cfg
 # Version of the plugin (X.Y.Z)
-# If the value is [MODULE_VERSION],
+# If the value is [MFMODULE_VERSION],
 # the current module version is used
 version=1.0.0
 ```
@@ -262,7 +262,7 @@ In practice, the plugins are installed in the `${HOME}/var/plugins` directory.
 	Another way to install the MFDATA `move_image` plugin in a production environment is to put down the `.plugin` file into `/etc/metwork.config.d/mfdata/external_plugins` directory. Then to install the plugin, you just restart the MFDATA service by entering `service metwork restart mfdata` command (as root user).
 	Check :doc:`../mfdata_deploy_plugin`.
 
-
+.. index:: ungzip plugin
 ## Use of the ungzip plugin
 
 The `ungzip` plugin allows you to unzip `.gz` files. This plugin automatically handles `.gz` files and returns the unzipped file to the switch. 
@@ -336,14 +336,8 @@ If the `ungzip` plugin is not installed, you will see the image is not archived 
 
 **Let's now Install the** `ungzip` **plugin (if not already installed).**
 
-In order to install this plugin, enter the command:
-
-```bash
-plugins.install /opt/metwork-mfdata/share/plugins/ungzip-[[version]-1.metwork.mfdata.plugin
-
-```
-
-where `[version]` is the value of the `version` of the `ungzip` plugin, e.g.  plugins.install /opt/metwork-mfdata/share/plugins/ungzip-master.ci53.508288c-1.metwork.mfdata.plugin
+In order to install this plugin, you just have to set `install_ungzip=1` in the `[internal_plugins]` section of the MFDATA configuration file (`/home/mfdata/config/config.ini`).
+Then restart MFDATA service by entering `service metwork restart mfdata` command (as root user).
 
 Then, check the `ugzip` plugin is installed, enter:
 
