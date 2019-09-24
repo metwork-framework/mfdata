@@ -8,7 +8,6 @@ MFDATA documentation
    :maxdepth: 3
 
    README
-   mfdata_intro
    installation_guide
    configure_a_metwork_package
    mfdata_load_env
