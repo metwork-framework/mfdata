@@ -1,4 +1,4 @@
-from acquisition.utils import MODULE_RUNTIME_HOME
+from acquisition.utils import MFMODULE_RUNTIME_HOME
 from acquisition.utils import _set_custom_environment
 from acquisition.utils import _get_tmp_filepath
 from acquisition.utils import _make_config_file_parser_class
