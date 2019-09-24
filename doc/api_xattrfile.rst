@@ -4,9 +4,6 @@ XATTRFILE API
 
 .. automodapi:: xattrfile
    :include-all-objects:
-
-.. automodapi:: xattrfile.print_tags
-
-.. automodapi:: xattrfile.get_tag
-
-.. automodapi:: xattrfile.set_tag
+   :no-inheritance-diagram:
+   :skip: metwork_get_redis_callable, unittests_get_redis_callable, DEFAULT_LOGGER, MODULE_RUNTIME_HOME, RED, UNITTESTS_RED, DictWithDirtyFlag
+   :inherited-members:

@@ -7,9 +7,9 @@ MFDATA documentation
    :name: mfdatatoc
    :maxdepth: 3
 
+   README
    mfdata_intro
-   configure_metwork_repo
-   install_a_metwork_package
+   installation_guide
    configure_a_metwork_package
    mfdata_load_env
    mfdata_quick_start
@@ -25,11 +25,7 @@ MFDATA documentation
    mfdata_tuning_monitoring
    api_xattrfile
    api_acquisition
-   layer_root
-   layer_python2
-   layer_python3
-   layer_default
-   layer_python
+   layers
    changelogs
 
 Indices and tables
