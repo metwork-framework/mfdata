@@ -149,7 +149,7 @@ class AcquisitionBase(object):
             (string) the fullpath of the plugin directory.
 
         """
-        return os.path.join(MODULE_RUNTIME_HOME,
+        return os.path.join(MFMODULE_RUNTIME_HOME,
                             'var', 'plugins', self.plugin_name)
 
     def __sigterm_handler(self, *args):
