@@ -1,5 +1,5 @@
 [![logo](https://raw.githubusercontent.com/metwork-framework/resources/master/logos/metwork-white-logo-small.png)](http://www.metwork-framework.org)
-# mfdata
+#  mfdata
 
 [//]: # (automatically generated from https://github.com/metwork-framework/resources/blob/master/cookiecutter/_%7B%7Bcookiecutter.repo%7D%7D/README.md)
 
@@ -14,9 +14,21 @@
 [![Gitter](https://github.com/metwork-framework/resources/blob/master/badges/community-fr.svg)](https://gitter.im/metwork-framework/community-fr?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
-[//]: # (TABLE_OF_CONTENTS_PLACEHOLDER)
+**Table of contents**
 
-## What is it?
+* [1\. What is it?](#1-what-is-it)
+* [2\. What is not in?](#2-what-is-not-in)
+* [3\. Quickstart](#3-quickstart)
+* [4\. Reference documentation](#4-reference-documentation)
+* [5\. Installation guide](#5-installation-guide)
+* [6\. Configuration guide](#6-configuration-guide)
+* [7\. Contributing guide](#7-contributing-guide)
+* [8\. Code of Conduct](#8-code-of-conduct)
+* [9\. Sponsors](#9-sponsors)
+
+
+
+## 1. What is it?
 
 This is the **M**etwork **F**ramework **DATA** processing **module**. This module is a "production ready" framework
 for processing "incoming files".
@@ -55,15 +67,15 @@ It's designed to process terrabytes of data every day in a very robust way:
 Last but not least, thanks to the "no polling at all" principle, you can process
 several thousands of file by second.
 
-## What is not in?
+## 2. What is not in?
 
 Of course, you can code the behavior you want but **mfdata module** is
 mainly designed to be "stateless". If you want to store durably something,
 have a look at **mfbase module**.
 
-## Quickstart
+## 3. Quickstart
 
-### Installation
+### 3.1 Installation
 
 **On a Linux CentOS 7 box** (please refer to reference documentation for other Linux distributions)
 
@@ -102,7 +114,7 @@ Then, to start mfdata services:
 service metwork start mfdata
 ```
 
-### Usage
+### 3.2 Usage
 
 ```console
 $ # AS mfdata user (created automatically during installation)
@@ -173,7 +185,7 @@ latest.switch.main.system_magic = ASCII text
 
 
 
-## Reference documentation
+## 4. Reference documentation
 
 - (for **master (development)** version), see [this dedicated site](http://metwork-framework.org/pub/metwork/continuous_integration/docs/master/mfdata/) for reference documentation.
 - (for **latest released stable** version), see [this dedicated site](http://metwork-framework.org/pub/metwork/releases/docs/stable/mfdata/) for reference documentation.
@@ -185,30 +197,30 @@ And if you are looking for an old released version, you can search [here](http:/
 
 
 
-## Installation guide
+## 5. Installation guide
 
 See [this document](.metwork-framework/install_a_metwork_package.md).
 
 
-## Configuration guide
+## 6. Configuration guide
 
 See [this document](.metwork-framework/configure_a_metwork_package.md).
 
 
 
-## Contributing guide
+## 7. Contributing guide
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 
 
-## Code of Conduct
+## 8. Code of Conduct
 
 See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) file.
 
 
 
-## Sponsors
+## 9. Sponsors
 
 *(If you are officially paid to work on MetWork Framework, please contact us to add your company logo here!)*
 
