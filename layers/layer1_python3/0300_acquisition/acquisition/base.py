@@ -5,7 +5,6 @@ from acquisition.utils import _make_config_file_parser_class
 import re
 import os
 import sys
-import datetime
 import mflog
 import configargparse
 from functools import partial
@@ -28,39 +27,67 @@ class AcquisitionBase(object):
     unit_tests = False
     unit_tests_args = None
     __logger = None
+    plugin_name = None
     step_name = None
     daemon_name = None
 
     def __init__(self):
         """Constructor."""
-        process_name = self.process_name
+        if self.plugin_name is None:
+            self.error_and_die(
+                "plugin_name property must be overriden and set"
+            )
+        step_or_daemon_name = self._get_step_or_daemon_name()
         plugin_name = self.plugin_name
         regexp = "^[A-Za-z0-9_]+$"
-        if not re.match(regexp, process_name):
-            self.error_and_die("process_name: %s must match with %s",
-                               process_name, regexp)
+        if not re.match(regexp, step_or_daemon_name):
+            self.error_and_die(
+                "step_name or daemon_name: %s must match with %s",
+                step_or_daemon_name,
+                regexp,
+            )
         if not re.match(regexp, plugin_name):
-            self.error_and_die("plugin_name: %s must match with %s",
-                               plugin_name, regexp)
-        _set_custom_environment(plugin_name, process_name)
+            self.error_and_die(
+                "plugin_name: %s must match with %s", plugin_name, regexp
+            )
+        _set_custom_environment(plugin_name, step_or_daemon_name)
 
-    def _init_parser(self):
-        parser = self.__get_argument_parser()
+    def _init(self):
+        description = "%s/%s acquisition %s" % (
+            self.plugin_name,
+            self._get_step_or_daemon_name(),
+            self.__class__.__name__,
+        )
+        parser = configargparse.ArgumentParser(
+            description=description,
+            add_env_var_help=False,
+            ignore_unknown_config_file_keys=True,
+            args_for_setting_config_path=["-c", "--config-file"],
+            config_file_parser_class=partial(
+                _make_config_file_parser_class,
+                self.plugin_name,
+                self._get_step_or_daemon_name(),
+            ),
+        )
+        self._add_extra_arguments_before(parser)
+        self.add_extra_arguments(parser)
+        self._add_extra_arguments_after(parser)
         if self.unit_tests and self.unit_tests_args:
             self.args, unknown = parser.parse_known_args(self.unit_tests_args)
         else:
             self.args, unknown = parser.parse_known_args()
-
-    def _init(self):
-        """Method called after CLI parsing but before processing any files."""
-        pass
+        return self.init()
 
     def init(self):
-        """Method called after CLI parsing but before processing any files."""
+        """Init what you want.
+
+        Called after CLI parsing but before processing any files.
+
+        """
         pass
 
     def _destroy(self):
-        pass
+        return self.destroy()
 
     def destroy(self):
         """Destroy what you want just before exiting.
@@ -69,33 +96,6 @@ class AcquisitionBase(object):
 
         """
         pass
-
-    def __get_argument_parser(self):
-        """Make and return an ArgumentParser object.
-
-        If you want to add some extra options, you have to override
-        the add_extra_arguments() method.
-
-        Returns:
-            an ArgumentParser object with all options added.
-
-        """
-        description = "%s/%s acquisition %s" % (self.plugin_name,
-                                                self.process_name,
-                                                self.__class__.__name__)
-        parser = configargparse.ArgumentParser(
-            description=description,
-            add_env_var_help=False,
-            ignore_unknown_config_file_keys=True,
-            args_for_setting_config_path=["-c", "--config-file"],
-            config_file_parser_class=partial(_make_config_file_parser_class,
-                                             self.plugin_name,
-                                             self.process_name)
-        )
-        self._add_extra_arguments_before(parser)
-        self.add_extra_arguments(parser)
-        self._add_extra_arguments_after(parser)
-        return parser
 
     def _add_extra_arguments_before(self, parser):
         pass
@@ -106,42 +106,18 @@ class AcquisitionBase(object):
     def _add_extra_arguments_after(self, parser):
         pass
 
-    @property
-    def process_name(self):
-        """Get the name of the process (step or daemon).
-
-        This method is called if there is no "process_name" property defined
-        she returns as name step_name or daemon_name
-        if one of them is defined
-
-        This said property SHOULD be defined.
-        The name must match with `^[A-Za-z0-9_]+$` regexp.
-
-        Returns:
-            (string) the name.
-
-        """
-        if 'step_name' in dir(self) and self.step_name is not None:
-            return self.step_name
-        elif 'daemon_name' in dir(self) and self.daemon_name is not None:
-            return self.daemon_name
-        else:
-            return "main"
-
-    @property
-    def plugin_name(self):
-        """Return the name of the plugin.
-
-        This method is called if there is no "step_name" property defined.
-        This said property MUST be defined.
-        The name must match with `^[A-Za-z0-9_]+$` regexp.
-
-        Returns:
-            (string) the name of the plugin.
-
-        """
-        raise NotImplementedError("The plugin_name property is not defined."
-                                  " Please define a plugin_name property.")
+    def _get_step_or_daemon_name(self):
+        try:
+            if self.step_name is not None:
+                return self.step_name
+        except Exception:
+            pass
+        try:
+            if self.daemon_name is not None:
+                return self.daemon_name
+        except Exception:
+            pass
+        return "main"
 
     def get_plugin_directory_path(self):
         """Return the plugin directory (fullpath).
@@ -150,12 +126,14 @@ class AcquisitionBase(object):
             (string) the fullpath of the plugin directory.
 
         """
-        return os.path.join(MFMODULE_RUNTIME_HOME,
-                            'var', 'plugins', self.plugin_name)
+        return os.path.join(
+            MFMODULE_RUNTIME_HOME, "var", "plugins", self.plugin_name
+        )
 
     def __sigterm_handler(self, *args):
         self.debug("SIGTERM signal handled => schedulling shutdown")
         self.stop_flag = True
+        # FIXME: Move this to step ???
 
     def get_tmp_filepath(self):
         """Get a full temporary filepath (including unique filename).
@@ -164,13 +142,17 @@ class AcquisitionBase(object):
             (string) full temporary filepath (including unique filename).
 
         """
-        return _get_tmp_filepath(self.plugin_name, self.process_name)
+        return _get_tmp_filepath(
+            self.plugin_name, self._get_step_or_daemon_name()
+        )
 
     def _get_logger(self):
         """Get a logger."""
         if not self.__logger:
-            logger_name = "mfdata.%s.%s" % (self.plugin_name,
-                                            self.process_name)
+            logger_name = "mfdata.%s.%s" % (
+                self.plugin_name,
+                self._get_step_or_daemon_name(),
+            )
             self.__logger = mflog.getLogger(logger_name)
         return self.__logger
 
@@ -214,13 +196,15 @@ class AcquisitionBase(object):
         logger = self._get_logger()
         logger.exception(str(msg), *args, **kwargs)
 
-    def _current_utc_datetime_with_ms(self):
-        return datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S:%f')
-
-    def _get_tag_name(self, name, counter_str_value='latest',
-                      force_process_name=None, force_plugin_name=None):
+    def _get_tag_name(
+        self,
+        name,
+        counter_str_value="latest",
+        force_process_name=None,
+        force_plugin_name=None,
+    ):
         plugin_name = self.plugin_name
-        process_name = self.process_name
+        process_name = self._get_step_or_daemon_name()
         if force_process_name is not None:
             process_name = force_process_name
         if force_plugin_name is not None:
@@ -228,11 +212,15 @@ class AcquisitionBase(object):
         if plugin_name == "core":
             return "%s.%s.%s" % (counter_str_value, plugin_name, name)
         else:
-            return "%s.%s.%s.%s" % (counter_str_value, plugin_name,
-                                    process_name, name)
+            return "%s.%s.%s.%s" % (
+                counter_str_value,
+                plugin_name,
+                process_name,
+                name,
+            )
 
     def _set_tag_latest(self, xaf, name, value):
-        tag_name = self._get_tag_name(name, 'latest')
+        tag_name = self._get_tag_name(name, "latest")
         self._set_tag(xaf, tag_name, value)
 
     def _set_tag(self, xaf, name, value):
@@ -255,9 +243,16 @@ class AcquisitionBase(object):
         if add_latest:
             self._set_tag_latest(xaf, name, value)
 
-    def get_tag(self, xaf, name, not_found_value=None,
-                counter_str_value='latest', force_process_name=None,
-                force_plugin_name=None, **kwargs):
+    def get_tag(
+        self,
+        xaf,
+        name,
+        not_found_value=None,
+        counter_str_value="latest",
+        force_process_name=None,
+        force_plugin_name=None,
+        **kwargs
+    ):
         """Read a tag on a file with good prefixes.
 
         Args:
@@ -272,13 +267,13 @@ class AcquisitionBase(object):
             kwargs: for compatibility with force_step_name
 
         """
-        if 'force_step_name' in kwargs.keys():
-            force_process_name = kwargs['force_step_name']
-        tag_name = self._get_tag_name(name, counter_str_value,
-                                      force_process_name, force_plugin_name)
+        if "force_step_name" in kwargs.keys():
+            force_process_name = kwargs["force_step_name"]
+        tag_name = self._get_tag_name(
+            name, counter_str_value, force_process_name, force_plugin_name
+        )
         return xaf.tags.get(tag_name, not_found_value)
 
-    def _get_counter_tag_value(self, xaf, not_found_value='0'):
-        tag_name = self._get_tag_name("step_counter",
-                                      force_plugin_name="core")
+    def _get_counter_tag_value(self, xaf, not_found_value="0"):
+        tag_name = self._get_tag_name("step_counter", force_plugin_name="core")
         return int(xaf.tags.get(tag_name, not_found_value))

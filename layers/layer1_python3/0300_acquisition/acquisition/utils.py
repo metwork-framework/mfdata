@@ -1,4 +1,5 @@
 import os
+import datetime
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from acquisition.configargparse_confparser import StepConfigFileParser
 
@@ -59,3 +60,7 @@ def _get_tmp_filepath(plugin_name, step_name):
 def _make_config_file_parser_class(plugin_name, step_name):
     return StepConfigFileParser(plugin_name, step_name,
                                 _set_custom_environment)
+
+
+def _get_current_utc_datetime_with_ms():
+    return datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S:%f")

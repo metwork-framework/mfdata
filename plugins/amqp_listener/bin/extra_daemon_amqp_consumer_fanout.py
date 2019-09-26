@@ -12,7 +12,7 @@ class ExtraDaemonAmqpConsumerFanout(AcquisitionListener):
 
     plugin_name = "amqp_listener"
     daemon_name = "extra_daemon_amqp_consumer_fanout"
-    subscription_exchange_type = 'fanout'
+    subscription_exchange_type = "fanout"
     channel = None
     connection = None
     message_number = 1
@@ -32,59 +32,88 @@ class ExtraDaemonAmqpConsumerFanout(AcquisitionListener):
         self.channel.close()
 
     def add_extra_arguments(self, parser):
-        parser.add_argument('--broker-hostname', action='store',
-                            default='127.0.0.1',
-                            help='the hostname or IP address of the remote broker. Defaults to localhost')
-        parser.add_argument('--broker-port', action='store', default=5672,
-                            type=int,
-                            help='the network port of the server host to connect to. Defaults to 1883.')
-        parser.add_argument('--credential-username', action='store',
-                            default=None,
-                            help='The username to authenticate with.')
-        parser.add_argument('--credential-password', action='store',
-                            default=None,
-                            help='The password to authenticate with.')
-        parser.add_argument('--subscription-exchange', action='store',
-                            help='string specifying the subscription exchange.')
-        parser.add_argument('--subscription-queue', action='store',
-                            help='string specifying the subscription queue.')
-        parser.add_argument('--delete-queue-after-stop', action='store_true',
-                            help='delete the queue after stop process.')
         parser.add_argument(
-            '--dest-dir',
-            action='store',
-            help='destination directory of the file made from the MQTT message')
-        parser.add_argument('--tmp-suffix', action='store', default='t',
-                            help='temporary file suffix. Default t')
+            "--broker-hostname",
+            action="store",
+            default="127.0.0.1",
+            help="the hostname or IP address of the remote broker. "
+            "Defaults to localhost",
+        )
+        parser.add_argument(
+            "--broker-port",
+            action="store",
+            default=5672,
+            type=int,
+            help="the network port of the server host to connect to. "
+            "Defaults to 1883.",
+        )
+        parser.add_argument(
+            "--credential-username",
+            action="store",
+            default=None,
+            help="The username to authenticate with.",
+        )
+        parser.add_argument(
+            "--credential-password",
+            action="store",
+            default=None,
+            help="The password to authenticate with.",
+        )
+        parser.add_argument(
+            "--subscription-exchange",
+            action="store",
+            help="string specifying the subscription exchange.",
+        )
+        parser.add_argument(
+            "--subscription-queue",
+            action="store",
+            help="string specifying the subscription queue.",
+        )
+        parser.add_argument(
+            "--delete-queue-after-stop",
+            action="store_true",
+            help="delete the queue after stop process.",
+        )
+        parser.add_argument(
+            "--dest-dir",
+            action="store",
+            help="destination directory of the file made "
+            "from the MQTT message",
+        )
+        parser.add_argument(
+            "--tmp-suffix",
+            action="store",
+            default="t",
+            help="temporary file suffix. Default t",
+        )
 
     def connect(self):
-        """"This method connects to RabbitMQ, returning true when the connection
-        is established.
-
-        :return: True if Ok else False
-        """
-        if self.args.credential_username is not None and\
-                self.args.credential_password is not None:
-            credentials = pika.PlainCredentials(self.args.credential_username,
-                                                self.args.credential_password)
+        if self.args.credential_username is not None \
+                and self.args.credential_password is not None:
+            credentials = pika.PlainCredentials(
+                self.args.credential_username, self.args.credential_password
+            )
             parameters = pika.ConnectionParameters(
                 host=self.args.broker_hostname,
                 port=self.args.broker_port,
-                credentials=credentials)
+                credentials=credentials,
+            )
         else:
             parameters = pika.ConnectionParameters(
-                host=self.args.broker_hostname, port=self.args.broker_port)
+                host=self.args.broker_hostname, port=self.args.broker_port
+            )
         try:
             self.connection = pika.BlockingConnection(parameters)
             self.channel = self.connection.channel()
 
             self.channel.exchange_declare(
                 exchange=self.args.subscription_exchange,
-                exchange_type=self.subscription_exchange_type)
+                exchange_type=self.subscription_exchange_type,
+            )
         except Exception as e:
             self.error(format(e))
             return False
-        except:
+        except Exception:
             self.error("Error unknown")
             return False
         else:
@@ -107,36 +136,52 @@ class ExtraDaemonAmqpConsumerFanout(AcquisitionListener):
         basename = mfutil.get_unique_hexa_identifier()
         self.debug("basename: %s" % (basename))
         filename = os.path.join(self.args.dest_dir, basename)
-        tmp_filename = '.'.join((filename, self.args.tmp_suffix))
+        tmp_filename = ".".join((filename, self.args.tmp_suffix))
         self.debug("Created tmp file name : %s" % tmp_filename)
         with open(tmp_filename, "w") as fichier:
             fichier.write(str(body))
         xaf = xattrfile.XattrFile(tmp_filename)
-        self.set_tag(xaf, 'amqp_listener.subscription_exchange',
-                     self.args.subscription_exchange)
-        self.set_tag(xaf, 'amqp_listener_subscription_queue',
-                     self.args.subscription_queue)
-        self.set_tag(xaf, 'amqp_listener_broker_hostname',
-                     self.args.broker_hostname)
-        self.set_tag(xaf, 'amqp_listener_broker_port',
-                     str(self.args.broker_port))
+        self.set_tag(
+            xaf,
+            "amqp_listener.subscription_exchange",
+            self.args.subscription_exchange,
+        )
+        self.set_tag(
+            xaf,
+            "amqp_listener_subscription_queue",
+            self.args.subscription_queue,
+        )
+        self.set_tag(
+            xaf, "amqp_listener_broker_hostname", self.args.broker_hostname
+        )
+        self.set_tag(
+            xaf, "amqp_listener_broker_port", str(self.args.broker_port)
+        )
         xaf.rename(filename)
         self.debug("Created file name : %s" % filename)
-        self.info('Received message %s from %s : %s' % (
-            basic_deliver.delivery_tag, properties.app_id, body))
+        self.info(
+            "Received message %s from %s : %s"
+            % (basic_deliver.delivery_tag, properties.app_id, body)
+        )
 
     def consume(self):
-        result = self.channel.queue_declare(self.args.subscription_queue,
-                                            exclusive=False)
-        self.channel.queue_bind(queue=self.args.subscription_queue,
-                                exchange=self.args.subscription_exchange)
-        self.info(' [*] Waiting for %s on queue %s. To exit press CTRL+C' % (
-            self.args.subscription_exchange,
-            self.args.subscription_queue))
+        result = self.channel.queue_declare(
+            self.args.subscription_queue, exclusive=False
+        )
+        self.channel.queue_bind(
+            queue=self.args.subscription_queue,
+            exchange=self.args.subscription_exchange,
+        )
+        self.info(
+            " [*] Waiting for %s on queue %s. To exit press CTRL+C"
+            % (self.args.subscription_exchange, self.args.subscription_queue)
+        )
 
-        self.channel.basic_consume(queue=self.args.subscription_queue,
-                                   on_message_callback=self.on_message,
-                                   auto_ack=True)
+        self.channel.basic_consume(
+            queue=self.args.subscription_queue,
+            on_message_callback=self.on_message,
+            auto_ack=True,
+        )
 
         self.channel.start_consuming()
 

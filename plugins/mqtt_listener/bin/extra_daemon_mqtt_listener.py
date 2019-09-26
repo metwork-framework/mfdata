@@ -7,7 +7,7 @@ import paho.mqtt.client as mqtt
 import xattrfile
 import signal
 import time
-from acquisition.acquisition_base import AcquisitionBase
+from acquisition.base import AcquisitionBase
 
 
 def on_connect(client, userdata, flags, rc):
@@ -15,33 +15,41 @@ def on_connect(client, userdata, flags, rc):
     client.debug("the client is connecting to the broker.")
     client.subscribe(client.args.subscription_topic)
 
+
 def on_disconnect(client, userdata, rc):
     client.debug("the client disconnects from the broker.")
     client.stop_flag = True
     client.is_connecting = False
 
+
 def on_message(client, userdata, message):
-    client.debug("message received: %s" ,str(message.payload.decode("utf-8")))
-    client.debug("message topic: %s",message.topic)
-    client.debug("message qos: %s",message.qos)
-    client.debug("message retain flag: %s",message.retain)
-    client.debug("message info: %s",message.info)
-    client.debug("userdata: %s",userdata)
+    client.debug("message received: %s", str(message.payload.decode("utf-8")))
+    client.debug("message topic: %s", message.topic)
+    client.debug("message qos: %s", message.qos)
+    client.debug("message retain flag: %s", message.retain)
+    client.debug("message info: %s", message.info)
+    client.debug("userdata: %s", userdata)
     basename = mfutil.get_unique_hexa_identifier()
     client.debug("basename: %s" % (basename))
 
     filepath = os.path.join(client.args.dest_dir, basename)
-    tmp_filepath = '.'.join((filepath, client.args.tmp_suffix))
+    tmp_filepath = ".".join((filepath, client.args.tmp_suffix))
     client.debug("Created tmp file name : %s" % (tmp_filepath))
     with open(tmp_filepath, "w") as fichier:
         fichier.write(str(message.payload.decode("utf-8")))
     xaf = xattrfile.XattrFile(tmp_filepath)
-    client.set_tag(xaf, 'mqtt_listener_subscription_topic', client.args.subscription_topic)
-    client.set_tag(xaf, 'mqtt_listener_received_topic', message.topic)
-    client.set_tag(xaf, 'mqtt_listener_broker_hostname', client.args.broker_hostname)
-    client.set_tag(xaf, 'mqtt_listener_broker_port', str(client.args.broker_port))
+    client.set_tag(
+        xaf, "mqtt_listener_subscription_topic", client.args.subscription_topic
+    )
+    client.set_tag(xaf, "mqtt_listener_received_topic", message.topic)
+    client.set_tag(
+        xaf, "mqtt_listener_broker_hostname", client.args.broker_hostname
+    )
+    client.set_tag(
+        xaf, "mqtt_listener_broker_port", str(client.args.broker_port)
+    )
     if userdata is not None:
-        client.set_tag(xaf, 'mqtt_listener_user_data', userdata)
+        client.set_tag(xaf, "mqtt_listener_user_data", userdata)
     xaf.rename(filepath)
     client.debug("Created file name : %s" % (filepath))
 
@@ -61,30 +69,56 @@ class ExtraDaemonMqttListener(mqtt.Client, AcquisitionBase):
         self.stop_flag = True
 
     def get_argument_parser(self):
-        """Make and return an ArgumentParser object.
-        If you want to add some extra options, you have to override
-        the add_extra_arguments() method.
-        Returns:
-            an ArgumentParser object with all options added.
-        """
         parser = configargparse.ArgumentParser()
 
-        parser.add_argument('--broker-hostname', action='store',
-                            default='127.0.0.1',
-                            help='the hostname or IP address of the remote broker. Defaults to localhost')
-        parser.add_argument('--broker-port', action='store', default=1883, type=int,
-                            help='the network port of the server host to connect to. Defaults to 1883.')
-        parser.add_argument('--keep-alive', action='store', default=60, type=int,
-                            help='maximum period in seconds allowed between communications with the broker')
-        parser.add_argument('--user-data', action='store',
-                            default=None,
-                            help='user defined data of any type. Defaults None')
-        parser.add_argument('--dest-dir', action='store',
-                            help='destination directory of the file made from the MQTT message')
-        parser.add_argument('--subscription-topic', action='store', default='#',
-                            help='string specifying the subscription topic to subscribe to. Default everybody')
-        parser.add_argument('--tmp-suffix', action='store', default='t',
-                            help='temporary file suffix. Default t')
+        parser.add_argument(
+            "--broker-hostname",
+            action="store",
+            default="127.0.0.1",
+            help="the hostname or IP address of the remote broker. "
+            "Defaults to localhost",
+        )
+        parser.add_argument(
+            "--broker-port",
+            action="store",
+            default=1883,
+            type=int,
+            help="the network port of the server host to "
+            "connect to. Defaults to 1883.",
+        )
+        parser.add_argument(
+            "--keep-alive",
+            action="store",
+            default=60,
+            type=int,
+            help="maximum period in seconds allowed between"
+            " communications with the broker",
+        )
+        parser.add_argument(
+            "--user-data",
+            action="store",
+            default=None,
+            help="user defined data of any type. Defaults None",
+        )
+        parser.add_argument(
+            "--dest-dir",
+            action="store",
+            help="destination directory of the file "
+            "made from the MQTT message",
+        )
+        parser.add_argument(
+            "--subscription-topic",
+            action="store",
+            default="#",
+            help="string specifying the subscription topic "
+            "to subscribe to. Default everybody",
+        )
+        parser.add_argument(
+            "--tmp-suffix",
+            action="store",
+            default="t",
+            help="temporary file suffix. Default t",
+        )
         return parser
 
     def run(self):
@@ -104,8 +138,10 @@ class ExtraDaemonMqttListener(mqtt.Client, AcquisitionBase):
             self.connect(self.args.broker_hostname, port=self.args.broker_port)
             self.loop_start()
         except Exception:
-           self.warning("Can not connect to the broker %s on port %d" % (self.args.broker_hostname,
-                                                                          self.args.broker_port))
+            self.warning(
+                "Can not connect to the broker %s on port %d"
+                % (self.args.broker_hostname, self.args.broker_port)
+            )
         else:
             while not self.is_connecting:
                 self.debug("Waiting for connection ...")

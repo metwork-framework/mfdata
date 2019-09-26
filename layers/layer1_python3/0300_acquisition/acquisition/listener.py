@@ -1,36 +1,18 @@
-from acquisition.acquisition_base import AcquisitionBase
+from acquisition.base import AcquisitionBase
 
 
 class AcquisitionListener(AcquisitionBase):
     """Abstract class to describe an acquisition listener.
 
     You have to override this class.
-
-    Attributes:
-
     """
-    def _init(self):
-        self._init_parser()
-        self.init()
-
-    def _destroy(self):
-        self.destroy()
-
-    def _add_extra_arguments_before(self, parser):
-        pass
-
-    def _add_extra_arguments_after(self, parser):
-        pass
 
     def listen(self):
-        """Listen.
+        """Listen to something.
 
         You have to override this method.
 
-        Args:
-
-        Returns:
-            boolean: processing status (True: ok, False: not ok)
+        When this method returns, the execution is stopped.
 
         """
         raise NotImplementedError("listen() method must be overriden")
