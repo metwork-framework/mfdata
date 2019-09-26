@@ -1,4 +1,4 @@
-from acquisition.utils import MODULE_RUNTIME_HOME
+from acquisition.utils import MFMODULE_RUNTIME_HOME
 from acquisition.utils import _set_custom_environment
 from acquisition.utils import _get_tmp_filepath
 from acquisition.utils import _make_config_file_parser_class
@@ -22,6 +22,7 @@ class AcquisitionBase(object):
         __logger (Logger): Logger object.
 
     """
+
     stop_flag = False
     args = None
     unit_tests = False
@@ -149,7 +150,7 @@ class AcquisitionBase(object):
             (string) the fullpath of the plugin directory.
 
         """
-        return os.path.join(MODULE_RUNTIME_HOME,
+        return os.path.join(MFMODULE_RUNTIME_HOME,
                             'var', 'plugins', self.plugin_name)
 
     def __sigterm_handler(self, *args):
@@ -246,6 +247,7 @@ class AcquisitionBase(object):
             name (string): name of the tag (without prefixes)
             value (string): value of the tag
             add_latest (boolean): add latest prefix
+
         """
         counter_str_value = str(self._get_counter_tag_value(xaf))
         tag_name = self._get_tag_name(name, counter_str_value)
@@ -268,6 +270,7 @@ class AcquisitionBase(object):
             force_plugin_name: tagger plugin name (if None, current
                 plugin name is taken)
             kwargs: for compatibility with force_step_name
+
         """
         if 'force_step_name' in kwargs.keys():
             force_process_name = kwargs['force_step_name']
