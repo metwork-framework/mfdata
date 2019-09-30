@@ -22,7 +22,6 @@ class AcquisitionBase(object):
 
     """
 
-    stop_flag = False
     args = None
     unit_tests = False
     unit_tests_args = None
@@ -129,11 +128,6 @@ class AcquisitionBase(object):
         return os.path.join(
             MFMODULE_RUNTIME_HOME, "var", "plugins", self.plugin_name
         )
-
-    def __sigterm_handler(self, *args):
-        self.debug("SIGTERM signal handled => schedulling shutdown")
-        self.stop_flag = True
-        # FIXME: Move this to step ???
 
     def get_tmp_filepath(self):
         """Get a full temporary filepath (including unique filename).

@@ -647,3 +647,7 @@ class AcquisitionStep(AcquisitionBase):
         """
         tag_name = self.__get_original_dirname_tag_name()
         return xaf.tags.get(tag_name, b"unknown").decode("utf8")
+
+    def __sigterm_handler(self, *args):
+        self.debug("SIGTERM signal handled => schedulling shutdown")
+        self.stop_flag = True
