@@ -1,6 +1,7 @@
 {% extends "mfxxx.status" %}
 {% block custom %}
 
+_check_circus_conf || RES=1
 redis_status.sh || RES=1
 circus_status_watcher.sh directory_observer || RES=1
 circus_status_watcher.sh conf_monitor || RES=1
