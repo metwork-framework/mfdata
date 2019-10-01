@@ -35,7 +35,7 @@ def dummy_exit(i):
 
 
 # get_plugin_name() not overridden
-class AcquisitionTestStepPluginNameNotOverrideen(AcquisitionStep):
+class AcquisitionTestStepPluginNameNotOverriden(AcquisitionStep):
 
     unit_tests = True
     step_name = "test"
@@ -88,10 +88,6 @@ def make_tmp_xattrfile():
 
 class MiscTestCase(TestCase):
 
-    # get_name() not overridden
-    def test_constructor_get_name_not_overridden(self):
-        self.assertRaises(NotImplementedError, lambda: AcquisitionStep())
-
     def test_contstructor_wrong_name_exit(self):
         # Mock os._exit() as sys.exit() to test the exiting and return code
         os._exit = sys.exit
@@ -101,7 +97,8 @@ class MiscTestCase(TestCase):
 
     # get_plugin_name() not overridden
     def test_constructor_get_plugin_name_not_overridden(self):
-        self.assertRaises(NotImplementedError, lambda: AcquisitionStep())
+        self.assertRaises(NotImplementedError,
+                          lambda: AcquisitionTestStepPluginNameNotOverriden())
 
     def test_contstructor_wrong_plugin_name_exit(self):
         # Mock os._exit() as sys.exit() to test the exiting and return code

@@ -38,19 +38,16 @@ class AcquisitionStep(AcquisitionBase):
     You have to override this class.
 
     Attributes:
-        debug_mode_allowed (boolean): if True, the debug mode is allowed.
         stop_flag (boolean): if True, stop the daemon as soon as possible.
-        unit_tests (boolean): if True, we are in unit tests mode.
-        failure_policy (string): failure policy.
+        debug_mode_allowed (boolean): if True, the debug mode is allowed.
+        failure_policy (string): failure policy ("move", "delete" or "keep").
         failure_policy_move_dest_dir (string): destination directory when
-            failure policy is move
+            failure policy is move.
         failure_policy_move_keep_tags (boolean): keep tags into another file
-            when failure policy is move ?
+            when failure policy is move.
         failure_policy_move_keep_tags_suffix (string): suffix to add to the
-            filename to keep tags when failure policy is move
-        args (Namespace): argparser Namespace object with parsed cli args.
-        __logger (Logger): Logger object.
-        __last_ping (Datetime): Datetime object of the last ping() call.
+            filename to keep tags when failure policy is move.
+        step_limit (int): maximum step number (to avoid some loops).
 
     """
 
@@ -63,15 +60,9 @@ class AcquisitionStep(AcquisitionBase):
     failure_policy_move_keep_tags = True
     failure_policy_move_keep_tags_suffix = None
     step_limit = DEFAULT_STEP_LIMIT
-    args = None
-    __logger = None
     __last_ping = None
     _shadow = False
     _debug_mode = False
-
-    def __init__(self):
-        """Constructor."""
-        super(AcquisitionStep, self).__init__()
 
     def _init(self):
         super(AcquisitionStep, self)._init()
@@ -153,10 +144,6 @@ class AcquisitionStep(AcquisitionBase):
             "in debug mode, if not, we consider we are in "
             "daemon mode",
         )
-
-    def __sigterm_handler(self, *args):
-        self.debug("SIGTERM signal handled => schedulling shutdown")
-        self.stop_flag = True
 
     def _exception_safe_call(
         self, func, args, kwargs, label, return_value_if_exception
@@ -393,37 +380,6 @@ class AcquisitionStep(AcquisitionBase):
 
     def get_stats_client(self, extra_tags={}):
         return get_stats_client(self.plugin_name, self.step_name, extra_tags)
-
-    @property
-    def step_name(self):
-        """Get the name of the step.
-
-        This method is called if there is no "step_name" property defined.
-        This said property SHOULD be defined.
-        The name must match with `^[A-Za-z0-9_]+$` regexp.
-
-        Returns:
-            (string) the name of the step.
-
-        """
-        return "main"
-
-    @property
-    def plugin_name(self):
-        """Return the name of the plugin.
-
-        This method is called if there is no "step_name" property defined.
-        This said property MUST be defined.
-        The name must match with `^[A-Za-z0-9_]+$` regexp.
-
-        Returns:
-            (string) the name of the plugin.
-
-        """
-        raise NotImplementedError(
-            "The plugin_name property is not defined."
-            " Please define a plugin_name property."
-        )
 
     def get_plugin_directory_path(self):
         """Return the plugin directory (fullpath).

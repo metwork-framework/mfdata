@@ -6,6 +6,7 @@ import re
 import os
 import sys
 import mflog
+import traceback
 import configargparse
 from functools import partial
 
@@ -16,9 +17,15 @@ class AcquisitionBase(object):
     You have to override this class.
 
     Attributes:
-        stop_flag (boolean): if True, stop the daemon as soon as possible.
         args (Namespace): argparser Namespace object with parsed cli args.
+        unit_tests (boolean): if True, we are in unit tests mode.
+        unit_tests_args (string): cli args (for unit tests).
         __logger (Logger): Logger object.
+        plugin_name (string): the name of the plugin.
+        step_name (string): the name of the step (if you inherits from
+            AcquisitionStep).
+        daemon_name (string): the name of the daemon (if you inherits from
+            AcquisitionListener).
 
     """
 
@@ -33,9 +40,8 @@ class AcquisitionBase(object):
     def __init__(self):
         """Constructor."""
         if self.plugin_name is None:
-            self.error_and_die(
-                "plugin_name property must be overriden and set"
-            )
+            raise NotImplementedError("plugin_name property must be overriden "
+                                      "and set")
         step_or_daemon_name = self._get_step_or_daemon_name()
         plugin_name = self.plugin_name
         regexp = "^[A-Za-z0-9_]+$"
@@ -154,6 +160,7 @@ class AcquisitionBase(object):
         """Log an error message and exit immediatly."""
         self.error(msg, *args, **kwargs)
         sys.stderr.write("exiting...\n")
+        sys.stderr.write("stack: %s\n" % "".join(traceback.format_stack()))
         os._exit(2)
 
     def warning(self, msg, *args, **kwargs):

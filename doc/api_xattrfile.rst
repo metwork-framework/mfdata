@@ -2,8 +2,19 @@
 XATTRFILE API
 =============
 
-.. automodapi:: xattrfile
-   :include-all-objects:
-   :no-inheritance-diagram:
-   :skip: metwork_get_redis_callable, unittests_get_redis_callable, DEFAULT_LOGGER, MFMODULE_RUNTIME_HOME, RED, UNITTESTS_RED, DictWithDirtyFlag
+XattrFile class
+---------------
+
+.. autoclass:: xattrfile.XattrFile
+   :members:
    :inherited-members:
+
+   .. automethod:: __init__
+
+Misc
+----
+
+.. autoclass:: xattrfile.BytesDictWithDirtyFlag
+   :members:
+
+   .. automethod:: __init__

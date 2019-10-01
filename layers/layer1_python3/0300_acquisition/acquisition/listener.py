@@ -5,6 +5,7 @@ class AcquisitionListener(AcquisitionBase):
     """Abstract class to describe an acquisition listener.
 
     You have to override this class.
+
     """
 
     def listen(self):

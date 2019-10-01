@@ -35,10 +35,10 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.napoleon',
               'sphinx.ext.intersphinx',
               'sphinx.ext.autosectionlabel',
-              'sphinx.ext.todo',
-              'sphinx_automodapi.automodapi',
-              'sphinx_automodapi.smart_resolver',
-              ]
+              'sphinx.ext.todo']
+#              'sphinx_automodapi.automodapi',
+#              'sphinx_automodapi.smart_resolver',
+#              ]
 
 # A dictionary of values to pass into the template engine’s context for all pages
 html_context = {
@@ -210,8 +210,8 @@ napoleon_include_special_with_doc = False
 napoleon_use_admonition_for_examples = False
 napoleon_use_admonition_for_notes = False
 napoleon_use_admonition_for_references = False
-napoleon_use_ivar = True
-napoleon_use_param = False
+#napoleon_use_ivar = False
+#napoleon_use_param = True
 autoclass_content = 'both'
 
 
