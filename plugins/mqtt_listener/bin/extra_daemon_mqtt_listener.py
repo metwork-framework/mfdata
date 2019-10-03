@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
-import configargparse
 import mfutil
 import os
 import paho.mqtt.client as mqtt
 import xattrfile
 import signal
 import time
-from acquisition.base import AcquisitionBase
+from acquisition.listener import AcquisitionListener
 
 
 def on_connect(client, userdata, flags, rc):
@@ -54,11 +53,12 @@ def on_message(client, userdata, message):
     client.debug("Created file name : %s" % (filepath))
 
 
-class ExtraDaemonMqttListener(mqtt.Client, AcquisitionBase):
+class ExtraDaemonMqttListener(mqtt.Client, AcquisitionListener):
 
     plugin_name = "mqtt_listener"
     daemon_name = "extra_daemon_mqtt_listener"
     is_connecting = False
+    stop_flag = False
 
     def __init__(self):
         super(ExtraDaemonMqttListener, self).__init__()
@@ -68,9 +68,7 @@ class ExtraDaemonMqttListener(mqtt.Client, AcquisitionBase):
         self.debug("SIGTERM signal handled => schedulling shutdown")
         self.stop_flag = True
 
-    def get_argument_parser(self):
-        parser = configargparse.ArgumentParser()
-
+    def add_extra_arguments(self, parser):
         parser.add_argument(
             "--broker-hostname",
             action="store",
@@ -119,12 +117,9 @@ class ExtraDaemonMqttListener(mqtt.Client, AcquisitionBase):
             default="t",
             help="temporary file suffix. Default t",
         )
-        return parser
 
-    def run(self):
+    def listen(self):
         self.info("Start daemon %s" % self.daemon_name)
-        parser = self.get_argument_parser()
-        self.args = parser.parse_args()
         self.debug("broker_hostname: %s" % self.args.broker_hostname)
         self.debug("broker_port: %s" % self.args.broker_port)
         self.debug("keep_alive: %s" % self.args.keep_alive)
