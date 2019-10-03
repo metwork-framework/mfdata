@@ -2,6 +2,7 @@
 
 import os
 import glob
+import sys
 import envtpl
 from configparser_extended import ExtendedConfigParser
 from acquisition.utils import _set_custom_environment
@@ -199,7 +200,12 @@ circus_ini_file = os.path.join(os.environ['MFMODULE_HOME'], 'config',
 with open(circus_ini_file, "r") as f:
     content = envtpl.render_string(f.read(), keep_multi_blank_lines=False)
 
-for config_file in glob.glob(MFDATA_PLUGIN_HOME + "/*/config.ini"):
+plugins = []
+if len(sys.argv) == 2:
+    config_files = glob.glob(sys.argv[1] + "/config.ini")
+else:
+    config_files = glob.glob(MFDATA_PLUGIN_HOME + "/*/config.ini")
+for config_file in config_files:
     content = content + make_watcher_conf(config_file)
 
 print(content)
