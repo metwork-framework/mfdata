@@ -213,7 +213,7 @@ Let's now deploy the `move_image` plugin on a production environment.
 
 <u>Prerequisites</u>:
 
-- Metwork have to be installed on this environment (at least MFDATA and its dependencies MFEXT and MFCOM).
+- Metwork have to be installed on this environment (at least MFDATA and its dependencies MFEXT).
 - You be logged in as mfdata user
 
 In order to deploy the plugin on a production environment,  put down the `move_image-[version]-1.metwork.mfdata.plugin` in a directory on this target environment, e.g. `/home/mfdata/released_plugins`

@@ -16,6 +16,7 @@ plugins/*/python3_virtualenv/
 plugins/*/.autorestart_excludes
 plugins/*/.autorestart_includes
 **/__pycache__
+layers/*/cache
 plugins/switch/local
 plugins/switch/python3_virtualenv_sources/src
 plugins/mqtt_listener/local
