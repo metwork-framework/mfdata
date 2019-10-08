@@ -4,6 +4,9 @@
 ## [Unreleased]
 
 ### New Features
+- build mfdata without mfcom (mfcom layers are now included in mfext)
+- add new options for switch plugin
+- introduce better error reporting
 - increase default file size limit for plugins
 - replace MODULE* environment variables names by MFMODULE* (MODULE_HOME becomes MFMODULE_HOME and so on)
 - add some optional dependencies for plugins

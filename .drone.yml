@@ -18,7 +18,7 @@ bootstrap_common: &bootstrap_common
     - if test "$${FORCED_OS_VERSION}" != ""; then if test "$${FORCED_OS_VERSION}" != "${OS_VERSION}"; then echo "step bypass"; exit 0; fi; fi
     - mkdir -p /opt/metwork-mfdata-$${TARGET_DIR}
 
-    - ./bootstrap.sh /opt/metwork-mfdata-$${TARGET_DIR} /opt/metwork-mfcom-$${DEP_DIR}
+    - ./bootstrap.sh /opt/metwork-mfdata-$${TARGET_DIR} /opt/metwork-mfext-$${DEP_DIR}
 
     - cat adm/root.mk
     - env |sort
@@ -32,8 +32,8 @@ build_common: &build_common
     - mkdir -p /opt/metwork-mfdata-$${TARGET_DIR}
     - if test -d /pub; then mkdir -p /pub/metwork/continuous_integration/buildlogs/${DRONE_BRANCH}/mfdata/${OS_VERSION}/${DRONE_BUILD_NUMBER}; fi
     - if test -d /pub; then make >/pub/metwork/continuous_integration/buildlogs/${DRONE_BRANCH}/mfdata/${OS_VERSION}/${DRONE_BUILD_NUMBER}/make.log 2>&1 || ( tail -200 /pub/metwork/continuous_integration/buildlogs/${DRONE_BRANCH}/mfdata/${OS_VERSION}/${DRONE_BUILD_NUMBER}/make.log ; exit 1 ) else make; fi
-    - git status
-    - git diff
+    - OUTPUT=`git status --short`
+    - if test "$${OUTPUT}" != ""; then echo "ERROR non empty git status output $${OUTPUT}"; echo "git diff output"; git diff; exit 1; fi
     - MODULEHASH=`/opt/metwork-mfdata-$${TARGET_DIR}/bin/mfdata_wrapper module_hash 2>module_hash.debug` # FIXME: module_hash for addons ?
     - if test -f /opt/metwork-mfdata-$${TARGET_DIR}/.dhash; then cat /opt/metwork-mfdata-$${TARGET_DIR}/.dhash; fi
     - cat module_hash.debug |sort |uniq ; rm -f module_hash.debug
@@ -66,7 +66,6 @@ publish_ci_common: &publish_ci_common
     - /private:/private
     - /buildcache:/buildcache
 
-
 integration_tests_common: &integration_tests_common
   commands:
     - if test "$${FORCED_OS_VERSION}" != ""; then if test "$${FORCED_OS_VERSION}" != "${OS_VERSION}"; then echo "step bypass"; exit 0; fi; fi
@@ -83,7 +82,6 @@ integration_tests_common: &integration_tests_common
     - su --command="mfdata.status" - mfdata
     - if test -d "integration_tests"; then chown -R mfdata integration_tests; cd integration_tests; su --command="cd `pwd`; ./run_integration_tests.sh" - mfdata; cd ..; fi
     - su --command="mfdata.stop" - mfdata
-
 
 
 pipeline:
@@ -201,7 +199,6 @@ pipeline:
       event: tag
       ref: refs/tags/v*
 
-
   integration_tests_integration:
     <<: *integration_tests_common
     
@@ -226,7 +223,6 @@ pipeline:
       event: [push, pull_request]
 
       branch: [  master, release_*, experimental* ]
-
 
   publish_ci_integration:
     <<: *publish_ci_common
@@ -261,6 +257,7 @@ pipeline:
     volumes:
       - /pub:/pub
     commands:
+      - if test -f .drone_downstream_bypass; then echo "step bypass"; exit 0; fi
       - cd /pub/metwork/continuous_integration/rpms/${DRONE_BRANCH}/${OS_VERSION} && genhdlist2 --allow-empty-media .
     when:
       event: push
@@ -274,7 +271,6 @@ pipeline:
     when:
       event: tag
       ref: refs/tags/v*
-
 
 
 

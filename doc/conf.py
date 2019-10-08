@@ -36,9 +36,6 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',
               'sphinx.ext.autosectionlabel',
               'sphinx.ext.todo']
-#              'sphinx_automodapi.automodapi',
-#              'sphinx_automodapi.smart_resolver',
-#              ]
 
 # A dictionary of values to pass into the template engine’s context for all pages
 html_context = {
@@ -70,10 +67,6 @@ autosectionlabel_maxdepth = 3
 
 # The output format for Graphviz when building HTML files. This must be either 'png' or 'svg'
 graphviz_output_format = 'svg'
-
-# This must be a string that specifies the name of the directory the automodsumm generated documentation ends up in.
-# This directory path should be relative to the documentation root (e.g., same place as index.rst). Defaults to 'api'.
-automodapi_toctreedirnm = 'api'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -210,8 +203,6 @@ napoleon_include_special_with_doc = False
 napoleon_use_admonition_for_examples = False
 napoleon_use_admonition_for_notes = False
 napoleon_use_admonition_for_references = False
-#napoleon_use_ivar = False
-#napoleon_use_param = True
 autoclass_content = 'both'
 
 

@@ -28,7 +28,7 @@ version=1.0.0
 
 In order to deploy a plugin in a production environment:
 
-- Metwork have to be installed on this environment (at least MFDATA and its dependencies MFEXT and MFCOM).
+- Metwork have to be installed on this environment (at least MFDATA and its dependencies MFEXT).
 - the plugin you want to deploy have to be 'released' in a `.plugin` file (refer to [Release a plugin](#release-a-plugin))
 
 ### The 'basic' way
