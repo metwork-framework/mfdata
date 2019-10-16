@@ -19,6 +19,7 @@ stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/nginx.log
 copy_env = True
 autostart = True
 respawn = True
+max_retry = -1
 hooks.before_start=circus_hooks.before_start_shell
 hooks.after_stop=circus_hooks.after_stop_shell
 working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
@@ -35,6 +36,7 @@ stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/conf_monitor.stderr
 copy_env = True                                                                 
 autostart = True                                                                
 respawn = True           
+max_retry = -1
 working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
 stop_signal = 9
 hooks.before_start=circus_hooks.before_start_shell
@@ -51,6 +53,7 @@ stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/redis.log
 copy_env = True
 autostart = True
 respawn = True
+max_retry = -1
 hooks.before_start=circus_hooks.before_start_shell
 working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
 
@@ -65,6 +68,7 @@ stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/directory_observer.stderr
 copy_env = True
 autostart = True
 respawn = True
+max_retry = -1
 hooks.before_start=circus_hooks.before_start_shell
 working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
 
@@ -80,6 +84,7 @@ stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/telegraf_collector_var_in
 copy_env = True
 autostart = True
 respawn = True
+max_retry = -1
 working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
 {% endif %}
 
@@ -97,6 +102,7 @@ stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/jsonlog2elasticsearch_ngi
 copy_env = True                                                                 
 autostart = True                                                                
 respawn = True                                                                  
+max_retry = -1
 hooks.before_start=circus_hooks.before_start_shell                              
 hooks.after_stop=circus_hooks.after_stop_shell          
 working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
