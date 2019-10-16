@@ -54,7 +54,6 @@ class AcquisitionReinjectStep(AcquisitionStep):
     def _before(self, xaf, **kwargs):
         if xaf.filepath not in self.__xafs:
             self._set_before_tags(xaf)
-            self._conditional_copy_to_debug_plugin(xaf)
             retry_attempt = int(self.get_tag(xaf, "attempt", "0"))
             self.__xafs[xaf.filepath] = (time.time(), retry_attempt, xaf)
         return False

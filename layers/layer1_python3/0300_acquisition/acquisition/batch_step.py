@@ -48,9 +48,6 @@ class AcquisitionBatchStep(AcquisitionStep):
 
     You have to override this class.
 
-    Attributes:
-        _batch (AcquisitionBatch): AcquisitionBatch object.
-
     """
 
     __batch = None

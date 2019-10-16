@@ -2,8 +2,29 @@
 ACQUISITION API
 ===============
 
-.. automodapi:: acquisition
-   :include-all-objects:
-   :no-inheritance-diagram:
-   :skip: AcquisitionMoveStep, AcquisitionDeleteStep, AcquisitionReinjectStep, AcquisitionForkStep, AcquisitionArchiveStep, AcquisitionStatsDClient
+AcquisitionStep class
+---------------------
+
+.. autoclass:: acquisition.AcquisitionStep
+   :members:
    :inherited-members:
+
+   .. automethod:: __init__
+
+AcquisitionBatchStep class
+--------------------------
+
+.. autoclass:: acquisition.AcquisitionBatchStep
+   :members:
+   :inherited-members:
+
+   .. automethod:: __init__
+
+AcquisitionListener class
+-------------------------
+
+.. autoclass:: acquisision.AcquisitionListener
+   :members:
+   :inherited-members:
+
+   .. automethod:: __init__

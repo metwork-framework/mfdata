@@ -89,6 +89,7 @@ def make_watcher_conf(plugin_configuration_file):
         output.append("max_age_variance = %i" % max_age_variance)
         output.append("copy_env = True")
         output.append("async_kill = True")
+        output.append("max_retry = -1")
         output.append("autostart = True")
         output.append("respawn = True")
         working_dir = os.path.dirname(plugin_configuration_file)
@@ -127,6 +128,7 @@ def make_watcher_conf(plugin_configuration_file):
                       "redis_plugin_%s.log" % plugin_name)
         output.append("copy_env = True")
         output.append("autostart = True")
+        output.append("max_retry = -1")
         output.append("respawn = True")
         with open("%s/tmp/config_auto/redis_plugin_%s.conf" %
                   (MFMODULE_RUNTIME_HOME, plugin_name), "w+") as f:
@@ -153,6 +155,7 @@ def make_watcher_conf(plugin_configuration_file):
         output.append("async_kill = True")
         output.append("autostart = True")
         output.append("respawn = True")
+        output.append("max_retry = -1")
         output.append("stdout_stream.class = FileStream")
         output.append("stdout_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/"
                       "extra_daemon_%s_plugin_%s.log" %
