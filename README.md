@@ -19,12 +19,13 @@
 * [1\. What is it?](#1-what-is-it)
 * [2\. What is not in?](#2-what-is-not-in)
 * [3\. Quickstart](#3-quickstart)
-* [4\. Reference documentation](#4-reference-documentation)
-* [5\. Installation guide](#5-installation-guide)
-* [6\. Configuration guide](#6-configuration-guide)
-* [7\. Contributing guide](#7-contributing-guide)
-* [8\. Code of Conduct](#8-code-of-conduct)
-* [9\. Sponsors](#9-sponsors)
+* [4\.  Cheatsheet](#4-cheatsheet)
+* [5\. Reference documentation](#5-reference-documentation)
+* [6\. Installation guide](#6-installation-guide)
+* [7\. Configuration guide](#7-configuration-guide)
+* [8\. Contributing guide](#8-contributing-guide)
+* [9\. Code of Conduct](#9-code-of-conduct)
+* [10\. Sponsors](#10-sponsors)
 
 
 
@@ -185,7 +186,11 @@ latest.switch.main.system_magic = ASCII text
 
 
 
-## 4. Reference documentation
+## 4.  Cheatsheet
+
+A cheatsheet for this module is available [here](.metwork-framework/cheatsheet.md)
+
+## 5. Reference documentation
 
 - (for **master (development)** version), see [this dedicated site](http://metwork-framework.org/pub/metwork/continuous_integration/docs/master/mfdata/) for reference documentation.
 - (for **latest released stable** version), see [this dedicated site](http://metwork-framework.org/pub/metwork/releases/docs/stable/mfdata/) for reference documentation.
@@ -197,30 +202,30 @@ And if you are looking for an old released version, you can search [here](http:/
 
 
 
-## 5. Installation guide
+## 6. Installation guide
 
 See [this document](.metwork-framework/install_a_metwork_package.md).
 
 
-## 6. Configuration guide
+## 7. Configuration guide
 
 See [this document](.metwork-framework/configure_a_metwork_package.md).
 
 
 
-## 7. Contributing guide
+## 8. Contributing guide
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 
 
-## 8. Code of Conduct
+## 9. Code of Conduct
 
 See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) file.
 
 
 
-## 9. Sponsors
+## 10. Sponsors
 
 *(If you are officially paid to work on MetWork Framework, please contact us to add your company logo here!)*
 
