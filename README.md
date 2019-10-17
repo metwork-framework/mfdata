@@ -19,7 +19,7 @@
 * [1\. What is it?](#1-what-is-it)
 * [2\. What is not in?](#2-what-is-not-in)
 * [3\. Quickstart](#3-quickstart)
-* [4\.  Cheatsheet](#4-cheatsheet)
+* [4\. Cheatsheet](#4-cheatsheet)
 * [5\. Reference documentation](#5-reference-documentation)
 * [6\. Installation guide](#6-installation-guide)
 * [7\. Configuration guide](#7-configuration-guide)
@@ -186,7 +186,7 @@ latest.switch.main.system_magic = ASCII text
 
 
 
-## 4.  Cheatsheet
+## 4. Cheatsheet
 
 A cheatsheet for this module is available [here](.metwork-framework/cheatsheet.md)
 
