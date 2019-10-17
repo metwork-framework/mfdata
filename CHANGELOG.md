@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- refactor around #154 issue
 - build mfdata without mfcom (mfcom layers are now included in mfext)
 - add new options for switch plugin
 - introduce better error reporting
