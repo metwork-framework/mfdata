@@ -165,8 +165,9 @@ class AcquisitionBatchStep(AcquisitionStep):
                            self._batch.get_age())
 
     def _process(self, xaf):
-        super(AcquisitionBatchStep, self)._process(xaf)
+        res = super(AcquisitionBatchStep, self)._process(xaf)
         self._conditional_process_batch()
+        return res
 
     def _process_batch(self):
         self.info("Start the processing of batch %s...", self._batch.id)
