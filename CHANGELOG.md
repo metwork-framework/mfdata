@@ -1,9 +1,10 @@
-# CHANGELOG
+# release_0.9 CHANGELOG
 
 
 ## [Unreleased]
 
 ### New Features
+- allow "-" and "." in http receiver
 - refactor around #154 issue
 - build mfdata without mfcom (mfcom layers are now included in mfext)
 - add new options for switch plugin
