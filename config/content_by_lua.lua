@@ -37,7 +37,7 @@ local function process()
 
     -- Tests
     if method == "POST" then
-        regex = "^/([a-zA-Z0-9_-]*)/*$"
+        regex = "^/([a-zA-Z0-9_%-%.]*)/*$"
         directory = string.match(uri, regex)
         if directory == nil then
             exit_with_ngx_error(400, string.format("POST request uri must match with %s regex", regex))
@@ -45,10 +45,10 @@ local function process()
             directory = default_directory
         end
     elseif method == "PUT" then
-        regex = "^/([a-zA-Z0-9_-]+)/*$"
+        regex = "^/([a-zA-Z0-9_%-%.]+)/*$"
         filename = string.match(uri, regex)
         if filename == nil then
-            regex = "^/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/*$"
+            regex = "^/([a-zA-Z0-9_%-%.]+)/([a-zA-Z0-9_%-%.]+)/*$"
             directory, filename = string.match(uri, regex)
             if directory == nil or filename == nil then
                 exit_with_ngx_error(400, string.format("PUT request uri must match with %s regex", regex))
