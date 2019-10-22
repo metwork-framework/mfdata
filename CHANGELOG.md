@@ -2,6 +2,16 @@
 
 
 
+## v0.8.5 (2019-10-22)
+
+### New Features
+- allow "-" and "." in http receiver
+
+
+
+
+
+
 ## v0.8.4 (2019-09-22)
 
 ### New Features
