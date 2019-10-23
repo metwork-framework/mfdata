@@ -28,3 +28,9 @@ AcquisitionListener class
    :inherited-members:
 
    .. automethod:: __init__
+
+Acquisition decorators
+----------------------
+
+.. automodule:: acquisition.decorators
+   :members:
