@@ -443,13 +443,18 @@ class XattrFile(object):
         """
         return os.path.getsize(self.filepath)
 
-    def hard_link(self, new_filepath):
+    def hard_link(self, new_filepath, tmp_suffix=".t"):
         """Create a hard link of the file (and its tags).
+
+        The temporary suffix is used during the hardlink to get a kind of
+        atomic operation.
 
         Note: tags are commited to redis during the hard link.
 
         Args:
             new_filepath (string): filepath for the hard link.
+            tmp_suffix (string): temporary suffix during copy
+                (None means no temporary suffix).
 
         Returns:
             a new Xattrfile corresponding to the new file/link.
@@ -459,11 +464,16 @@ class XattrFile(object):
             IOError: can't do the link at a filesystem level.
 
         """
-        os.link(self.filepath, new_filepath)
-        res = self.copy_tags_on(new_filepath)
+        tmp_filepath = new_filepath
+        if tmp_suffix is not None:
+            tmp_filepath = tmp_filepath + tmp_suffix
+        os.link(self.filepath, tmp_filepath)
+        xattr_f = self.copy_tags_on(tmp_filepath)
+        if tmp_suffix is not None:
+            xattr_f.rename(new_filepath)
         self.logger.debug("%s hardlinked to %s" %
                           (self.filepath, new_filepath))
-        return res
+        return xattr_f
 
     def chmod(self, mode_int):
         """Change the mode of the file to the provided numeric mode.
@@ -506,28 +516,27 @@ class XattrFile(object):
                 f.write("\n")
 
     def _hardlink_move_or_copy(self, new_filepath, hardlink_mode=True,
-                               tmp_suffix=".t", chmod_mode_int=None,
-                               keep_original_file=False):
-        # Note: keep_original_file is only used with hardlink_mode=True
+                               tmp_suffix=".t", chmod_mode_int=None):
         old_filepath = self.filepath
         if chmod_mode_int is None:
             try:
                 if hardlink_mode:
                     self.hard_link(new_filepath)
-                    if not keep_original_file:
-                        self.delete()
                 else:
                     self.rename(new_filepath)
                 return (True, True)
             except Exception:
                 pass
         try:
-            self.copy(new_filepath, tmp_suffix=tmp_suffix,
-                      chmod_mode_int=chmod_mode_int)
-            if not keep_original_file:
-                self.delete()
-            self.__set_filepath(new_filepath)
-            self._read_tags()
+            if hardlink_mode:
+                self.copy(new_filepath, tmp_suffix=tmp_suffix,
+                          chmod_mode_int=chmod_mode_int)
+            else:
+                self = self.copy(new_filepath, tmp_suffix=tmp_suffix,
+                                 chmod_mode_int=chmod_mode_int)
+                if not XattrFile(old_filepath).delete_or_nothing():
+                    self.logger.warning("can't delete %s", old_filepath)
+                    return (False, False)
             return (True, False)
         except Exception:
             if hardlink_mode:
@@ -543,7 +552,7 @@ class XattrFile(object):
         """Move or copy (only if move failed) without any exceptions.
 
         The original file (and its tags) is deleted (whatever move or copy
-        is effectively done).
+        is effectively done) and the current object is renamed to new filepath.
 
         Args:
             new_filepath (string): complete new filepath towards move/copy.
@@ -562,18 +571,17 @@ class XattrFile(object):
                                            hardlink_mode=False)
 
     def hardlink_or_copy(self, new_filepath, tmp_suffix=".t",
-                         chmod_mode_int=None, keep_original_file=False):
+                         chmod_mode_int=None):
         """Hardlink or copy (only if move failed) without raising exceptions.
 
-        The original file (and its tags) is deleted (whatever hardlink or copy
-        is effectively done) if keep_original_file=False (default).
+        The original file (and its tags) is keeped intact and the current
+        object is not modified.
 
         Args:
             new_filepath (string): complete new filepath towards harlink/copy.
             tmp_suffix (string): temporary suffix during copy
                 (None means no temporary suffix).
             chmod_mode_int (integer): DEPRECATED (do not use).
-            keep_original_file (boolean): keep original file?
 
         Returns:
             (boolean, boolean): first boolean is True if the operation was ok,
@@ -584,8 +592,7 @@ class XattrFile(object):
         return self._hardlink_move_or_copy(
             new_filepath, tmp_suffix=tmp_suffix,
             chmod_mode_int=chmod_mode_int,
-            hardlink_mode=True,
-            keep_original_file=keep_original_file)
+            hardlink_mode=True)
 
     def delete_or_nothing(self):
         """Delete the file and corresponding tags.
