@@ -206,10 +206,11 @@ class BasicTestCase(TestCase):
         r1, r2 = y.hardlink_or_copy(tmp_data_file_path2)
         self.assertTrue(r1)
         self.assertTrue(r2)
-        self.assertFalse(os.path.isfile(tmp_data_file_path))
+        self.assertTrue(os.path.isfile(tmp_data_file_path))
         self.assertTrue(os.path.isfile(tmp_data_file_path2))
         self.assertEquals(make_xattrfile(
             tmp_data_file_path2).tags['key1'], b'value1')
+        make_xattrfile(tmp_data_file_path).delete()
         make_xattrfile(tmp_data_file_path2).delete()
 
     def test_14_hardlink_or_copy2(self):
@@ -232,12 +233,12 @@ class BasicTestCase(TestCase):
         y = make_xattrfile(tmp_data_file_path)
         old_os_link = os.link
         os.link = partial(os_link_fake, old_os_link,
-                          y.filepath, tmp_data_file_path2)
+                          y.filepath, tmp_data_file_path2 + ".t")
         r1, r2 = y.hardlink_or_copy(tmp_data_file_path2)
         os.link = old_os_link
         self.assertTrue(r1)
         self.assertFalse(r2)
-        self.assertFalse(os.path.isfile(tmp_data_file_path))
+        self.assertTrue(os.path.isfile(tmp_data_file_path))
         self.assertTrue(os.path.isfile(tmp_data_file_path2))
         self.assertEquals(make_xattrfile(
             tmp_data_file_path2).tags['key1'], b'value1')
@@ -254,8 +255,7 @@ class BasicTestCase(TestCase):
         x.tags['key1'] = b'value1'
         x.copy(tmp_data_file_path)
         y = make_xattrfile(tmp_data_file_path)
-        r1, r2 = y.hardlink_or_copy(tmp_data_file_path2,
-                                    keep_original_file=True)
+        r1, r2 = y.hardlink_or_copy(tmp_data_file_path2)
         self.assertTrue(r1)
         self.assertTrue(r2)
         self.assertTrue(os.path.isfile(tmp_data_file_path))
