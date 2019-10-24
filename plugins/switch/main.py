@@ -324,6 +324,7 @@ class AcquisitionSwitchStep(AcquisitionStep):
                     self.warning("can't delete: %s", xaf.filepath)
                 xaf = new_xaf
         result = True
+        hardlink_used = False
         for directory, use_hardlink in directories[:-1]:
             if use_hardlink:
                 result = result and self._hardlink_or_copy(xaf, directory)
