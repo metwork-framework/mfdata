@@ -360,12 +360,12 @@ class XattrFile(object):
         if tmp_suffix is not None:
             tmp_filepath = tmp_filepath + tmp_suffix
         shutil.copy2(self.filepath, tmp_filepath)
+        self.logger.debug("%s copied to %s", self.filepath, tmp_filepath)
         xattr_f = self.copy_tags_on(tmp_filepath)
         if chmod_mode_int is not None:
             xattr_f.chmod(chmod_mode_int)
         if tmp_suffix is not None:
             xattr_f.rename(new_filepath)
-        self.logger.debug("%s copied to %s" % (self.filepath, new_filepath))
         return xattr_f
 
     def rename(self, new_filepath):
@@ -468,11 +468,11 @@ class XattrFile(object):
         if tmp_suffix is not None:
             tmp_filepath = tmp_filepath + tmp_suffix
         os.link(self.filepath, tmp_filepath)
+        self.logger.debug("%s hardlinked to %s" %
+                          (self.filepath, tmp_filepath))
         xattr_f = self.copy_tags_on(tmp_filepath)
         if tmp_suffix is not None:
             xattr_f.rename(new_filepath)
-        self.logger.debug("%s hardlinked to %s" %
-                          (self.filepath, new_filepath))
         return xattr_f
 
     def chmod(self, mode_int):
