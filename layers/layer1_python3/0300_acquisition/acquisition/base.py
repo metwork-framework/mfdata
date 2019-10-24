@@ -37,7 +37,7 @@ class AcquisitionBase(object):
     unit_tests_args = None
     __logger = None
     plugin_name = None
-    step_name = None
+    step_name = "main"  # default value
     daemon_name = None
 
     def __init__(self):
@@ -116,13 +116,13 @@ class AcquisitionBase(object):
 
     def _get_step_or_daemon_name(self):
         try:
-            if self.step_name is not None:
-                return self.step_name
+            if self.daemon_name is not None:
+                return self.daemon_name
         except Exception:
             pass
         try:
-            if self.daemon_name is not None:
-                return self.daemon_name
+            if self.step_name is not None:
+                return self.step_name
         except Exception:
             pass
         return "main"
