@@ -9,7 +9,7 @@ from configparser_extended import ExtendedConfigParser
 import hashlib
 from magic import Magic
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
-from acquisition.utils import _get_or_make_trash_dir
+from acquisition.utils import _get_or_make_trash_dir, _get_tmp_filepath
 from xattrfile import XattrFile
 
 MAGIC_OBJECTS_CACHE = {}
@@ -27,9 +27,11 @@ class AcquisitionSwitchStep(AcquisitionStep):
     condition_tuples = None
     in_dir = None
     no_match_policy = None
+    uid = None
 
     def init(self):
         self.in_dir = os.environ["MFDATA_DATA_IN_DIR"]
+        self.uid = os.getuid()
         conf_file = os.path.join(
             os.environ["MFMODULE_RUNTIME_HOME"],
             "tmp",
@@ -101,6 +103,11 @@ class AcquisitionSwitchStep(AcquisitionStep):
             "--no-magic",
             action="store_true",
             help="if set, don't compute magic tags",
+        )
+        parser.add_argument(
+            "--no-uid-fix",
+            action="store_true",
+            help="if set, don't try to fix incoming files uids",
         )
         parser.add_argument(
             "--max-header-length",
@@ -249,7 +256,8 @@ class AcquisitionSwitchStep(AcquisitionStep):
 
     def _set_file_size_tag(self, xaf):
         size = xaf.getsize()
-        self.set_tag(xaf, "size", str(size))
+        if size is not None:
+            self.set_tag(xaf, "size", str(size))
 
     def _set_header_line_header(self, xaf, max_size):
         line = None
@@ -266,6 +274,9 @@ class AcquisitionSwitchStep(AcquisitionStep):
             return tell
 
     def process(self, xaf):
+        uid = xaf.getuid()
+        fix_uid = uid is not None and uid != self.uid and \
+            not self.args.no_uid_fix
         self._set_file_size_tag(xaf)
         if self.args.max_header_length > 0:
             tell = self._set_header_line_header(
@@ -286,37 +297,64 @@ class AcquisitionSwitchStep(AcquisitionStep):
         if len(directories) == 0:
             return self._no_match(xaf)
         if len(directories) == 1:
-            self._set_after_tags(xaf, True)
-            return self._move_or_copy(xaf, directories[0][0])
+            if fix_uid:
+                # We force a copy here to be sure that the file will be
+                # owned by current user
+                return self._copy(xaf, directories[0][0])
+            else:
+                return self._move_or_copy(xaf, directories[0][0])
         # len(directories) > 1
+        can_hardlink = any([x for _, x in directories])
+        if fix_uid and can_hardlink:
+            # we can use hardlinking for one directory but
+            # to do that, we have to fix the ownership of the current file
+            self.info("the file: %s is owned by uid:%i and not by current "
+                      "uid: %i => let's copy it to change its ownership",
+                      xaf.filepath, uid, self.uid)
+            new_tmp_filepath = _get_tmp_filepath(self.plugin_name,
+                                                 self.step_name)
+            try:
+                new_xaf = xaf.copy(new_tmp_filepath)
+            except Exception:
+                self.warning("can't copy %s to %s", xaf.filepath,
+                             new_tmp_filepath)
+            else:
+                self.info("%s copied to %s", xaf.filepath, new_tmp_filepath)
+                if not xaf.delete_or_nothing():
+                    self.warning("can't delete: %s", xaf.filepath)
+                xaf = new_xaf
         result = True
-        hardlink_used = False
         for directory, use_hardlink in directories[:-1]:
-            self._set_after_tags(xaf, True)
             if use_hardlink:
                 result = result and self._hardlink_or_copy(xaf, directory)
                 hardlink_used = True
             else:
                 result = result and self._copy(xaf, directory)
-        self._set_after_tags(xaf, True)
-        if result and directories[-1][1]:
-            # we can hardlink here, so we can move last one
-            result = result and self._move_or_copy(xaf, directories[-1][0])
-        else:
-            if not result:
-                # there are some errors, we prefer to copy to keep the original
-                # file for trash policy
-                result = result and self._copy(xaf, directories[-1][0])
+        # Special case for last directory (we can optimize a little bit)
+        # If there is no error:
+        #     If the last directory allow hardlinking => move
+        #     If the last directory does not allow hardlinking
+        #         If we used hardlinking for other directories => copy
+        #         If we didn't use hardlinking for other directories => move
+        # If there is some errors:
+        #     => copy to keep the original file for trash policy
+        if result:
+            if directories[-1][1]:
+                # we can hardlink here, so we can move last one
+                result = result and self._move_or_copy(xaf, directories[-1][0])
             else:
-                # no error
-                if not hardlink_used:
+                if hardlink_used:
+                    # we have to copy
+                    result = result and self._copy(xaf, directories[-1][0])
+                else:
                     # no hardlink used, we can move the last one
                     result = result and self._move_or_copy(
                         xaf, directories[-1][0]
                     )
-                else:
-                    # we have to copy
-                    result = result and self._copy(xaf, directories[-1][0])
+        else:
+            # there are some errors, we prefer to copy to keep the original
+            # file for trash policy
+            result = result and self._copy(xaf, directories[-1][0])
         return result
 
 
