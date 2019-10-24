@@ -330,18 +330,6 @@ class AcquisitionBase(object):
                 original_dirname = str(os.path.basename(dirname))
                 self._set_tag(xaf, tag_name, original_dirname)
 
-    def _set_after_tags(self, xaf, process_status):
-        self.set_tag(
-            xaf,
-            "exit_step",
-            _get_current_utc_datetime_with_ms(),
-            add_latest=False,
-        )
-        if process_status:
-            self.set_tag(xaf, "process_status", "ok", add_latest=False)
-        else:
-            self.set_tag(xaf, "process_status", "nok", add_latest=False)
-
     def _set_before_tags(self, xaf):
         current = _get_current_utc_datetime_with_ms()
         self.__increment_and_set_counter_tag_value(xaf)
