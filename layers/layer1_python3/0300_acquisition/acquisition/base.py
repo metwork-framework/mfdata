@@ -37,7 +37,7 @@ class AcquisitionBase(object):
     unit_tests_args = None
     __logger = None
     plugin_name = None
-    step_name = None
+    step_name = "main"  # default value
     daemon_name = None
 
     def __init__(self):
@@ -116,13 +116,13 @@ class AcquisitionBase(object):
 
     def _get_step_or_daemon_name(self):
         try:
-            if self.step_name is not None:
-                return self.step_name
+            if self.daemon_name is not None:
+                return self.daemon_name
         except Exception:
             pass
         try:
-            if self.daemon_name is not None:
-                return self.daemon_name
+            if self.step_name is not None:
+                return self.step_name
         except Exception:
             pass
         return "main"
@@ -329,18 +329,6 @@ class AcquisitionBase(object):
                 dirname = os.path.dirname(xaf._original_filepath)
                 original_dirname = str(os.path.basename(dirname))
                 self._set_tag(xaf, tag_name, original_dirname)
-
-    def _set_after_tags(self, xaf, process_status):
-        self.set_tag(
-            xaf,
-            "exit_step",
-            _get_current_utc_datetime_with_ms(),
-            add_latest=False,
-        )
-        if process_status:
-            self.set_tag(xaf, "process_status", "ok", add_latest=False)
-        else:
-            self.set_tag(xaf, "process_status", "nok", add_latest=False)
 
     def _set_before_tags(self, xaf):
         current = _get_current_utc_datetime_with_ms()

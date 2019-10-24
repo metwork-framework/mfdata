@@ -131,7 +131,6 @@ class ExtraDaemonAmqpListener(AcquisitionListener):
                 self, xaf, _unused_channel, basic_deliver, properties, body
             )
         self._set_before_tags(xaf)
-        self._set_after_tags(xaf, True)
         xaf.rename(filename)
         self.debug("Created file name : %s" % filename)
         self.info(

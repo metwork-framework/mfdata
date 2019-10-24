@@ -66,8 +66,6 @@ class AcquisitionMoveStep(AcquisitionStep):
         old_filepath = xaf.filepath
         if self.drop_tags:
             xaf.clear_tags()
-        else:
-            self._set_after_tags(xaf, True)
         success, moved = xaf.move_or_copy(new_filepath,
                                           chmod_mode_int=fcmi)
         if success:

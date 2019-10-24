@@ -54,7 +54,6 @@ class ExtraDaemonMqttListener(AcquisitionListener):
             xaf, "mqtt_listener_broker_port", str(self.args.broker_port)
         )
         self._set_before_tags(xaf)
-        self._set_after_tags(xaf, True)
         xaf.rename(filepath)
 
     def __sigterm_handler(self, *args):

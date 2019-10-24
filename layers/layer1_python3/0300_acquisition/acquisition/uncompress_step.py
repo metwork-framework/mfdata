@@ -34,7 +34,6 @@ class AcquisitionUncompressStep(AcquisitionStep):
             self.warning('impossible to uncompress (%s)' %
                          self.cmodule.__name__)
             return False
-        self._set_after_tags(xaf, True)
         new_xaf = xaf.copy_tags_on(tmp_filepath)
         new_xaf.rename(new_filepath)
         return True
