@@ -438,10 +438,29 @@ class XattrFile(object):
         """Return the size of the file (in bytes).
 
         Returns
-            int: the size of the file (in bytes).
+            int: the size of the file (in bytes) or None in case of problems.
 
         """
-        return os.path.getsize(self.filepath)
+        try:
+            return os.path.getsize(self.filepath)
+        except Exception as e:
+            self.logger.warning("can't get the size of %s with exception: %s",
+                                self.filepath, e)
+            return None
+
+    def getuid(self):
+        """Return the uid of the file.
+
+        Returns:
+            int: the uid of the file or None in case of problems.
+
+        """
+        try:
+            return os.stat(self.filepath).st_uid
+        except Exception as e:
+            self.logger.warning("can't get the uid of %s with exception: %s",
+                                self.filepath, e)
+            return None
 
     def hard_link(self, new_filepath, tmp_suffix=".t"):
         """Create a hard link of the file (and its tags).
