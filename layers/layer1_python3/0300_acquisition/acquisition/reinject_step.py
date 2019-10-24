@@ -66,9 +66,12 @@ class AcquisitionReinjectStep(AcquisitionStep):
         new_filepath = os.path.join(self.args.reinject_dir,
                                     get_unique_hexa_identifier())
         xaf.move_or_copy(new_filepath)
+        self.get_stats_client().incr("number_of_processed_files", 1)
+        self.get_stats_client().incr("bytes_of_processed_files", xaf.getsize())
 
     def give_up(self, xaf):
         self.warning("max retry attempt for %s => deleting", xaf.filepath)
+        self.get_stats_client().incr("number_of_processing_errors", 1)
         xaf.delete_or_nothing()
 
     def ping(self):
