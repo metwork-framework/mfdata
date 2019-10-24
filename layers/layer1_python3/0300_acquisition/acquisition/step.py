@@ -187,7 +187,7 @@ class AcquisitionStep(AcquisitionBase):
 
     def _before(self, xaf):
         tmp_filepath = self.get_tmp_filepath()
-        self.debug("Move %s to %s", xaf.filepath, tmp_filepath)
+        self.info("Move %s to %s (to process it)", xaf.filepath, tmp_filepath)
         try:
             xaf.rename(tmp_filepath)
         except (IOError, OSError):
