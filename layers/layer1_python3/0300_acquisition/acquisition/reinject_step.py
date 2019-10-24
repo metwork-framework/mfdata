@@ -65,7 +65,6 @@ class AcquisitionReinjectStep(AcquisitionStep):
                   self.args.reinject_dir, retry_attempt + 1)
         new_filepath = os.path.join(self.args.reinject_dir,
                                     get_unique_hexa_identifier())
-        self._set_after_tags(xaf, True)
         xaf.move_or_copy(new_filepath)
 
     def give_up(self, xaf):

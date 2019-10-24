@@ -241,7 +241,6 @@ class AcquisitionStep(AcquisitionBase):
                     if xaf._before_process_filepath == xaf.filepath:
                         xaf.delete_or_nothing()
         else:
-            self._set_after_tags(xaf, process_status)
             self._trash(xaf)
         self._exception_safe_call(
             self.after, [process_status], {}, "after %s" % xaf.filepath, False
@@ -368,7 +367,6 @@ class AcquisitionStep(AcquisitionBase):
             get_plugin_step_directory_path(plugin_name, step_name),
             get_unique_hexa_identifier(),
         )
-        self._set_after_tags(xaf, True)
         result, _ = xaf.move_or_copy(target_path)
         return result
 
@@ -388,7 +386,6 @@ class AcquisitionStep(AcquisitionBase):
             get_plugin_step_directory_path(plugin_name, step_name),
             get_unique_hexa_identifier(),
         )
-        self._set_after_tags(xaf, True)
         result = xaf.copy_or_nothing(target_path)
         return result
 
