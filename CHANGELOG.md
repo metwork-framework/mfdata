@@ -2,6 +2,22 @@
 
 
 
+## v0.9.2 (2019-10-24)
+
+### New Features
+- change the behavior of hardlinks methods to provide atomicity
+- add metrics to reinject step
+- add getuid() method and better getsite() error reporting
+
+
+### Bug Fixes
+- fix default value for step_name
+- fix issues with hardlinking when incoming files come with another uid
+
+
+
+
+
 ## v0.9.1 (2019-10-23)
 
 - No interesting change
