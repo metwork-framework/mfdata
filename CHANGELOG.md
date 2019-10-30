@@ -1,7 +1,8 @@
 # release_0.8 CHANGELOG
 
 
-## [Unreleased]
+
+## v0.8.6 (2019-10-25)
 
 ### New Features
 - change the behavior of hardlinks methods to provide atomicity
