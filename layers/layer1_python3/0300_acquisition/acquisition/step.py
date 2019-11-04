@@ -142,8 +142,11 @@ class AcquisitionStep(AcquisitionBase):
             self.exception("exception during %s" % label)
             return return_value_if_exception
 
-    def _process(self, xaf):
-        xaf._original_filepath = xaf.filepath
+    def _process(self, xaf, force_original_filepath=None):
+        if force_original_filepath is not None:
+            xaf._original_filepath = force_original_filepath
+        else:
+            xaf._original_filepath = xaf.filepath
         self.info("Start the processing of %s...", xaf._original_filepath)
         timer = self.get_stats_client().timer("processing_file_timer")
         timer.start()
@@ -335,7 +338,7 @@ class AcquisitionStep(AcquisitionBase):
         tmp_filepath = self.get_tmp_filepath()
         original_xaf = xattrfile.XattrFile(filepath)
         xaf = original_xaf.copy(tmp_filepath)
-        return self._process(xaf)
+        return self._process(xaf, force_original_filepath=filepath)
 
     def get_stats_client(self, extra_tags={}):
         return get_stats_client(self.plugin_name, self.step_name, extra_tags)
