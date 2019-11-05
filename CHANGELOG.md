@@ -12,6 +12,7 @@
 
 
 ### Bug Fixes
+- fix get_original_basename/dirname behaviour in debug mode
 - fix failure_policy_move_keep_tags configuration key
 - fix default value for step_name
 - fix issues with hardlinking when incoming files come with another uid
