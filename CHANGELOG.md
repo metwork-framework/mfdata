@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- allow ,;: in directorie/filenames
 
 
 ### Bug Fixes
