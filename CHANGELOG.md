@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- allow ,;: in directorie/filenames
 - add metrics to reinject step
 - add getuid() method and better getsite() error reporting
 - change the behavior of hardlinks methods to provide atomicity
