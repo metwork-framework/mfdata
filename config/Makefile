@@ -2,7 +2,7 @@ CONFIGS=config.ini directory_observer.ini redis.conf nginx.conf content_by_lua.l
 
 include ../adm/root.mk
 include $(MFEXT_HOME)/share/subdir_root.mk
-include $(MFEXT_HOME)/opt/misc/share/config_subdir.mk
+include $(MFEXT_HOME)/share/config_subdir.mk
 
 test:
 	layer_wrapper --layers=devtools@mfext noutf8.sh
