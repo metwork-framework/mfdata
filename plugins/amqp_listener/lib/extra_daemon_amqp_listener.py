@@ -88,9 +88,6 @@ class ExtraDaemonAmqpListener(AcquisitionListener):
         except Exception as e:
             self.error(format(e))
             return False
-        except Exception:
-            self.error("Error unknown")
-            return False
         else:
             return True
 
