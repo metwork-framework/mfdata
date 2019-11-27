@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- adaptation to removal of layer misc@mfext
 - allow ,;: in directorie/filenames
 - add metrics to reinject step
 - add getuid() method and better getsite() error reporting
