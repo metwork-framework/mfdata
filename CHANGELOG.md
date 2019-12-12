@@ -1,7 +1,8 @@
 # release_0.9 CHANGELOG
 
 
-## [Unreleased]
+
+## v0.9.5 (2019-11-07)
 
 ### New Features
 - allow ,;: in directorie/filenames
