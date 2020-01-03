@@ -1,10 +1,7 @@
-###################
-##### STARTUP #####
-###################
-[startup]
-flag=1
+{% extends "config.ini" %}
 
-
+{% block custom %}
+{% raw -%}
 ###################
 ##### DATA IN #####
 ###################
@@ -21,44 +18,6 @@ tmp_max_lifetime=60
 # Max lifetime for a file in data_in_dir but
 # not in trash or tmp subdir (in minutes)
 other_max_lifetime=360
-
-
-###############
-##### LOG #####
-###############
-[log]
-# log retention (in days)
-retention=5
-retention[DEV]=1
-
-# log minimal level
-# (DEBUG => everything,
-#  INFO => everything but not DEBUG,
-#  WARNING => everything but not DEBUG and INFO,
-#  ERROR => everything but not DEBU, INFO and WARNING,
-#  CRITICAL => everything but not DEBUG, INFO, WARNING AND ERROR)
-minimal_level=INFO
-minimal_level[DEV]=DEBUG
-
-# duplicate some log messages in JSON to a specific file (for external monitoring tool)
-# If json_file value is:
-# null => the feature is desactivated
-# AUTO => the json_file is @@@MFMODULE_RUNTIME_HOME@@@/log/json_logs.log if
-#         [admin]/hostname != null else null (desactivated)
-json_file=AUTO
-
-# Minimal level for this json log file
-# (DEBUG => everything,
-#  INFO => everything but not DEBUG,
-#  WARNING => everything but not DEBUG and INFO,
-#  ERROR => everything but not DEBU, INFO and WARNING,
-#  CRITICAL => everything but not DEBUG, INFO, WARNING AND ERROR)
-json_minimal_level=WARNING
-# log default level
-# (NOTSET, DEBUG => everything)
-#  INFO => everything but not DEBUG)
-#  WARNING => everything but not DEBUG and INFO)
-#  CRITICAL => everything but not DEBUG, INFO AND WARNING)
 
 
 ##################
@@ -89,29 +48,6 @@ port=0
 max_memory=2048
 pubsubclient_output_buffer_hard_limit = 1600
 pubsubclient_output_buffer_soft_limit = 1200
-
-
-#################
-##### ADMIN #####
-#################
-[admin]
-# Hostname hosting the mfadmin module (if any)
-# null => no monitoring
-hostname=null
-
-# Influxdb HTTP port on mfadmin host
-# (change this only if you changed influxdb http port on mfadmin host)
-influxdb_http_port=18086
-
-# ElasticSearch HTTP port on mfadmin host
-# (change this only if you changed elasticsearch http port on mfadmin host)
-elasticsearch_http_port=15603
-
-# If send_nginx_logs=1, send nginx access logs to the configured admin hostname
-send_nginx_logs=0
-
-# If send_mflog_logs=1, send mflog logs to the configured admin hostname
-send_mflog_logs=1
 
 
 #################
@@ -182,6 +118,7 @@ mqtt_listener_broker_port=1883
 # a string specifying the subscription topic to subscribe to.Default to # (all)
 mqtt_listener_subscription_topic=#
 
+
 ####################
 #####   AMQP   #####
 ####################
@@ -209,9 +146,12 @@ amqp_consumer_subscription_queue=my_queue
 # The subscription routing key (wildcards allowed) (for "topic" mode)
 amqp_consumer_subscription_routing_topic_keys = "*"
 
+
 ####################
 ##### TELEGRAF #####
 ####################
 [telegraf]
 statsd_port=18126
 debug=0
+{% endraw %}
+{% endblock %}

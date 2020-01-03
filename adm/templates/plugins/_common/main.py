@@ -1,5 +1,5 @@
 {% block main -%}
-#!/usr/bin/env {{cookiecutter.python_version|default('python3')}}
+#!/usr/bin/env python
 
 from acquisition import Acquisition{{typeStep}}Step
 

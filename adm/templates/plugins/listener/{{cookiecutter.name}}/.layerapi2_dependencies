@@ -1,6 +1,1 @@
-{{cookiecutter.python_version}}@mfdata
--{{cookiecutter.python_version}}_devtools@mfext
--{{cookiecutter.python_version}}_ia@mfext
--{{cookiecutter.python_version}}_vim@mfext
--scientific_core@mfext
--{{cookiecutter.python_version}}_scientific@mfext
+../../_common/python3_layerapi2_dependencies
