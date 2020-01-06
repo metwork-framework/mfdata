@@ -1,1 +1,0 @@
-../../../_common/{{cookiecutter.python_version}}_virtualenv_sources/requirements-to-freeze.txt

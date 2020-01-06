@@ -1,4 +1,4 @@
-#!/usr/bin/env {{cookiecutter.python_version|default('python3')}}
+#!/usr/bin/env python3
 
 import time
 from acquisition.listener import AcquisitionListener

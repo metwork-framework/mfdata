@@ -9,13 +9,9 @@ stop_children = True
 
 {% if MFDATA_NGINX_FLAG == "1" %}
 [watcher:nginx]
-cmd={{MFEXT_HOME}}/opt/openresty/nginx/sbin/nginx
-args=-p {{MFMODULE_RUNTIME_HOME}}/tmp/nginx_tmp_prefix -c {{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/nginx.conf
+cmd=log_proxy_wrapper
+args=--stdout {{MFMODULE_RUNTIME_HOME}}/log/nginx_access.log --stderr {{MFMODULE_RUNTIME_HOME}}/log/nginx_error.log -- {{MFEXT_HOME}}/opt/openresty/nginx/sbin/nginx -p {{MFMODULE_RUNTIME_HOME}}/tmp/nginx_tmp_prefix -c {{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/nginx.conf
 numprocesses=1
-stdout_stream.class = FileStream
-stdout_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/nginx.log
-stderr_stream.class = FileStream
-stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/nginx.log
 copy_env = True
 autostart = True
 respawn = True
@@ -26,13 +22,10 @@ working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
 {% endif %}
 
 [watcher:conf_monitor]                                                          
-cmd={{MFMODULE_HOME}}/bin/mfdata_conf_monitor.py                                         
+cmd=log_proxy_wrapper
+args=--stdout {{MFMODULE_RUNTIME_HOME}}/log/conf_monitor.log --stderr STDOUT -- {{MFMODULE_HOME}}/bin/mfdata_conf_monitor.py                                         
 args=                                                                           
 numprocesses = 1                                                                
-stdout_stream.class = FileStream                                                
-stdout_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/conf_monitor.stdout        
-stderr_stream.class = FileStream                                                
-stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/conf_monitor.stderr        
 copy_env = True                                                                 
 autostart = True                                                                
 respawn = True           
@@ -43,13 +36,9 @@ hooks.before_start=circus_hooks.before_start_shell
 hooks.after_stop=circus_hooks.after_stop_shell
 
 [watcher:redis]
-cmd=redis-server
-args={{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/redis.conf
+cmd=log_proxy_wrapper
+args=--stdout {{MFMODULE_RUNTIME_HOME}}/log/redis.log --stderr STDOUT -- redis-server {{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/redis.conf
 numprocesses = 1
-stdout_stream.class = FileStream
-stdout_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/redis.log
-stderr_stream.class = FileStream
-stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/redis.log
 copy_env = True
 autostart = True
 respawn = True
@@ -58,13 +47,9 @@ hooks.before_start=circus_hooks.before_start_shell
 working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
 
 [watcher:directory_observer]
-cmd=python3
-args=-m directory_observer.directory_observer --config={{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/directory_observer.ini
+cmd=log_proxy_wrapper
+args=--stdout {{MFMODULE_RUNTIME_HOME}}/log/directory_observer.log --stderr STDOUT -- python3 -m directory_observer.directory_observer --config={{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/directory_observer.ini
 numprocesses = 1
-stdout_stream.class = FileStream
-stdout_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/directory_observer.stdout
-stderr_stream.class = FileStream
-stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/directory_observer.stderr
 copy_env = True
 autostart = True
 respawn = True
@@ -74,13 +59,9 @@ working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
 
 {% if MFDATA_ADMIN_HOSTNAME != "null" %}
 [watcher:telegraf_collector_var_in_files_count]
-cmd={{MFDATA_HOME}}/bin/telegraf_collector_var_in_files_count.py
-args=
+cmd=log_proxy_wrapper
+args=--stdout {{MFMODULE_RUNTIME_HOME}}/log/telegraf_collector_var_in_files_count.log --stderr STDOUT -- {{MFDATA_HOME}}/bin/telegraf_collector_var_in_files_count.py
 numprocesses = 1
-stdout_stream.class = FileStream
-stdout_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/telegraf_collector_var_in_files_count.stdout
-stderr_stream.class = FileStream
-stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/telegraf_collector_var_in_files_count.stderr
 copy_env = True
 autostart = True
 respawn = True
@@ -88,29 +69,61 @@ max_retry = -1
 working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
 {% endif %}
 
-{% if MFDATA_ADMIN_HOSTNAME_IP != "null" %}
-{% if MFDATA_ADMIN_SEND_NGINX_LOGS == "1" %}
-{% if MFDATA_NGINX_FLAG == "1" %}
-[watcher:jsonlog2elasticsearch]
-cmd=layer_wrapper
-args=--layers=monitoring@mfext -- jsonlog2elasticsearch --transform-func=jsonlog2elasticsearch_metwork_addon.transform_func {{MFDATA_ADMIN_HOSTNAME_IP}} {{MFDATA_ADMIN_ELASTICSEARCH_HTTP_PORT}} nginx-%Y.%m.%d {{MFMODULE_RUNTIME_HOME}}/log/nginx_access.log
-numprocesses = 1                                                                
-stdout_stream.class = FileStream                                                
-stdout_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/jsonlog2elasticsearch_nginx.log                  
-stderr_stream.class = FileStream                                                
-stderr_stream.filename = {{MFMODULE_RUNTIME_HOME}}/log/jsonlog2elasticsearch_nginx.log
-copy_env = True                                                                 
-autostart = True                                                                
-respawn = True                                                                  
-max_retry = -1
-hooks.before_start=circus_hooks.before_start_shell                              
-hooks.after_stop=circus_hooks.after_stop_shell          
-working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
-async_kill = True
+{% for PLUGIN in PLUGINS %}
+    {% for STEP in PLUGIN.steps %}
 
+[watcher:step.{{PLUGIN.name}}.{{STEP.name}}]
+cmd = log_proxy_wrapper
+args = {{STEP.cmd_args}}
+numprocesses = {{STEP.numprocesses}}
+working_dir = {{PLUGIN.dir}}
+copy_env = True
+async_kill = True
+autostart = True
+respawn = True
+autorestart_kill_signal=2
+graceful_timeout = {{STEP.timeout}}
+max_retry = -1
+mfdata_plugin = {{PLUGIN.name}}
+{% if STEP.before_start %}
+hooks.before_start = {{STEP.before_start}}
 {% endif %}
-{% endif %}
-{% endif %}
+{% if STEP.max_age > 0 -%}
+max_age = {{STEP.max_age}}
+max_age_variance = {{STEP.max_age}}
+
+{% endif -%}
+{% for key, value in STEP.rlimits.items()|sort() %}
+rlimit_{{key}} = {{value}}
+{% endfor %}
+
+    {% endfor %}
+
+    {% for EXTRA in PLUGIN.extra_daemons %}
+
+[watcher:{{EXTRA.name}}]
+cmd = log_proxy_wrapper
+args = {{EXTRA.cmd_args}}
+numprocesses = {{EXTRA.numprocesses}}
+working_dir = {{PLUGIN.dir}}
+copy_env = True
+async_kill = True
+autostart = True
+respawn = True
+graceful_timeout = {{EXTRA.graceful_timeout}}
+mfdata_plugin = {{PLUGIN.name}}
+max_retry = -1
+{% if EXTRA.max_age > 0 -%}
+max_age = {{EXTRA.max_age}}
+max_age_variance = {{EXTRA.max_age}}
+
+{% endif -%}
+{% for key, value in EXTRA.rlimits.items()|sort() %}
+rlimit_{{key}} = {{value}}
+{% endfor %}
+
+    {% endfor %}
+{% endfor %}
 
 {% endraw %}
 {% endblock %}
