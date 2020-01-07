@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- log refactoring
 - adaptation to removal of layer misc@mfext
 - allow ,;: in directorie/filenames
 - add metrics to reinject step
