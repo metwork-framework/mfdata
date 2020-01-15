@@ -10,9 +10,8 @@ import json
 import signal
 import codecs
 import sys
-from os import environ
 
-from configparser_extended import ExtendedConfigParser
+from opinionated_configparser import OpinionatedConfigParser
 from argparse import ArgumentParser
 from mflog import getLogger
 
@@ -373,8 +372,7 @@ def init():
     if not ficconfig:
         return False
 
-    parser = ExtendedConfigParser(config=environ.get("MFCONFIG", "GENERIC"),
-                                  strict=False, inheritance='im')
+    parser = OpinionatedConfigParser(default_section="common")
     data = codecs.open(ficconfig, "r", "utf-8")
     try:
         parser.read_file(data)

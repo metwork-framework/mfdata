@@ -9,11 +9,10 @@ fi
 
 python3 <<EOF
 import os
-from configparser_extended import ExtendedConfigParser
+from opinionated_configparser import OpinionatedConfigParser
 from mfutil import mkdir_p
 
-config = os.environ.get('MFCONFIG', 'GENERIC')
-parser = ExtendedConfigParser(config=config, strict=False, inheritance='im', interpolation=None)
+parser = OpinionatedConfigParser(interpolation=None)
 
 parser.read("%s/tmp/config_auto/directory_observer.ini" % os.environ['MFMODULE_RUNTIME_HOME'])
 

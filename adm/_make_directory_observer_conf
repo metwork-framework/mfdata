@@ -3,7 +3,7 @@
 import os
 import glob
 import envtpl
-from configparser_extended import ExtendedConfigParser
+from opinionated_configparser import OpinionatedConfigParser
 from acquisition.utils import _set_custom_environment
 
 MFDATA_PLUGIN_HOME = os.path.join(os.environ["MFMODULE_RUNTIME_HOME"],
@@ -13,8 +13,7 @@ CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
 
 def make_directory_observer_conf(plugin_configuration_file):
     output = []
-    parser = ExtendedConfigParser(config=CONFIG, strict=False,
-                                  inheritance='im', interpolation=None)
+    parser = OpinionatedConfigParser(interpolation=None)
     plugin_name = os.path.basename(os.path.dirname(plugin_configuration_file))
     parser.read(plugin_configuration_file)
     steps = [x.replace("step_", "", 1).split(':')[0] for x in parser.sections()
@@ -41,9 +40,9 @@ def make_directory_observer_conf(plugin_configuration_file):
         for i in range(0, len(listened_directories)):
             output.append("")
             if len(listened_directories) == 1:
-                output.append("[step_%s_%s:common]" % (plugin_name, step))
+                output.append("[step_%s_%s]" % (plugin_name, step))
             else:
-                output.append("[step_%s_%s_%i:common]" % (plugin_name,
+                output.append("[step_%s_%s_%i]" % (plugin_name,
                                                           step, i))
             output.append("active=true")
             output.append("directory=%s" % listened_directories[i])
