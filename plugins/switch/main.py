@@ -5,7 +5,7 @@ import re  # noqa: F401
 from datetime import datetime  # noqa: F401
 import fnmatch  # noqa: F401
 from acquisition.step import AcquisitionStep
-from configparser_extended import ExtendedConfigParser
+from opinionated_configparser import OpinionatedConfigParser
 import hashlib
 from magic import Magic
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
@@ -13,8 +13,6 @@ from acquisition.utils import _get_or_make_trash_dir, _get_tmp_filepath
 from xattrfile import XattrFile
 
 MAGIC_OBJECTS_CACHE = {}
-CONFIG = os.environ.get("MFCONFIG", "GENERIC")
-
 
 def eval_condition(xaf_file, condition):
     x = xaf_file.tags  # noqa: F841
@@ -41,9 +39,7 @@ class AcquisitionSwitchStep(AcquisitionStep):
         if not os.path.exists(conf_file):
             self.error_and_die("no switch configuration file")
         self.condition_tuples = []
-        parser = ExtendedConfigParser(
-            config=CONFIG, strict=False, inheritance="im", interpolation=None
-        )
+        parser = OpinionatedConfigParser(interpolation=None)
         parser.read(conf_file)
         sections = parser.sections()
         for section in sections:
