@@ -12,7 +12,7 @@ import os
 from opinionated_configparser import OpinionatedConfigParser
 from mfutil import mkdir_p
 
-parser = OpinionatedConfigParser(interpolation=None)
+parser = OpinionatedConfigParser()
 
 parser.read("%s/tmp/config_auto/directory_observer.ini" % os.environ['MFMODULE_RUNTIME_HOME'])
 
