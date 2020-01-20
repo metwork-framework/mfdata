@@ -39,7 +39,7 @@ class AcquisitionSwitchStep(AcquisitionStep):
         if not os.path.exists(conf_file):
             self.error_and_die("no switch configuration file")
         self.condition_tuples = []
-        parser = OpinionatedConfigParser(interpolation=None)
+        parser = OpinionatedConfigParser()
         parser.read(conf_file)
         sections = parser.sections()
         for section in sections:
