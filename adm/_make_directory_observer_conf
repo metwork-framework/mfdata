@@ -13,7 +13,7 @@ CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
 
 def make_directory_observer_conf(plugin_configuration_file):
     output = []
-    parser = OpinionatedConfigParser()
+    parser = OpinionatedConfigParser(interpolation=None)
     plugin_name = os.path.basename(os.path.dirname(plugin_configuration_file))
     parser.read(plugin_configuration_file)
     steps = [x.replace("step_", "", 1).split(':')[0] for x in parser.sections()
