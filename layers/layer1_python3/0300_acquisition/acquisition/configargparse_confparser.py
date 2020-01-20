@@ -1,9 +1,8 @@
 import configargparse
-import os
 import collections
 import envtpl
 import sys
-from configparser_extended import ExtendedConfigParser
+from opinionated_configparser import OpinionatedConfigParser
 
 
 class StepConfigFileParser(configargparse.ConfigFileParser):
@@ -35,9 +34,7 @@ class StepConfigFileParser(configargparse.ConfigFileParser):
         """
         f = self.custom_environment_callable
         f(self.plugin_name, self.step_name)
-        config = os.environ.get('MFCONFIG', 'GENERIC')
-        config_parser = ExtendedConfigParser(
-            config=config, inheritance='im', interpolation=None)
+        config_parser = OpinionatedConfigParser()
         content = stream.read()
         if(sys.version_info < (3, 0)):
             content = content.decode("utf-8")
