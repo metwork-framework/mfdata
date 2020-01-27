@@ -225,8 +225,10 @@ class AcquisitionSwitchStep(AcquisitionStep):
 
     def _get_selected_directories(self, xaf):
         directories = []
-        for (_, cond, directory, _, use_hardlink) in self.condition_tuples:
-            self.debug("Evaluating cond: %s on tags: %s..." % (cond, xaf.tags))
+        for (plugin_name, cond, directory, _, use_hardlink) in \
+                self.condition_tuples:
+            self.debug("Evaluating plugin:%s cond: %s "
+                       "on tags: %s..." % (plugin_name, cond, xaf.tags))
             res = self._exception_safe_call(
                 eval_condition, [xaf, cond], {}, "eval_switch_condition", None
             )
