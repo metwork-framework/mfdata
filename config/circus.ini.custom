@@ -79,7 +79,7 @@ numprocesses = {{STEP.numprocesses}}
 working_dir = {{PLUGIN.dir}}
 copy_env = True
 async_kill = True
-autostart = True
+autostart = {% if METWORK_STARTING|default("0") == "1" %}False{% else %}True{% endif %}
 respawn = True
 autorestart_kill_signal=2
 graceful_timeout = {{STEP.timeout}}
@@ -108,7 +108,7 @@ numprocesses = {{EXTRA.numprocesses}}
 working_dir = {{PLUGIN.dir}}
 copy_env = True
 async_kill = True
-autostart = True
+autostart = {% if METWORK_STARTING|default("0") == "1" %}False{% else %}True{% endif %}
 respawn = True
 graceful_timeout = {{EXTRA.graceful_timeout}}
 mfdata_plugin = {{PLUGIN.name}}
