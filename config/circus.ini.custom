@@ -94,9 +94,7 @@ max_age_variance = {{STEP.max_age}}
 
 {% endif -%}
 {% for key, value in STEP.rlimits.items()|sort() %}
-{% if key != "core" -%}
 rlimit_{{key}} = {{value}}
-{% endif -%}
 {% endfor %}
 
     {% endfor %}
@@ -121,9 +119,7 @@ max_age_variance = {{EXTRA.max_age}}
 
 {% endif -%}
 {% for key, value in EXTRA.rlimits.items()|sort() %}
-{% if key != "core" -%}
 rlimit_{{key}} = {{value}}
-{% endif -%}
 {% endfor %}
 
     {% endfor %}
