@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- improve debug logs for switch plugin
 - log refactoring
 - adaptation to removal of layer misc@mfext
 - allow ,;: in directorie/filenames
