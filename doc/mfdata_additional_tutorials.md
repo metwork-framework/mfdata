@@ -460,14 +460,12 @@ _ _ _
 # rlimit_nofile => maximum number of open file descriptors for the current process.
 # rlimit_stack => maximum size (in bytes) of the call stack for the current process.
 #     This only affects the stack of the main thread in a multi-threaded process.
-# rlimit_core => maximum size (in bytes) of a core file that the current process can create.
 # rlimit_fsize =>  maximum size of a file which the process may create.
 # (empty value means no limit)
 #
 rlimit_as = 10000000000
 rlimit_nofile = 1000
 rlimit_stack = 10000000
-rlimit_core = 10000000000
 rlimit_fsize = 10000000000
 ```
 
