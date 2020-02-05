@@ -9,8 +9,7 @@ from mfutil.plugins import layerapi2_label_to_plugin_name
 from mfext.plugins_common import get_rlimit_conf, test_deprecated_options, \
     get_plugin_format_version, get_workers, \
     get_split_conf, get_cmd_and_args, get_extra_daemon_conf, \
-    get_redis_service_extra_conf
-from opinionated_configparser import OpinionatedConfigParser
+    get_redis_service_extra_conf, get_plugin_parser
 
 MFMODULE_HOME = os.environ["MFMODULE_HOME"]
 MFMODULE_RUNTIME_HOME = os.environ["MFMODULE_RUNTIME_HOME"]
@@ -24,9 +23,8 @@ def get_current_step_queue(plugin_name, step_name):
     return "step.%s.%s" % (plugin_name, step_name)
 
 
-def get_conf(plugin_configuration_file):
+def get_conf(plugin_dir):
     plugin_conf = {}
-    plugin_dir = os.path.dirname(plugin_configuration_file)
     try:
         with open(os.path.join(plugin_dir, ".layerapi2_label"), "r") as f:
             label = f.read().strip()
@@ -42,8 +40,7 @@ def get_conf(plugin_configuration_file):
                        "ignoring this plugin", plugin_dir, e)
         return None
     logger = LOGGER.bind(plugin_name=plugin_name)
-    parser = OpinionatedConfigParser(interpolation=None)
-    parser.read(plugin_configuration_file)
+    parser = get_plugin_parser(plugin_dir, plugin_name, interpolation=None)
     version = get_plugin_format_version(logger, parser)
     steps = [x.replace("step_", "", 1).split(':')[0] for x in parser.sections()
              if x.startswith("step_")]
@@ -113,11 +110,12 @@ circus_ini_file = os.path.join(os.environ['MFMODULE_HOME'], 'config',
                                'circus.ini')
 plugins = []
 if len(sys.argv) == 2:
-    config_files = glob.glob(sys.argv[1] + "/config.ini")
+    label_files = glob.glob(sys.argv[1] + "/.layerapi2_label")
 else:
-    config_files = glob.glob(MFDATA_PLUGIN_HOME + "/*/config.ini")
-for config_file in config_files:
-    plugin_conf = get_conf(config_file)
+    label_files = glob.glob(MFDATA_PLUGIN_HOME + "/*/.layerapi2_label")
+config_directories = [os.path.dirname(x) for x in label_files]
+for config_dir in config_directories:
+    plugin_conf = get_conf(config_dir)
     if plugin_conf:
         plugins.append(plugin_conf)
 with open(circus_ini_file, "r") as f:

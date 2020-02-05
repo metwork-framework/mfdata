@@ -1,6 +1,7 @@
 import os
 import datetime
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
+from mfutil.layerapi2 import LayerApi2Wrapper
 from acquisition.configargparse_confparser import StepConfigFileParser
 
 MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', '/tmp')
@@ -14,14 +15,19 @@ def get_plugin_step_directory_path(plugin_name, step_name):
 
 
 def _set_custom_environment(plugin_name, step_name):
-    module_runtime_home = MFMODULE_RUNTIME_HOME
     os.environ['MFDATA_CURRENT_PLUGIN_NAME'] = plugin_name
     os.environ['MFDATA_CURRENT_STEP_NAME'] = step_name
-    os.environ['MFDATA_CURRENT_PLUGIN_DIR'] = \
-        os.path.join(module_runtime_home, 'var', 'plugins',
-                     plugin_name)
-    os.environ['MFDATA_CURRENT_CONFIG_INI_PATH'] = \
-        os.path.join(os.environ['MFDATA_CURRENT_PLUGIN_DIR'], 'config.ini')
+    label = "plugin_%s@mfdata" % plugin_name
+    plugin_dir = LayerApi2Wrapper.get_layer_home(label)
+    if plugin_dir is None:
+        plugin_dir = "%s/var/plugins/%s" % (MFMODULE_RUNTIME_HOME, plugin_name)
+    os.environ['MFDATA_CURRENT_PLUGIN_DIR'] = plugin_dir
+    if os.path.isfile("%s/config.ini" % plugin_dir):
+        os.environ['MFDATA_CURRENT_CONFIG_INI_PATH'] = \
+            os.path.join(plugin_dir, 'config.ini')
+    else:
+        os.environ['MFDATA_CURRENT_CONFIG_INI_PATH'] = \
+            os.path.join(plugin_dir, 'metadata.ini')
     os.environ['MFDATA_CURRENT_STEP_QUEUE'] = "step.%s.%s" % (plugin_name,
                                                               step_name)
     os.environ['MFDATA_CURRENT_STEP_DIR'] = \
