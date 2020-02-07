@@ -9,7 +9,7 @@ from magic import Magic
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from acquisition.utils import _get_or_make_trash_dir, _get_tmp_filepath
 from xattrfile import XattrFile
-from mfutil.eval import safe_eval
+from mfutil import eval as safe_eval
 
 MAGIC_OBJECTS_CACHE = {}
 
