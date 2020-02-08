@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- use safe_eval from mfutil to evaluate conditions in switch plugin
 - improve debug logs for switch plugin
 - log refactoring
 - adaptation to removal of layer misc@mfext
