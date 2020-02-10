@@ -238,7 +238,7 @@ class AcquisitionSwitchStep(AcquisitionStep):
             self.debug("Evaluating plugin:%s cond: %s "
                        "on tags: %s..." % (plugin_name, cond, xaf.tags))
             res = self._exception_safe_call(
-                eval_condition, [xaf, cond], {}, "eval_switch_condition", None
+                self.eval_condition, [xaf, cond], {}, "eval_switch_condition", None
             )
             if res:
                 self.debug("=> True")
