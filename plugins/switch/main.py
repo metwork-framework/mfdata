@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import os
+import re  # noqa: F401
 from datetime import datetime  # noqa: F401
+import fnmatch  # noqa: F401
 from acquisition.step import AcquisitionStep
 from opinionated_configparser import OpinionatedConfigParser
 import hashlib
@@ -9,9 +11,12 @@ from magic import Magic
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from acquisition.utils import _get_or_make_trash_dir, _get_tmp_filepath
 from xattrfile import XattrFile
-from mfutil.eval import safe_eval
 
 MAGIC_OBJECTS_CACHE = {}
+
+def eval_condition(xaf_file, condition):
+    x = xaf_file.tags  # noqa: F841
+    return eval(condition)
 
 
 class AcquisitionSwitchStep(AcquisitionStep):
@@ -62,19 +67,6 @@ class AcquisitionSwitchStep(AcquisitionStep):
                     " in case of move no-match policy"
                 )
             mkdir_p_or_die(nmpmdd)
-
-    def eval_condition(self, xaf_file, condition):
-        if "fnmatch.fnmatch" in condition:
-            # FIXME: remove in 0.11
-            self.warning("fnmatch.fnmatch usage in condition is deprecated "
-                         "=> use fnmatch_fnmatch instead")
-            condition = condition.replace("fnmatch.fnmatch", "fnmatch_fnmatch")
-        if "re.match" in condition:
-            # FIXME: remove in 0.11
-            self.warning("re.match usage in condition is deprecated "
-                         "=> use re_match instead")
-            condition = condition.replace("re.match", "re_match")
-        return safe_eval(condition, {"x": xaf_file.tags})
 
     def add_extra_arguments(self, parser):
         parser.add_argument(
