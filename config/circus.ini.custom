@@ -10,7 +10,7 @@ stop_children = True
 {% if MFDATA_NGINX_FLAG == "1" %}
 [watcher:nginx]
 cmd=log_proxy_wrapper
-args=--stdout {{MFMODULE_RUNTIME_HOME}}/log/nginx_access.log --stderr {{MFMODULE_RUNTIME_HOME}}/log/nginx_error.log -- {{MFEXT_HOME}}/opt/openresty/nginx/sbin/nginx -p {{MFMODULE_RUNTIME_HOME}}/tmp/nginx_tmp_prefix -c {{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/nginx.conf
+args=--stdout nginx_access.log --stderr nginx_error.log -- {{MFEXT_HOME}}/opt/openresty/nginx/sbin/nginx -p {{MFMODULE_RUNTIME_HOME}}/tmp/nginx_tmp_prefix -c {{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/nginx.conf
 numprocesses=1
 copy_env = True
 autostart = True
@@ -23,7 +23,7 @@ working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
 
 [watcher:conf_monitor]                                                          
 cmd=log_proxy_wrapper
-args=--stdout {{MFMODULE_RUNTIME_HOME}}/log/conf_monitor.log --stderr STDOUT -- {{MFMODULE_HOME}}/bin/mfdata_conf_monitor.py                                         
+args=--stdout conf_monitor.log --stderr STDOUT -- {{MFMODULE_HOME}}/bin/mfdata_conf_monitor.py                                         
 args=                                                                           
 numprocesses = 1                                                                
 copy_env = True                                                                 
@@ -37,7 +37,7 @@ hooks.after_stop=mfext.circus_hooks.after_stop_shell
 
 [watcher:redis]
 cmd=log_proxy_wrapper
-args=--stdout {{MFMODULE_RUNTIME_HOME}}/log/redis.log --stderr STDOUT -- redis-server {{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/redis.conf
+args=--stdout redis.log --stderr STDOUT -- redis-server {{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/redis.conf
 numprocesses = 1
 copy_env = True
 autostart = True
@@ -48,7 +48,7 @@ working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
 
 [watcher:directory_observer]
 cmd=log_proxy_wrapper
-args=--stdout {{MFMODULE_RUNTIME_HOME}}/log/directory_observer.log --stderr STDOUT -- python3 -m directory_observer.directory_observer --config={{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/directory_observer.ini
+args=--stdout directory_observer.log --stderr STDOUT -- python3 -m directory_observer.directory_observer --config={{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/directory_observer.ini
 numprocesses = 1
 copy_env = True
 autostart = True
@@ -60,7 +60,7 @@ working_dir = {{MFMODULE_RUNTIME_HOME}}/tmp
 {% if MFDATA_ADMIN_HOSTNAME != "null" %}
 [watcher:telegraf_collector_var_in_files_count]
 cmd=log_proxy_wrapper
-args=--stdout {{MFMODULE_RUNTIME_HOME}}/log/telegraf_collector_var_in_files_count.log --stderr STDOUT -- {{MFDATA_HOME}}/bin/telegraf_collector_var_in_files_count.py
+args=--stdout telegraf_collector_var_in_files_count.log --stderr STDOUT -- {{MFDATA_HOME}}/bin/telegraf_collector_var_in_files_count.py
 numprocesses = 1
 copy_env = True
 autostart = True
