@@ -65,11 +65,19 @@ local function process()
     if body == nil then
         local filepath = request.get_body_file()
         if filepath == nil then
-            exit_with_ngx_error(400, string.format("no body in the request"))
-        end
-        local linkres = mfutil.link(filepath, targetpath)
-        if linkres ~= 0 then
-            exit_with_ngx_error(500, string.format("can't make a hard link %s => %s different filesystem ?", targetpath, filepath))
+            -- The original file is empty (no body data) ==> We create an empty file
+            local tmptargetpath = string.format("%s.t", targetpath)
+            local file = io.open(tmptargetpath, "w")
+            file:close()
+            local renameres = os.rename(tmptargetpath, targetpath)
+            if renameres ~= true then
+                exit_with_ngx_error(500, string.format("can't rename %s to %s", tmptargetpath, targetpath))
+            end
+        else
+            local linkres = mfutil.link(filepath, targetpath)
+            if linkres ~= 0 then
+                exit_with_ngx_error(500, string.format("can't make a hard link %s => %s different filesystem ?", targetpath, filepath))
+            end
         end
     else
         local tmptargetpath = string.format("%s.t", targetpath)
