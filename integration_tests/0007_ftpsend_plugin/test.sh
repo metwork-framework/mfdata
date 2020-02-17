@@ -44,11 +44,11 @@ cp toto ${MFMODULE_RUNTIME_HOME}/var/in/step.foobar2.send
 sleep 1
 ls -l ${MFMODULE_RUNTIME_HOME}/var/in/step.foobar2.send
 
-# We wait 10s maximum for creation of the archive directory
+# We wait 30s maximum for creation of the archive directory
 nb=0
 while [ ! -d "$DEST_DIR" ]; do
     nb=$(($nb + 1))
-    if [ $nb -eq 10 ]; then
+    if [ $nb -eq 30 ]; then
         exit 1
     fi
     sleep 1
