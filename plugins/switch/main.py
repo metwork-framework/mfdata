@@ -14,6 +14,12 @@ from xattrfile import XattrFile
 from mfutil import eval as safe_eval
 
 MAGIC_OBJECTS_CACHE = {}
+FEATURE_FLAG_EVAL_TYPE = "old"
+
+
+def eval_condition(xaf_file, condition):
+    x = xaf_file.tags  # noqa: F841
+    return eval(condition)
 
 
 class AcquisitionSwitchStep(AcquisitionStep):
@@ -239,10 +245,16 @@ class AcquisitionSwitchStep(AcquisitionStep):
                 self.condition_tuples:
             self.debug("Evaluating plugin:%s cond: %s "
                        "on tags: %s..." % (plugin_name, cond, xaf.tags))
-            res = self._exception_safe_call(
-                self.eval_condition, [xaf, cond], {},
-                "eval_switch_condition", None
-            )
+            if FEATURE_FLAG_EVAL_TYPE == "old":
+                res = self._exception_safe_call(
+                    eval_condition, [xaf, cond], {}, "eval_switch_condition",
+                    None
+                )
+            else:
+                res = self._exception_safe_call(
+                    self.eval_condition, [xaf, cond], {},
+                    "eval_switch_condition", None
+                )
             if res:
                 self.debug("=> True")
                 directories.append((directory, use_hardlink))
