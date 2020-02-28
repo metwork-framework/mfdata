@@ -14,7 +14,7 @@ from xattrfile import XattrFile
 from mfutil import eval as safe_eval
 
 MAGIC_OBJECTS_CACHE = {}
-FEATURE_FLAG_EVAL_TYPE = "old"
+FEATURE_FLAG_EVAL_TYPE = "new"
 
 
 def eval_condition(xaf_file, condition):
