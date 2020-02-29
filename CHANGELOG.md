@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- add httpsend plugin template
 - allow empty nginx uploads
 - remove absolute log paths from log_proxy usages (LOGPROXY_LOG_DIRECTORY env variable is used by default)
 - use safe_eval from mfutil to evaluate conditions in switch plugin
