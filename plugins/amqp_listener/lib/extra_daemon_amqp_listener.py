@@ -115,11 +115,14 @@ class ExtraDaemonAmqpListener(AcquisitionListener):
             "amqp_listener.subscription_exchange",
             self.args.subscription_exchange,
         )
-        self.set_tag(
-            xaf,
-            "amqp_listener_subscription_queue",
-            self.args.subscription_queue,
-        )
+        try:
+            self.set_tag(
+                xaf,
+                "amqp_listener_subscription_queue",
+                self.args.subscription_queue,
+            )
+        except Exception:
+            pass
         self.set_tag(
             xaf, "amqp_listener_broker_hostname", self.args.broker_hostname
         )
