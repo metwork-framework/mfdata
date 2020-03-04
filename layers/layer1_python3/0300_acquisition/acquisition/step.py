@@ -354,40 +354,54 @@ class AcquisitionStep(AcquisitionBase):
             MFMODULE_RUNTIME_HOME, "var", "plugins", self.plugin_name
         )
 
-    def move_to_plugin_step(self, xaf, plugin_name, step_name):
+    def move_to_plugin_step(self, xaf, plugin_name, step_name,
+                            keep_original_basename=False):
         """Move a XattrFile to another plugin/step.
 
         Args:
-            xaf (XattrFile): XattrFile to move
-            plugin_name (string): plugin name
-            step_name (string): step name
+            xaf (XattrFile): XattrFile to move.
+            plugin_name (string): plugin name.
+            step_name (string): step name.
+            keep_original_basename (boolean): if True, we keep the original
+                basename of xaf.
 
         Returns:
-            boolean: True if ok
+            boolean: True if ok.
 
         """
+        if keep_original_basename:
+            basename = xaf.basename()
+        else:
+            basename = get_unique_hexa_identifier()
         target_path = os.path.join(
             get_plugin_step_directory_path(plugin_name, step_name),
-            get_unique_hexa_identifier(),
+            basename,
         )
         result, _ = xaf.move_or_copy(target_path)
         return result
 
-    def copy_to_plugin_step(self, xaf, plugin_name, step_name):
+    def copy_to_plugin_step(self, xaf, plugin_name, step_name,
+                            keep_original_basename=False):
         """Copy a XattrFile (with tags) to another plugin/step.
 
         Args:
-            xaf (XattrFile): XattrFile to move
-            plugin_name (string): plugin name
-            step_name (string): step name
+            xaf (XattrFile): XattrFile to move.
+            plugin_name (string): plugin name.
+            step_name (string): step name.
+            keep_original_basename (boolean): if True, we keep the original
+                basename of xaf.
 
         Returns:
             boolean: True if ok
 
         """
+        if keep_original_basename:
+            basename = xaf.basename()
+        else:
+            basename = get_unique_hexa_identifier()
         target_path = os.path.join(
             get_plugin_step_directory_path(plugin_name, step_name),
-            get_unique_hexa_identifier(),
+            basename,
         )
         result = xaf.copy_or_nothing(target_path)
         return result
