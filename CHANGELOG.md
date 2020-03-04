@@ -1,6 +1,18 @@
 # release_0.9 CHANGELOG
 
 
+## [Unreleased]
+
+### New Features
+
+
+### Bug Fixes
+- fix typo in configuration key for amqp (topic mode)
+- fix bug in amqp topic mode
+
+
+
+
 
 ## v0.9.9 (2020-01-28)
 
