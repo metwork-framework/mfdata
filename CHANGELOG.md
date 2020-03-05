@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- add a keep_original_basename in copy/move_to_plugin_step
 - add httpsend plugin template
 - allow empty nginx uploads
 - remove absolute log paths from log_proxy usages (LOGPROXY_LOG_DIRECTORY env variable is used by default)
