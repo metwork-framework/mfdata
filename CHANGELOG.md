@@ -1,9 +1,11 @@
 # release_0.9 CHANGELOG
 
 
-## [Unreleased]
+
+## v0.9.10 (2020-03-04)
 
 ### New Features
+- add a keep_original_basename in copy/move_to_plugin_step
 
 
 ### Bug Fixes
