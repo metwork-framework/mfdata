@@ -35,6 +35,9 @@ class StepConfigFileParser(configargparse.ConfigFileParser):
         f = self.custom_environment_callable
         f(self.plugin_name, self.step_name)
         config_parser = OpinionatedConfigParser()
+        # FIXME: remove __ special handling
+        config_parser.optionxform = lambda x: x[1:].lower() \
+            if x.startswith('_') and not x.startswith('__') else x.lower()
         content = stream.read()
         if(sys.version_info < (3, 0)):
             content = content.decode("utf-8")
