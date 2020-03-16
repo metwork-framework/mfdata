@@ -2,6 +2,20 @@
 
 
 
+## v0.9.10 (2020-03-04)
+
+### New Features
+- add a keep_original_basename in copy/move_to_plugin_step
+
+
+### Bug Fixes
+- fix typo in configuration key for amqp (topic mode)
+- fix bug in amqp topic mode
+
+
+
+
+
 ## v0.9.9 (2020-01-28)
 
 - No interesting change

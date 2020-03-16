@@ -4,6 +4,8 @@
 ## [Unreleased]
 
 ### New Features
+- add a keep_original_basename in copy/move_to_plugin_step
+- add httpsend plugin template
 - allow empty nginx uploads
 - remove absolute log paths from log_proxy usages (LOGPROXY_LOG_DIRECTORY env variable is used by default)
 - use safe_eval from mfutil to evaluate conditions in switch plugin
@@ -19,6 +21,9 @@
 
 
 ### Bug Fixes
+- fix syslog nginx conf
+- fix bug in amqp topic mode
+- fix typo in configuration key for amqp (topic mode)
 - remove rlimit_core (because of `ulimit -c 0` in mfext)
 - fix get_original_basename/dirname behaviour in debug mode
 - fix failure_policy_move_keep_tags configuration key
