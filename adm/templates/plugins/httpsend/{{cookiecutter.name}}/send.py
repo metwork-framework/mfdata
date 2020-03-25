@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import time
 import requests
 from mfutil import get_unique_hexa_identifier
 from acquisition import AcquisitionStep
@@ -29,7 +30,7 @@ class Step{{cookiecutter.name|capitalize}}Send(AcquisitionStep):
         url = self.args.http_url
         for to_replace, replaced in replaces.items():
             url = url.replace(to_replace, replaced)
-        return url
+        return time.strftime(url)
 
     def add_extra_arguments(self, parser):
         parser.add_argument('--http-method', type=str, default='PUT',
