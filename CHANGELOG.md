@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- The number of processes of the switch plugin is now configurable (default is 1)
 - add a keep_original_basename in copy/move_to_plugin_step
 - add httpsend plugin template
 - allow empty nginx uploads
