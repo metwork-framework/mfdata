@@ -105,6 +105,8 @@ switch_use_magic_tags=1
 # (0 => no ascii_header tag)
 switch_max_header_length=60
 
+# number of processes
+switch_numprocesses=1
 
 ####################
 #####   MQTT   #####
