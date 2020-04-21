@@ -24,8 +24,8 @@ other_max_lifetime=360
 ##### CIRCUS #####
 ##################
 [circus]
-endpoint = ipc://{{MFMODULE_RUNTIME_HOME}}var/circus.socket
-pubsub_endpoint = ipc://{{MFMODULE_RUNTIME_HOME}}var/circus_pubsub.socket
+endpoint = ipc://@@@MFMODULE_RUNTIME_HOME@@@/var/circus.socket
+pubsub_endpoint = ipc://@@@MFMODULE_RUNTIME_HOME@@@/var/circus_pubsub.socket
 
 
 ##############################
@@ -58,8 +58,8 @@ flag=1
 # nginx will listen on a unix socket
 # but, if you set a value != 0 bellow, it will also listen this tcp port
 port=9091
-upload_dir={{MFMODULE_RUNTIME_HOME}}var/in/incoming
-clientbody_temp_path={{MFMODULE_RUNTIME_HOME}}var/in/tmp/nginx
+upload_dir=@@@MFMODULE_RUNTIME_HOME@@@/var/in/incoming
+clientbody_temp_path=@@@MFMODULE_RUNTIME_HOME@@@/var/in/tmp/nginx
 # MB
 upload_max_body_size=100
 workers={{MFHARDWARE_NUMBER_OF_CPU_CORES_MULTIPLIED_BY_2}}
