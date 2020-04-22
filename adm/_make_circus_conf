@@ -1,21 +1,11 @@
 #!/usr/bin/env python3
 
 import os
-import glob
-import sys
 import envtpl
 from mflog import get_logger
-from mfutil.plugins import layerapi2_label_to_plugin_name
-from mfext.plugins_common import get_rlimit_conf, test_deprecated_options, \
-    get_plugin_format_version, get_workers, \
-    get_split_conf, get_cmd_and_args, get_extra_daemon_conf, \
-    get_redis_service_extra_conf, get_plugin_parser
+from mfplugin.manager import PluginsManager
 
 MFMODULE_HOME = os.environ["MFMODULE_HOME"]
-MFMODULE_RUNTIME_HOME = os.environ["MFMODULE_RUNTIME_HOME"]
-MFDATA_PLUGIN_HOME = os.path.join(os.environ["MFMODULE_RUNTIME_HOME"],
-                                  "var", "plugins")
-CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
 LOGGER = get_logger("_make_circus_conf")
 
 
@@ -23,109 +13,33 @@ def get_current_step_queue(plugin_name, step_name):
     return "step.%s.%s" % (plugin_name, step_name)
 
 
-def get_conf(plugin_dir):
-    plugin_conf = {}
+def get_conf(plugin):
+    plugin.reload()
+    return plugin
+
+
+plugin_confs = []
+manager = PluginsManager()
+for plugin in manager.plugins.values():
     try:
-        with open(os.path.join(plugin_dir, ".layerapi2_label"), "r") as f:
-            label = f.read().strip()
-    except Exception:
-        LOGGER.warning(
-            "can't read %s/.layerapi2_label => ignoring this plugin",
-            plugin_dir)
-        return None
-    try:
-        plugin_name = layerapi2_label_to_plugin_name(label)
+        plugin.load_full()
     except Exception as e:
-        LOGGER.warning("can't read %s/.layerapi2_label with error: %s => "
-                       "ignoring this plugin", plugin_dir, e)
-        return None
-    logger = LOGGER.bind(plugin_name=plugin_name)
-    parser = get_plugin_parser(plugin_dir, plugin_name, interpolation=None)
-    version = get_plugin_format_version(logger, parser)
-    steps = [x.replace("step_", "", 1).split(':')[0] for x in parser.sections()
-             if x.startswith("step_")]
-    extra_daemons = [x.replace("extra_daemon_", "", 1).split(':')[0]
-                     for x in parser.sections()
-                     if x.startswith("extra_daemon_")]
-    redis_service = False
-    if parser.has_option("general", "redis_service"):
-        redis_service = parser.getboolean("general", "redis_service")
-    test_deprecated_options(logger, parser)
-    plugin_conf["name"] = plugin_name
-    plugin_conf["dir"] = plugin_dir
-    plugin_conf["steps"] = []
-    plugin_conf["version"] = version
-    plugin_conf["extra_daemons"] = []
-
-    for step in steps:
-        step_conf = {}
-        logger = logger.bind(step=step)
-        section = "step_%s" % step
-        step_conf["name"] = step
-        workers = get_workers(logger, parser, section)
-        step_conf["before_start"] = None
-        timeout = 600
-        max_age = 310
-        step_conf["rlimits"] = get_rlimit_conf(parser, section)
-        if parser.has_option(section, "__before_start"):
-            step_conf["before_start"] = parser.get(section, "__before_start")
-        max_age = 0
-        if parser.has_option(section, "max_age"):
-            max_age = parser.getint(section, "max_age")
-        if parser.has_option(section, "timeout"):
-            timeout = parser.getint(section, "timeout")
-        step_conf["max_age"] = max_age
-        step_conf["timeout"] = timeout
-        step_conf["numprocesses"] = workers
-        add_plugin_dir_to_python_path = True
-        if parser.has_option(section, "add_plugin_dir_to_python_path"):
-            add_plugin_dir_to_python_path = \
-                parser.getboolean(section, "add_plugin_dir_to_python_path")
-        step_conf["add_plugin_dir_to_python_path"] = \
-            add_plugin_dir_to_python_path
-        if version < 1:
-            cmd_and_args = "%s %s" % (parser.get(section, "cmd"),
-                                      parser.get(section, "args"))
-        else:
-            cmd_and_args = parser.get(section, "cmd_and_args")
-        step_conf.update(get_split_conf(logger, parser, section))
-        step_conf["cmd_args"] = get_cmd_and_args(cmd_and_args,
-                                                 plugin_conf, step_conf, False)
-        plugin_conf["steps"].append(step_conf)
-
-    for extra_daemon in extra_daemons:
-        section = "extra_daemon_%s" % extra_daemon
-        extra_conf = get_extra_daemon_conf(logger, parser, section,
-                                           extra_daemon, plugin_conf)
-        plugin_conf["extra_daemons"].append(extra_conf)
-
-    if redis_service:
-        extra_conf = get_redis_service_extra_conf(logger, parser, plugin_conf)
-        plugin_conf["extra_daemons"].append(extra_conf)
-
-    return plugin_conf
-
-
+        LOGGER.warning("invalid plugin: %s (%s) => ignoring it ; details: %s" %
+                       (plugin.name, plugin.home, e))
+        continue
+    with plugin.plugin_env_context():
+        p = get_conf(plugin)
+    if p is None:
+        continue
+    plugin_confs.append(p)
 circus_ini_file = os.path.join(os.environ['MFMODULE_HOME'], 'config',
                                'circus.ini')
-plugins = []
-if len(sys.argv) == 2:
-    label_files = glob.glob(sys.argv[1] + "/.layerapi2_label")
-else:
-    label_files = glob.glob(MFDATA_PLUGIN_HOME + "/*/.layerapi2_label")
-config_directories = [os.path.dirname(x) for x in label_files]
-for config_dir in config_directories:
-    plugin_conf = get_conf(config_dir)
-    if plugin_conf:
-        plugins.append(plugin_conf)
 with open(circus_ini_file, "r") as f:
     extra_variables = {
-        "PLUGINS": plugins
+        "PLUGINS": plugin_confs
     }
-    tmp_content = envtpl.render_string(f.read(),
-                                       extra_variables=extra_variables,
-                                       keep_multi_blank_lines=False)
-    # double evaluation for some corner cases
-    content = envtpl.render_string(tmp_content, keep_multi_blank_lines=False)
+    content = envtpl.render_string(f.read(),
+                                   extra_variables=extra_variables,
+                                   keep_multi_blank_lines=False)
 
 print(content)

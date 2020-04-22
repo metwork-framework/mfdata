@@ -8,6 +8,7 @@ setup(
     entry_points={
         "console_scripts": [
             "inject_file = acquisition.inject_file:main",
+            "reinject_step = acquisition.reinject_step:main",
         ]
     }
 )

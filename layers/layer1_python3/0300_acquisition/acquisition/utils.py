@@ -2,7 +2,6 @@ import os
 import datetime
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 from mfutil.layerapi2 import LayerApi2Wrapper
-from acquisition.configargparse_confparser import StepConfigFileParser
 
 MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', '/tmp')
 IN_DIR = os.path.join(MFMODULE_RUNTIME_HOME, "var", "in")
@@ -61,11 +60,6 @@ def _get_tmp_filepath(plugin_name, step_name):
     tmp_dir = _get_or_make_tmp_dir(plugin_name, step_name)
     tmp_name = get_unique_hexa_identifier()
     return os.path.join(tmp_dir, tmp_name)
-
-
-def _make_config_file_parser_class(plugin_name, step_name):
-    return StepConfigFileParser(plugin_name, step_name,
-                                _set_custom_environment)
 
 
 def _get_current_utc_datetime_with_ms():

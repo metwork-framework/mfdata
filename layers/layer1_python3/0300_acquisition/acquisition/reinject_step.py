@@ -2,6 +2,7 @@ import os
 import time
 
 from acquisition import AcquisitionStep
+from acquisition.utils import get_plugin_step_directory_path
 from mfutil import mkdir_p_or_die
 from xattrfile import XattrFile
 from mfutil import get_unique_hexa_identifier
@@ -14,24 +15,46 @@ class AcquisitionReinjectStep(AcquisitionStep):
 
     debug_mode_allowed = False
     __xafs = None
+    step_name = "reinject"
 
     def add_extra_arguments(self, parser):
-        parser.add_argument('--reinject-delay', action='store',
-                            default=60,
-                            help='number of seconds to way before '
-                                 'trying to reinject')
-        parser.add_argument('--reinject-attempts', action='store',
-                            default=5,
-                            help='number of reinject retry attempts')
-        parser.add_argument('--reinject-dir', action='store',
-                            default=None,
-                            help='destination directory')
+        parser.add_argument(
+            '--reinject',
+            action='store',
+            default=None,
+            help="destination target (if it starts with slash => this is an "
+            "absolute directory, if it is a string like "
+            "'plugin_name/step_name' (a slash between two strings) => "
+            "this is a plugin_name/step_name, if it is a single string "
+            "(without slash) => it's a step name for the current plugin")
 
     def init(self):
         self.__xafs = {}
-        if self.args.reinject_dir is None:
-            self.error_and_die('you have to set a reinject-dir')
+        if self.args.reinject is None:
+            self.error_and_die('you have to set a reinject argument')
+        if self.args.reinject.startswith('/'):
+            self.reinject_dir = self.args.reinject
+        else:
+            if '/' in self.args.reinject:
+                # plugin_name/step_name
+                self.reinject_dir = get_plugin_step_directory_path(
+                    self.args.reinject.split('/')[0].strip(),
+                    self.args.reinject.split('/')[1].strip()
+                )
+            else:
+                # step_name
+                self.reinject_dir = get_plugin_step_directory_path(
+                    self.plugin_name,
+                    self.args.reinject.strip()
+                )
         mkdir_p_or_die(self.args.reinject_dir)
+        self.retry_total = self.get_config_value("retry_total", transform=int)
+        self.retry_min_wait = self.get_config_value("retry_min_wait",
+                                                    transform=float)
+        self.retry_max_wait = self.get_config_value("retry_max_wait",
+                                                    transform=float)
+        self.retry_backoff = self.get_config_value("retry_backoff",
+                                                    transform=float)
 
     def destroy(self):
         self.debug("destroy called")
@@ -52,11 +75,22 @@ class AcquisitionReinjectStep(AcquisitionStep):
             xaf2.rename(filepath)
 
     def _before(self, xaf, **kwargs):
+        if self.retry_total <= 0:
+            self.info("retry_total <= 0 => let's delete the file")
+            xaf.delete_or_nothing()
+            return False
         if xaf.filepath not in self.__xafs:
             self._set_before_tags(xaf)
             retry_attempt = int(self.get_tag(xaf, "attempt", "0"))
             self.__xafs[xaf.filepath] = (time.time(), retry_attempt, xaf)
         return False
+
+    def delay(self, attempt_number):
+        tmp = self.retry_min_wait + \
+            self.retry_backoff * (2 ** (attempt_number - 1))
+        if tmp > self.retry_max_wait:
+            return self.retry_max_wait
+        return tmp
 
     def reinject(self, xaf, retry_attempt):
         self._set_tag_latest(xaf, "attempt", str(retry_attempt + 1))
@@ -75,18 +109,24 @@ class AcquisitionReinjectStep(AcquisitionStep):
         xaf.delete_or_nothing()
 
     def ping(self):
-        now = int(time.time())
+        now = time.time()
         filepaths = list(self.__xafs.keys())
         for filepath in filepaths:
             try:
                 if not os.path.exists(filepath):
                     del(self.__xafs[filepath])
                 mtime, retry_attempt, xaf = self.__xafs[filepath]
-                if retry_attempt >= int(self.args.reinject_attempts):
+                if retry_attempt >= self.retry_total:
                     self.give_up(xaf)
                     del(self.__xafs[filepath])
-                if (now - int(mtime)) >= int(self.args.reinject_delay):
+                delay = self.delay(retry_attempt + 1)
+                if now - mtime >= delay:
                     self.reinject(xaf, retry_attempt)
                     del(self.__xafs[filepath])
             except KeyError:
                 pass
+
+
+def main():
+    x = AcquisitionReinjectStep()
+    x.run()

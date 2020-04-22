@@ -1,0 +1,10 @@
+{% extends "templates/config.ini" %}
+
+{% block custom %}
+[custom]
+
+# Destination plugin/step of the unbzipped file
+#
+# Use syntax like: plugin_name/step_name
+dest_dir = switch/main
+{% endblock %}

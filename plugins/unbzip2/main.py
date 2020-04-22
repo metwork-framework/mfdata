@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
+
 from acquisition.unbzip2_step import AcquisitionUnbzip2Step
 
 
 class StepUnbzip2(AcquisitionUnbzip2Step):
 
-    plugin_name = "unbzip2"
+    step_name = "main"
 
 
 if __name__ == "__main__":

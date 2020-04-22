@@ -1,0 +1,35 @@
+{% extends "templates/config.ini" %}
+
+{% set CMD_AND_ARGS_EXTRA_ARGS = "--dest-dir={CUSTOM_DEST_DIR} --drop-tag={CUSTOM_DROP_TAGS} --force-chmod={CUSTOM_FORCE_CHMOD} --dest-basename={CUSTOM_DEST_BASENAME}" %}
+
+{% block custom %}
+[custom]
+
+# Destination directory or plugin/step
+#
+# If the value starts with "/" (slash), we considerer this is an (absolute) directory
+# else write something like "plugin_name/step_name" to target a specific plugin/step.
+dest_dir = FIXME
+
+# Target basename (under dest_dir)
+# you can use some placeholders for this basename:
+# - {ORIGINAL_BASENAME}
+# - {ORIGINAL_DIRNAME}
+# - {RANDOM_ID}
+# - {STEP_COUNTER}
+# - {ORIGINAL_UID}
+# - strftime placeholders like %Y%m%d
+dest_basename={ORIGINAL_BASENAME}
+
+# If set force chmod on files after move with well known
+# octal value (example : '0700')
+# (empty or null => no chmod done)
+# (can be used only if dest_dir is an absolute directory)
+force_chmod=
+
+# Drop internal tags
+# 1    => yes
+# 0    => no
+# AUTO => yes if dest_dir is an absolute directory, no if dest_dir is a plugin_name/step_name
+drop_tags=AUTO
+{% endblock %}

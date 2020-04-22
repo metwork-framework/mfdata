@@ -1,49 +1,44 @@
 #!/usr/bin/env python3
 
 import os
-import glob
 import envtpl
-from mfext.plugins_common import get_plugin_parser
-from mfutil.plugins import layerapi2_label_file_to_plugin_name
+from mflog import get_logger
+from mfplugin.manager import PluginsManager
+from acquisition.switch_rules import RulesReader
 
 MFDATA_PLUGIN_HOME = os.path.join(os.environ["MFMODULE_RUNTIME_HOME"],
                                   "var", "plugins")
+LOGGER = get_logger("_make_switch_conf")
 
 
-def make_switch_conf(plugin_dir):
-    output = []
-    plugin_name = layerapi2_label_file_to_plugin_name(
-        "%s/.layerapi2_label" % plugin_dir)
-    parser = get_plugin_parser(plugin_dir, plugin_name, interpolation=None)
-    steps = [x.replace("step_", "", 1).split(':')[0] for x in parser.sections()
-             if x.startswith("step_")]
-    for step in steps:
-        section = "step_%s" % step
-        if not parser.has_option(section, "switch_logical_condition"):
-            continue
-        use_hardlink = False
-        if parser.has_option(section, "switch_use_hardlink"):
-            use_hardlink = parser.getboolean(section, "switch_use_hardlink")
-        condition = parser.get(section, "switch_logical_condition").strip()
-        if condition.lower() in ('none', 'null'):
-            continue
-        output.append("")
-        output.append("[step_%s_%s]" % (plugin_name, step))
-        mdid = os.environ['MFDATA_DATA_IN_DIR']
-        output.append("plugin_name=%s" % plugin_name)
-        output.append("directory=%s/step.%s.%s" % (mdid, plugin_name, step))
-        output.append("condition=%s" % condition)
-        output.append("use_hardlink=%s" % use_hardlink)
-        magic_file = "%s/%s/magic" % (MFDATA_PLUGIN_HOME, plugin_name)
-        if os.path.exists(magic_file):
-            output.append("magic_file=%s" % magic_file)
-        else:
-            output.append("magic_file=null")
-    return "\n".join(output)
+def make_switch_conf(plugin):
+    log = LOGGER.bind(plugin=plugin)
+    rules_path = "%s/switch_rules.ini" % plugin.home
+    if not os.path.isfile(rules_path):
+        return ""
+    r = RulesReader()
+    try:
+        r.read(rules_path)
+    except Exception as e:
+        log.warning(
+            "invalid rules file: %s => ignoring the plugin, details: %s" %
+            (rules_path, e))
+        return ""
+    return envtpl.render_string("\n".join(r._raw_lines))
 
 
-content = ""
-for label_file in glob.glob(MFDATA_PLUGIN_HOME + "/*/.layerapi2_label"):
-    content = content + make_switch_conf(os.path.dirname(label_file))
-
-print(envtpl.render_string(content, keep_multi_blank_lines=False))
+manager = PluginsManager()
+for plugin in manager.plugins.values():
+    try:
+        plugin.load_full()
+    except Exception as e:
+        LOGGER.warning("invalid plugin: %s (%s) => ignoring it ; details: %s" %
+                       (plugin.name, plugin.home, e))
+        continue
+    with plugin.plugin_env_context():
+        tmp = make_switch_conf(plugin)
+    if len(tmp) > 0:
+        print("# <CONTRIBUTION OF %s PLUGIN>" % plugin.name)
+        print(tmp)
+        print("# </CONTRIBUTION OF %s PLUGIN>" % plugin.name)
+        print()

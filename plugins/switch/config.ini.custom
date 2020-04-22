@@ -1,0 +1,11 @@
+{% extends "templates/config.ini" %}     
+
+{% block retry_policy %}
+{% endblock %}
+{% block custom %}
+[custom]
+rules_path = {% raw %}{{MFSERVER_CURRENT_PLUGIN_DIR}}{% endraw %}/rules.ini
+no_match_policy = delete
+{% endblock %}
+{% block extra_daemons %}
+{% endblock %}

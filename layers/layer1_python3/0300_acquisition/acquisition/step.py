@@ -354,9 +354,10 @@ class AcquisitionStep(AcquisitionBase):
             MFMODULE_RUNTIME_HOME, "var", "plugins", self.plugin_name
         )
 
-    def move_to_plugin_step(self, xaf, plugin_name, step_name,
-                            keep_original_basename=False):
-        """Move a XattrFile to another plugin/step.
+    def hardlink_to_plugin_step(self, xaf, plugin_name, step_name,
+                                keep_original_basename=False,
+                                info=False):
+        """Hardlink (or copy) a XattrFile to another plugin/step.
 
         Args:
             xaf (XattrFile): XattrFile to move.
@@ -364,6 +365,7 @@ class AcquisitionStep(AcquisitionBase):
             step_name (string): step name.
             keep_original_basename (boolean): if True, we keep the original
                 basename of xaf.
+            info (boolean): if true, add INFO log messages.
 
         Returns:
             boolean: True if ok.
@@ -373,15 +375,58 @@ class AcquisitionStep(AcquisitionBase):
             basename = xaf.basename()
         else:
             basename = get_unique_hexa_identifier()
+        old_filepath = xaf.filepath
         target_path = os.path.join(
             get_plugin_step_directory_path(plugin_name, step_name),
             basename,
         )
-        result, _ = xaf.move_or_copy(target_path)
+        result, hardlinked = xaf.hardlink_or_copy(target_path)
+        if info and result:
+            if hardlinked:
+                self.info("File %s hardlinked to %s" %
+                          (old_filepath, target_path))
+            else:
+                self.info("File %s copied to %s (can't hardlink)" %
+                          (old_filepath, target_path))
+
+    def move_to_plugin_step(self, xaf, plugin_name, step_name,
+                            keep_original_basename=False,
+                            info=False):
+        """Move (or copy) a XattrFile to another plugin/step.
+
+        Args:
+            xaf (XattrFile): XattrFile to move.
+            plugin_name (string): plugin name.
+            step_name (string): step name.
+            keep_original_basename (boolean): if True, we keep the original
+                basename of xaf.
+            info (boolean): if true, add INFO log messages.
+
+        Returns:
+            boolean: True if ok.
+
+        """
+        if keep_original_basename:
+            basename = xaf.basename()
+        else:
+            basename = get_unique_hexa_identifier()
+        old_filepath = xaf.filepath
+        target_path = os.path.join(
+            get_plugin_step_directory_path(plugin_name, step_name),
+            basename,
+        )
+        result, moved = xaf.move_or_copy(target_path)
+        if info and result:
+            if moved:
+                self.info("File %s moved to %s" %
+                          (old_filepath, target_path))
+            else:
+                self.info("File %s copied to %s (can't move)" %
+                          (old_filepath, target_path))
         return result
 
     def copy_to_plugin_step(self, xaf, plugin_name, step_name,
-                            keep_original_basename=False):
+                            keep_original_basename=False, info=False):
         """Copy a XattrFile (with tags) to another plugin/step.
 
         Args:
@@ -390,6 +435,7 @@ class AcquisitionStep(AcquisitionBase):
             step_name (string): step name.
             keep_original_basename (boolean): if True, we keep the original
                 basename of xaf.
+            info (boolean): if true, add INFO log messages.
 
         Returns:
             boolean: True if ok
@@ -399,11 +445,14 @@ class AcquisitionStep(AcquisitionBase):
             basename = xaf.basename()
         else:
             basename = get_unique_hexa_identifier()
+        old_filepath = xaf.filepath
         target_path = os.path.join(
             get_plugin_step_directory_path(plugin_name, step_name),
             basename,
         )
         result = xaf.copy_or_nothing(target_path)
+        if info and result:
+            self.info("File %s copied to %s" % (old_filepath, target_path))
         return result
 
     def process(self, xaf):

@@ -1,8 +1,8 @@
 from acquisition.utils import MFMODULE_RUNTIME_HOME
 from acquisition.utils import _set_custom_environment
 from acquisition.utils import _get_tmp_filepath
-from acquisition.utils import _make_config_file_parser_class
 from mfutil import get_unique_hexa_identifier
+from mfplugin.utils import validate_plugin_name
 from acquisition.utils import _get_current_utc_datetime_with_ms
 import re
 import os
@@ -10,8 +10,9 @@ import sys
 import six
 import mflog
 import traceback
-import configargparse
-from functools import partial
+import argparse
+
+MFMODULE = os.environ.get("MFMODULE", "GENERIC")
 
 
 class AcquisitionBase(object):
@@ -42,21 +43,18 @@ class AcquisitionBase(object):
 
     def __init__(self):
         """Constructor."""
-        if self.plugin_name is None:
-            raise NotImplementedError("plugin_name property must be overriden "
-                                      "and set")
         step_or_daemon_name = self._get_step_or_daemon_name()
-        plugin_name = self.plugin_name
+        plugin_name = os.environ.get("MFDATA_CURRENT_PLUGIN_NAME",
+                                     self.__class__.plugin_name)
+        if plugin_name is None:
+            raise Exception("you have to execute this inside a plugin_env")
+        validate_plugin_name(self.plugin_name)
         regexp = "^[A-Za-z0-9_]+$"
         if not re.match(regexp, step_or_daemon_name):
             self.error_and_die(
                 "step_name or daemon_name: %s must match with %s",
                 step_or_daemon_name,
                 regexp,
-            )
-        if not re.match(regexp, plugin_name):
-            self.error_and_die(
-                "plugin_name: %s must match with %s", plugin_name, regexp
             )
         _set_custom_environment(plugin_name, step_or_daemon_name)
 
@@ -66,17 +64,7 @@ class AcquisitionBase(object):
             self._get_step_or_daemon_name(),
             self.__class__.__name__,
         )
-        parser = configargparse.ArgumentParser(
-            description=description,
-            add_env_var_help=False,
-            ignore_unknown_config_file_keys=True,
-            args_for_setting_config_path=["-c", "--config-file"],
-            config_file_parser_class=partial(
-                _make_config_file_parser_class,
-                self.plugin_name,
-                self._get_step_or_daemon_name(),
-            ),
-        )
+        parser = argparse.ArgumentParser(description=description)
         self._add_extra_arguments_before(parser)
         self.add_extra_arguments(parser)
         self._add_extra_arguments_after(parser)
@@ -200,6 +188,36 @@ class AcquisitionBase(object):
         logger = self._get_logger()
         logger.exception(str(msg), *args, **kwargs)
 
+    def __get_config_value(self, section, key, transform=None, default=None):
+        env_var = "%s_PLUGIN_%s_%s_%s" % \
+            (MFMODULE, self.plugin_name.replace('-', '_').upper(),
+             section.replace('-', '_').upper(),
+             key.replace('-', '_').upper())
+        if env_var not in os.environ:
+            raise Exception("%s does not exist in the environment" % env_var)
+        val = os.environ.get(env_var, default)
+        if isinstance(val, Exception):
+            # pylint: disable=E0702
+            raise val
+        if transform is not None:
+            try:
+                val = transform(val)
+            except Exception as e:
+                raise Exception("can't call transform function on "
+                                "configuration key: [%s]/%s with "
+                                "exception: %s" % (section, key, e))
+        return val
+
+    def get_config_value(self, key, transform=None, default=Exception()):
+        return self.__get_config_value("step_%s" % self.step_name, key,
+                                       transform=transform,
+                                       default=default)
+
+    def get_custom_config_value(self, key, transform=None,
+                                default=Exception()):
+        return self.__get_config_value("custom", key, transform=transform,
+                                       default=default)
+
     def _get_tag_name(
         self,
         name,
@@ -223,15 +241,16 @@ class AcquisitionBase(object):
                 name,
             )
 
-    def _set_tag_latest(self, xaf, name, value):
+    def _set_tag_latest(self, xaf, name, value, info=False):
         tag_name = self._get_tag_name(name, "latest")
-        self._set_tag(xaf, tag_name, value)
+        self._set_tag(xaf, tag_name, value, info=info)
 
-    def _set_tag(self, xaf, name, value):
-        self.debug("Setting tag %s = %s" % (name, value))
+    def _set_tag(self, xaf, name, value, info=False):
+        log = self.info if info else self.debug
+        log("Setting tag %s = %s" % (name, value))
         xaf.tags[name] = value
 
-    def set_tag(self, xaf, name, value, add_latest=True):
+    def set_tag(self, xaf, name, value, add_latest=True, info=False):
         """Set a tag on a file with good prefixes.
 
         Args:
@@ -239,13 +258,14 @@ class AcquisitionBase(object):
             name (string): name of the tag (without prefixes)
             value (string): value of the tag
             add_latest (boolean): add latest prefix
+            info (boolean): if True, a log info message is send (else debug)
 
         """
         counter_str_value = str(self._get_counter_tag_value(xaf))
         tag_name = self._get_tag_name(name, counter_str_value)
-        self._set_tag(xaf, tag_name, value)
+        self._set_tag(xaf, tag_name, value, info=info)
         if add_latest:
-            self._set_tag_latest(xaf, name, value)
+            self._set_tag_latest(xaf, name, value, info=info)
 
     def get_tag(
         self,

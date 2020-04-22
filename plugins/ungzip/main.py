@@ -6,7 +6,7 @@ from acquisition.ungzip_step import AcquisitionUngzipStep
 
 class StepUngzip(AcquisitionUngzipStep):
 
-    plugin_name = "ungzip"
+    step_name = "main"
 
 
 if __name__ == "__main__":
