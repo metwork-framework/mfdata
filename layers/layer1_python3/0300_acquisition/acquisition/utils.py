@@ -45,20 +45,24 @@ def _get_or_make_trash_dir(plugin_name, step_name):
     return trash_dir
 
 
-def _get_tmp_filepath(plugin_name, step_name):
+def _get_tmp_filepath(plugin_name, step_name, forced_basename=None):
     """Get a full temporary filepath (including unique filename).
 
     Args:
         plugin_name (string): plugin name.
         step_name (string): step name.
-
+        forced_basename (string): if not None, use the given string as
+            basename. If None, the basename is a random identifier.
 
     Returns:
         (string) full temporary filepath (including unique filename).
 
     """
     tmp_dir = _get_or_make_tmp_dir(plugin_name, step_name)
-    tmp_name = get_unique_hexa_identifier()
+    if forced_basename is None:
+        tmp_name = get_unique_hexa_identifier()
+    else:
+        tmp_name = forced_basename
     return os.path.join(tmp_dir, tmp_name)
 
 

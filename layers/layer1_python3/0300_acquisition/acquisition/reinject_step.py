@@ -54,7 +54,7 @@ class AcquisitionReinjectStep(AcquisitionStep):
         self.retry_max_wait = self.get_config_value("retry_max_wait",
                                                     transform=float)
         self.retry_backoff = self.get_config_value("retry_backoff",
-                                                    transform=float)
+                                                   transform=float)
 
     def destroy(self):
         self.debug("destroy called")

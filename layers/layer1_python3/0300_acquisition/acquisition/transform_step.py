@@ -11,7 +11,7 @@ class AcquisitionTransformStep(AcquisitionStep):
                             "plugin_name/step_name" % self.args.dest_dir)
         if '/' not in self.args.dest_dir:
             raise Exception("invalid dest_dir: %s" % self.args.dest_dir)
-        tmp = self.args.dest_dir.split()
+        tmp = self.args.dest_dir.split('/')
         if len(tmp) != 2:
             raise Exception("invalid dest_dir: %s" % self.args.dest_dir)
         self.dest_plugin_name = tmp[0]
@@ -31,8 +31,8 @@ class AcquisitionTransformStep(AcquisitionStep):
         self.info("Processing file: %s" % xaf.filepath)
         try:
             out = self.transform(xaf)
-        except Exception as e:
-            self.warning("exception during transform() call: %s" % e)
+        except Exception:
+            self.exception("exception during transform() call")
             return False
         if out is None:
             self.debug("transform() returned None => we do nothing more")

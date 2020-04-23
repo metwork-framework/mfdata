@@ -89,8 +89,8 @@ class AcquisitionMoveStep(AcquisitionStep):
                 self.debug("before_move() returned None or False "
                            "=> we do nothing more")
                 return True
-        except Exception as e:
-            self.warning("Exception: %s during before_move() => failure" % e)
+        except Exception:
+            self.exception("exception during before_move() => failure")
             return False
         fcmi = int(self.force_chmod, 8) \
             if self.force_chmod != "" else None

@@ -189,7 +189,14 @@ class AcquisitionStep(AcquisitionBase):
         return after_status
 
     def _before(self, xaf):
-        tmp_filepath = self.get_tmp_filepath()
+        if "first.core.original_uid" in xaf.tags:
+            forced_uid = \
+                xaf.tags['first.core.original_uid'].decode('utf8')
+            tmp_filepath = self.get_tmp_filepath(
+                forced_basename=forced_uid)
+        else:
+            tmp_filepath = self.get_tmp_filepath()
+            forced_uid = os.path.basename(tmp_filepath)
         self.info("Move %s to %s (to process it)", xaf.filepath, tmp_filepath)
         try:
             xaf.rename(tmp_filepath)
@@ -200,6 +207,7 @@ class AcquisitionStep(AcquisitionBase):
                 tmp_filepath,
             )
             return False
+        self._set_original_uid_if_necessary(xaf, forced_uid=forced_uid)
         xaf._before_process_filepath = xaf.filepath
         self._set_before_tags(xaf)
         if self._get_counter_tag_value(xaf) > self.step_limit:
@@ -354,6 +362,22 @@ class AcquisitionStep(AcquisitionBase):
             MFMODULE_RUNTIME_HOME, "var", "plugins", self.plugin_name
         )
 
+    def __xxx_to_plugin_step_get_basename(self, xaf,
+                                          keep_original_basename):
+        if keep_original_basename is None:
+            if "first.core.original_uid" in xaf.tags:
+                return xaf.tags["first.core.original_uid"].decode('utf8')
+            else:
+                keep_original_basename = False
+        if keep_original_basename is True:
+            return xaf.basename()
+        elif keep_original_basename is False:
+            return get_unique_hexa_identifier()
+        else:
+            raise Exception("invalid value for keep_original_basename: %s "
+                            "(must be True, False or None)",
+                            keep_original_basename)
+
     def hardlink_to_plugin_step(self, xaf, plugin_name, step_name,
                                 keep_original_basename=False,
                                 info=False):
@@ -364,17 +388,17 @@ class AcquisitionStep(AcquisitionBase):
             plugin_name (string): plugin name.
             step_name (string): step name.
             keep_original_basename (boolean): if True, we keep the original
-                basename of xaf.
+                basename of xaf. If False, we generate a new basename, If None,
+                we use the value of first.core.original_uid tag as basename
+                (if exists).
             info (boolean): if true, add INFO log messages.
 
         Returns:
             boolean: True if ok.
 
         """
-        if keep_original_basename:
-            basename = xaf.basename()
-        else:
-            basename = get_unique_hexa_identifier()
+        basename = \
+            self.__xxx_to_plugin_step_get_basename(xaf, keep_original_basename)
         old_filepath = xaf.filepath
         target_path = os.path.join(
             get_plugin_step_directory_path(plugin_name, step_name),
@@ -388,6 +412,7 @@ class AcquisitionStep(AcquisitionBase):
             else:
                 self.info("File %s copied to %s (can't hardlink)" %
                           (old_filepath, target_path))
+        return result
 
     def move_to_plugin_step(self, xaf, plugin_name, step_name,
                             keep_original_basename=False,
@@ -399,17 +424,17 @@ class AcquisitionStep(AcquisitionBase):
             plugin_name (string): plugin name.
             step_name (string): step name.
             keep_original_basename (boolean): if True, we keep the original
-                basename of xaf.
+                basename of xaf. If False, we generate a new basename, If None,
+                we use the value of first.core.original_uid tag as basename
+                (if exists).
             info (boolean): if true, add INFO log messages.
 
         Returns:
             boolean: True if ok.
 
         """
-        if keep_original_basename:
-            basename = xaf.basename()
-        else:
-            basename = get_unique_hexa_identifier()
+        basename = \
+            self.__xxx_to_plugin_step_get_basename(xaf, keep_original_basename)
         old_filepath = xaf.filepath
         target_path = os.path.join(
             get_plugin_step_directory_path(plugin_name, step_name),
@@ -434,17 +459,17 @@ class AcquisitionStep(AcquisitionBase):
             plugin_name (string): plugin name.
             step_name (string): step name.
             keep_original_basename (boolean): if True, we keep the original
-                basename of xaf.
+                basename of xaf. If False, we generate a new basename, If None,
+                we use the value of first.core.original_uid tag as basename
+                (if exists).
             info (boolean): if true, add INFO log messages.
 
         Returns:
             boolean: True if ok
 
         """
-        if keep_original_basename:
-            basename = xaf.basename()
-        else:
-            basename = get_unique_hexa_identifier()
+        basename = \
+            self.__xxx_to_plugin_step_get_basename(xaf, keep_original_basename)
         old_filepath = xaf.filepath
         target_path = os.path.join(
             get_plugin_step_directory_path(plugin_name, step_name),

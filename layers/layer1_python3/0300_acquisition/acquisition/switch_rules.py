@@ -17,8 +17,8 @@ class Action(object):
         self.step_name = step_name
 
     def __hash__(self):
-        return hash(self.__class__.__name__,
-                    self.plugin_name, self.step_name)
+        return hash((self.__class__.__name__,
+                    self.plugin_name, self.step_name))
 
 
 class CopyAction(Action):
@@ -27,7 +27,7 @@ class CopyAction(Action):
         return "copy to %s/%s" % (self.plugin_name, self.step_name)
 
 
-class HardLinkAction(Action):
+class HardlinkAction(Action):
 
     def __str__(self):
         return "hardlink to %s/%s" % (self.plugin_name, self.step_name)
@@ -52,19 +52,16 @@ class RulesBlock(object):
     def add_switch_rule(self, switch_rule):
         self.switch_rules.append(switch_rule)
 
-    def evaluate(self, xaf):
-        raise NotImplementedError("evaluate() must be overriden")
+    def eval(self, xaf, rule_pattern):
+        raise NotImplementedError()
 
-    def _evaluate(self, xaf, func, func_label):
-        val = xaf.tags.get(self.params[0], "{NOT_FOUND}")
+    def evaluate(self, xaf):
         actions = set()
         for rule in self.switch_rules:
-            res = func(val, rule.pattern)
-            LOGGER.debug("%s(%s, %s) switch rule => %s" %
-                         (func_label, val, rule.pattern, res))
+            res = self.eval(xaf, rule.pattern)
             if res:
                 LOGGER.debug("=> adding actions: %s" %
-                             ", ".join(rule.actions))
+                             ", ".join([str(x) for x in rule.actions]))
                 actions = actions.union(rule.actions)
         return actions
 
@@ -75,6 +72,9 @@ class OneParameterRulesBlock(RulesBlock):
         RulesBlock.__init__(self, params)
         if len(params) != 1:
             raise Exception("This rules block must have exactly one argument")
+
+    def get_val_from_xaf(self, xaf):
+        return xaf.tags.get(self.params[0], b"{NOT_FOUND}").decode('utf8')
 
 
 class ZeroParameterRulesBlock(RulesBlock):
@@ -87,23 +87,29 @@ class ZeroParameterRulesBlock(RulesBlock):
 
 class FnmatchRulesBlock(OneParameterRulesBlock):
 
-    def evaluate(self, xaf):
-        return self._evaluate(xaf, fnmatch.fnmatch, "fnmatch.fnmatch")
+    def eval(self, xaf, rule_pattern):
+        val = self.get_val_from_xaf(xaf)
+        res = fnmatch.fnmatch(val, rule_pattern)
+        LOGGER.debug("fnmatch.fnmatch(%s, %s) switch rule => %s" %
+                     (val, rule_pattern, res))
+        return res
 
 
 class RegexRulesBlock(OneParameterRulesBlock):
 
-    def evaluate(self, xaf):
-        return self._evaluate(xaf, re.match, "re.match")
+    def eval(self, xaf, rule_pattern):
+        val = self.get_val_from_xaf(xaf)
+        res = re.match(val, rule_pattern)
+        LOGGER.debug("fnmatch.fnmatch(%s, %s) switch rule => %s" %
+                     (val, rule_pattern, res))
+        return res
 
 
 class AlwaystrueRulesBlock(ZeroParameterRulesBlock):
 
-    def always_true(self, *args, **kwargs):
+    def eval(self, xaf, rule_pattern):
+        LOGGER.debug("alwaystrue switch rule => True")
         return True
-
-    def evaluate(self, xaf):
-        return self._evaluate(xaf, self.always_true, "always_true")
 
 
 class RulesSet(object):
@@ -118,7 +124,7 @@ class RulesSet(object):
         actions = set()
         for rule_block in self.rule_blocks:
             res = rule_block.evaluate(xaf)
-            actions.union(res)
+            actions = actions.union(res)
         return actions
 
 
@@ -131,7 +137,8 @@ class RulesReader(object):
     def rules_block_factory(self, rule_type, params=[]):
         c = "%sRulesBlock" % rule_type.capitalize()
         try:
-            return (c.__class__)(*params)
+            klass = globals()[c]
+            return klass(params)
         except Exception:
             self.log.exception("probably a wrong rules block type: %s" %
                                rule_type)
@@ -140,7 +147,8 @@ class RulesReader(object):
     def action_factory(self, action_type, *args, **kwargs):
         c = "%sAction" % action_type.capitalize()
         try:
-            return (c.__class__)(*args, **kwargs)
+            klass = globals()[c]
+            return klass(*args, **kwargs)
         except Exception:
             self.log.exception("probably a wrong action type: %s" %
                                action_type)
@@ -154,24 +162,26 @@ class RulesReader(object):
         rules_block = None
         line_number = 0
         for line in lines:
-            self.log = self.log.bind(line_number=line_number)
             line_number += 1
+            self.log = self.log.bind(line_number=line_number)
             tmp = line.strip()
             if len(tmp) == 0:
                 continue
             if tmp[0] == "#":
                 continue
             self._raw_lines.append(tmp)
-            if fnmatch.fnmatch(tmp, "[rules:*:*]"):
+            if fnmatch.fnmatch(tmp, "?rules:*:*") and tmp[0] == '[' and \
+                    tmp[-1] == ']':
                 tempo = tmp.split(':')
                 typ = tempo[1]
-                params = tempo[-1].split(',')
+                params = tempo[-1][:-1].split(',')
                 if rules_block is not None:
                     result.add_rules_block(rules_block)
                 rules_block = self.rules_block_factory(typ, params)
-            elif fnmatch.fnmatch(tmp, "[rules:*]"):
+            elif fnmatch.fnmatch(tmp, "?rules:*") and tmp[0] == '[' and \
+                    tmp[-1] == ']':
                 tempo = tmp.split(':')
-                typ = tempo[1]
+                typ = tempo[1][:-1]
                 if rules_block is not None:
                     result.add_rules_block(rules_block)
                 rules_block = self.rules_block_factory(typ)
@@ -185,7 +195,7 @@ class RulesReader(object):
                     if len(tempo2) == 2:
                         if tempo2[1].endswith('*'):
                             act = self.action_factory("hardlink", tempo2[0],
-                                                      tempo2[1])
+                                                      tempo2[1][:-1])
                         else:
                             act = self.action_factory("copy", tempo2[0],
                                                       tempo2[1])
@@ -198,7 +208,7 @@ class RulesReader(object):
                     raise BadSyntax()
                 rules_block.add_switch_rule(switch_rule)
             else:
-                self.log.error("bad line syntax")
+                self.log.error("bad line syntax: %s" % tmp)
                 raise BadSyntax()
         if rules_block is not None:
             result.add_rules_block(rules_block)

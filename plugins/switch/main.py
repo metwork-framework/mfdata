@@ -7,7 +7,7 @@ import fnmatch  # noqa: F401
 from acquisition.copy_step import AcquisitionCopyStep
 from acquisition.utils import _get_or_make_trash_dir
 from xattrfile import XattrFile
-from acquisition.switch_rules import RulesReader, HardLinkAction
+from acquisition.switch_rules import RulesReader, HardlinkAction
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -60,7 +60,7 @@ class AcquisitionSwitchStep(AcquisitionCopyStep):
             return None
         res = []
         for action in actions:
-            hardlink = isinstance(action, HardLinkAction)
+            hardlink = isinstance(action, HardlinkAction)
             res.append((action.plugin_name, action.step_name, hardlink))
         return res
 

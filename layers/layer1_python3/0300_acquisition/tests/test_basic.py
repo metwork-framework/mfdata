@@ -98,7 +98,7 @@ class MiscTestCase(TestCase):
     def test_contstructor_wrong_plugin_name_exit(self):
         # Mock os._exit() as sys.exit() to test the exiting and return code
         os._exit = sys.exit
-        with self.assertRaises(Exception) as cm:
+        with self.assertRaises(Exception):
             AcquisitionTestStepWrongPluginName()
 
     @redirect_stderr_on_stdout()

@@ -1,12 +1,14 @@
 {% extends "templates/config.ini" %}
 
+{% set CMD_AND_ARGS_EXTRA_ARGS = "--dest-dir={CUSTOM_DEST_DIR}" %}
+
 {% block custom %}
 [custom]
 
 # Destination plugin/step
 #
 # Use something like "plugin_name/step_name" to target a specific plugin/step
-move_dest_dir = switch/main
+dest_dir = switch/main
 
 # Custom libmagic configuration file
 # (empty => no custom magic configuration file, default "system" configuration

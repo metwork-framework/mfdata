@@ -64,8 +64,8 @@ class AcquisitionCopyStep(AcquisitionStep):
                 self.debug("before_copy() returned None or False "
                            "=> we do nothing more")
                 return True
-        except Exception as e:
-            self.warning("Exception: %s during before_copy() => failure" % e)
+        except Exception:
+            self.exception("exception during before_copy() => failure")
             return False
         uid = xaf.getuid()
         fix_uid = uid is not None and uid != self.uid

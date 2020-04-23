@@ -44,9 +44,9 @@ class AcquisitionBase(object):
     def __init__(self):
         """Constructor."""
         step_or_daemon_name = self._get_step_or_daemon_name()
-        plugin_name = os.environ.get("MFDATA_CURRENT_PLUGIN_NAME",
-                                     self.__class__.plugin_name)
-        if plugin_name is None:
+        self.plugin_name = os.environ.get("MFDATA_CURRENT_PLUGIN_NAME",
+                                          self.__class__.plugin_name)
+        if self.plugin_name is None:
             raise Exception("you have to execute this inside a plugin_env")
         validate_plugin_name(self.plugin_name)
         regexp = "^[A-Za-z0-9_]+$"
@@ -56,7 +56,7 @@ class AcquisitionBase(object):
                 step_or_daemon_name,
                 regexp,
             )
-        _set_custom_environment(plugin_name, step_or_daemon_name)
+        _set_custom_environment(self.plugin_name, step_or_daemon_name)
 
     def _init(self):
         description = "%s/%s acquisition %s" % (
@@ -126,15 +126,20 @@ class AcquisitionBase(object):
             MFMODULE_RUNTIME_HOME, "var", "plugins", self.plugin_name
         )
 
-    def get_tmp_filepath(self):
+    def get_tmp_filepath(self, forced_basename=None):
         """Get a full temporary filepath (including unique filename).
+
+        Args:
+            forced_basename (string): if not None, use the given string as
+                basename. If None, the basename is a random identifier.
 
         Returns:
             (string) full temporary filepath (including unique filename).
 
         """
         return _get_tmp_filepath(
-            self.plugin_name, self._get_step_or_daemon_name()
+            self.plugin_name, self._get_step_or_daemon_name(),
+            forced_basename=forced_basename
         )
 
     def _get_logger(self):
@@ -334,13 +339,16 @@ class AcquisitionBase(object):
                 original_basename = str(
                     os.path.basename(xaf._original_filepath)
                 )
-                self._set_tag(xaf, tag_name, original_basename)
+                self._set_tag(xaf, tag_name, original_basename, info=True)
 
-    def __set_original_uid_if_necessary(self, xaf):
+    def _set_original_uid_if_necessary(self, xaf, forced_uid=None):
         tag_name = self._get_original_uid_tag_name()
         if tag_name not in xaf.tags:
-            original_uid = get_unique_hexa_identifier()
-            self._set_tag(xaf, tag_name, original_uid)
+            if forced_uid is None:
+                original_uid = get_unique_hexa_identifier()
+            else:
+                original_uid = forced_uid
+            self._set_tag(xaf, tag_name, original_uid, info=True)
 
     def __set_original_dirname_if_necessary(self, xaf):
         if hasattr(xaf, "_original_filepath") and xaf._original_filepath:
@@ -348,12 +356,12 @@ class AcquisitionBase(object):
             if tag_name not in xaf.tags:
                 dirname = os.path.dirname(xaf._original_filepath)
                 original_dirname = str(os.path.basename(dirname))
-                self._set_tag(xaf, tag_name, original_dirname)
+                self._set_tag(xaf, tag_name, original_dirname, info=True)
 
     def _set_before_tags(self, xaf):
         current = _get_current_utc_datetime_with_ms()
         self.__increment_and_set_counter_tag_value(xaf)
-        self.set_tag(xaf, "enter_step", current, add_latest=False)
+        self.set_tag(xaf, "enter_step", current, add_latest=False, info=True)
         self.__set_original_basename_if_necessary(xaf)
-        self.__set_original_uid_if_necessary(xaf)
+        self._set_original_uid_if_necessary(xaf)
         self.__set_original_dirname_if_necessary(xaf)
