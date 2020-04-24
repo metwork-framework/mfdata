@@ -1,5 +1,0 @@
-# keep files 5 days
-0 3 * * * {% raw %}{{MFDATA_HOME}}{% endraw %}/bin/cronwrap.sh --lock --low --log-capture-to /dev/null -- find {% raw %}{{MFMODULE_RUNTIME_HOME}}{% endraw %}/var/archive/ -type f -mtime +5 -exec rm -f {} \;
-
-# remove empty directories
-0 4 * * * {% raw %}{{MFDATA_HOME}}{% endraw %}/bin/cronwrap.sh --lock --low --log-capture-to /dev/null -- find {% raw %}{{MFMODULE_RUNTIME_HOME}}{% endraw %}/var/archive/ -type d -exec rmdir {} \;

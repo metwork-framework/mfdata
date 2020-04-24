@@ -1,0 +1,43 @@
+{% extends "templates/config.ini" %}
+
+{% set CMD_AND_ARGS_EXTRA_ARGS = "--dest-dir={CUSTOM_DEST_DIR} --keep-tags-suffix={CUSTOM_KEEP_TAGS_SUFFIX} --force-chmod={CUSTOM_FORCE_CHMOD} --dest-basename={CUSTOM_DEST_BASENAME}" %}
+
+{% block custom %}
+[custom]
+
+# Destination directory or plugin/step
+#
+# Absolute directory path (starting with "/" (slash)) where files will be 
+# archived
+# WARNING: this directory is automatically cleaned (see lifetime option)
+#          => you should use a dedicated directory for this plugin
+dest_dir = {% raw %}{{MFMODULE_RUNTIME_HOME}}{% endraw %}/var/archive
+
+# Target basename (under dest_dir)
+# you can use some placeholders for this basename:
+# - {ORIGINAL_BASENAME}
+# - {ORIGINAL_DIRNAME}
+# - {RANDOM_ID}
+# - {STEP_COUNTER}
+# - {ORIGINAL_UID}
+# - strftime placeholders like %Y%m%d
+# (note: this is not exactly a basename as you can add some subdirectories inside
+#  which will be dynamically created, the final archive absolute file path will
+#  be dest_dir + "/" + dest_basename
+dest_basename=%Y%m%d/{RANDOM_ID}
+
+# If set force chmod on files after move with well known
+# octal value (example : '0700')
+# (empty or null => no chmod done)
+force_chmod=
+
+# Internal tags will be dropped in archive dir
+# but if keep_tags_suffix is not empty, they will be dumped in another file:
+# dest_dir + "/" + dest_basename + keep_tags_suffix
+# (if you don't want tags at all, put an empty (or null) value below)
+keep_tags_suffix=.tags
+
+# Number of days to keep files in dest_dir
+# (if < 0 => no cleaning is done)
+lifetime=5
+{% endblock %}

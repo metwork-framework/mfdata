@@ -1,0 +1,43 @@
+{% extends "templates/config.ini" %}
+
+{% set CMD_AND_ARGS_EXTRA_ARGS = "--dest-dir={CUSTOM_DEST_DIR} --command-template={CUSTOM_COMMAND_TEMPLATE} --command-returning-path={CUSTOM_COMMAND_RETURNING_PATH}" %}
+
+{% block custom %}
+[custom]
+
+# Command template to execute (with arguments)
+# 
+# This command will be executed (shell style) for each incoming file in
+# this plugin. Following placeholders are available:
+# - {% raw %}{{ENV_VAR}}{% endraw %}, replaced by corresponding ENV_VAR
+# - {% raw %}{{MFDATA_CURRENT_PLUGIN_DIR}}{% endraw %}, replaced by the fullpath of the current
+#     plugin directory (just a particular case of previous placeholder but
+#     a very useful one)
+# - {PATH}, replaced by the fullpath of the incoming file
+#
+# Example (not very useful):
+# command_template = stat {PATH}
+# (to execute stat command on each incoming file)
+# 
+command_template = FIXME
+
+# Parse command output to (possibly) find a filepath to move (with all tags)
+# to dest_dir.
+#
+# If set to 1, we will parse the command output (stdout only) to find the 
+# first line (if any) starting with "FILEPATH:". The following part on this 
+# "FILEPATH:" line will be interpreted as a result filepath which will be
+# moved to dest_dir (with all tags copied). If we can't find this special
+# tag in the output, nothing will be done after the command execution.
+#
+# If you don't want to do anything after the command, you can use "0" here
+# (to avoid the parsing)
+command_returning_path = 1
+
+# Destination plugin/step (only if command_returning_path == 1, see details)
+#
+# Use something like "plugin_name/step_name" to target a specific plugin/step
+# (tip: you can use {% raw %}{{MFDATA_CURRENT_PLUGIN_NAME}}{% endraw %} to get the current plugin name)
+dest_dir = switch/main
+
+{% endblock %}
