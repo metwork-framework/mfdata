@@ -194,9 +194,8 @@ class AcquisitionBase(object):
         logger.exception(str(msg), *args, **kwargs)
 
     def __get_config_value(self, section, key, transform=None, default=None):
-        env_var = "%s_PLUGIN_%s_%s_%s" % \
-            (MFMODULE, self.plugin_name.replace('-', '_').upper(),
-             section.replace('-', '_').upper(),
+        env_var = "%s_CURRENT_PLUGIN_%s_%s" % \
+            (MFMODULE, section.replace('-', '_').upper(),
              key.replace('-', '_').upper())
         if env_var not in os.environ:
             raise Exception("%s does not exist in the environment" % env_var)
@@ -361,7 +360,7 @@ class AcquisitionBase(object):
     def _set_before_tags(self, xaf):
         current = _get_current_utc_datetime_with_ms()
         self.__increment_and_set_counter_tag_value(xaf)
-        self.set_tag(xaf, "enter_step", current, add_latest=False, info=True)
+        self.set_tag(xaf, "enter_step", current, add_latest=False, info=False)
         self.__set_original_basename_if_necessary(xaf)
         self._set_original_uid_if_necessary(xaf)
         self.__set_original_dirname_if_necessary(xaf)

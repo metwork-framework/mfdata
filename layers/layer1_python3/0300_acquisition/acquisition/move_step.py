@@ -21,43 +21,55 @@ class AcquisitionMoveStep(AcquisitionStep):
             self.dest_dir = get_plugin_step_directory_path(plugin_name,
                                                            step_name)
         mkdir_p_or_die(self.dest_dir)
-        if self.args.drop_tags == "AUTO":
-            self.drop_tags = self.args.dest_dir.startswith('/')
-        elif self.args.drop_tags == "1":
+        try:
+            if self.args.drop_tags == "AUTO":
+                self.drop_tags = self.args.dest_dir.startswith('/')
+            elif self.args.drop_tags == "1":
+                self.drop_tags = True
+            elif self.args.drop_tags == "0":
+                self.drop_tags = False
+            else:
+                raise Exception("invalid value for drop_tags configuration "
+                                "key: %s" % self.args.drop_tags)
+        except AttributeError:
             self.drop_tags = True
-        elif self.args.drop_tags == "0":
-            self.drop_tags = False
-        else:
-            raise Exception("invalid value for drop_tags configuration "
-                            "key: %s" % self.args.drop_tags)
-        if self.args.force_chmod == "null":
+        try:
+            if self.args.force_chmod == "null":
+                self.force_chmod = ""
+            else:
+                self.force_chmod = self.args.force_chmod
+        except AttributeError:
             self.force_chmod = ""
-        else:
-            self.force_chmod = self.args.force_chmod
-        if self.args.target_basename == "":
-            raise Exception("target_basename can't be empty")
-        self.target_basename = self.args.target_basename
+        if self.args.dest_basename == "":
+            raise Exception("dest_basename can't be empty")
+        self.dest_basename = self.args.dest_basename
 
-    def add_extra_arguments(self, parser):
+    def add_dest_arguments(self, parser):
         parser.add_argument('--dest-dir', action='store',
                             default="FIXME",
                             help='destination directory (can be an absolute '
                             'path or something like "plugin_name/step_name")')
-        parser.add_argument('--drop-tags', action='store',
-                            default="AUTO",
-                            help='1 (yes), 0 (no) or '
-                            'AUTO (yes for absolute dest-dir)')
+        parser.add_argument('--dest-basename', action='store',
+                            default="{ORIGINAL_BASENAME}",
+                            help='target basename (under dest_dir)')
+
+    def add_force_chmod_argument(self, parser):
         parser.add_argument('--force-chmod', action='store',
                             default="",
                             help='if non empty, force chmod on files after '
                             'move with well known octal value '
                             '(example : 0700)')
-        parser.add_argument('---dest-basename', action='store',
-                            default="{ORIGINAL_BASENAME}",
-                            help='target basename (under dest_dir)')
+
+    def add_extra_arguments(self, parser):
+        self.add_dest_arguments(parser)
+        parser.add_argument('--drop-tags', action='store',
+                            default="AUTO",
+                            help='1 (yes), 0 (no) or '
+                            'AUTO (yes for absolute dest-dir)')
+        self.add_force_chmod_argument(parser)
 
     def compute_basename(self, xaf):
-        if self.target_basename == "{ORIGINAL_BASENAME}":
+        if self.dest_basename == "{ORIGINAL_BASENAME}":
             # shortpath for performance reasons
             return get_unique_hexa_identifier()
         step_counter = self._get_counter_tag_value(xaf, not_found_value='999')
@@ -68,7 +80,7 @@ class AcquisitionMoveStep(AcquisitionStep):
             "{ORIGINAL_UID}": self.get_original_uid(xaf),
             "{STEP_COUNTER}": str(step_counter)
         }
-        tmp = self.target_basename
+        tmp = self.dest_basename
         for to_replace, replaced in replaces.items():
             tmp = tmp.replace(to_replace, replaced)
         if '%' in tmp:

@@ -4,6 +4,8 @@ from acquisition.step import AcquisitionStep
 
 class AcquisitionTransformStep(AcquisitionStep):
 
+    dest_dir_default = "FIXME"
+
     def _init(self):
         AcquisitionStep._init(self)
         if self.args.dest_dir.startswith('/'):
@@ -20,7 +22,7 @@ class AcquisitionTransformStep(AcquisitionStep):
 
     def add_extra_arguments(self, parser):
         parser.add_argument('--dest-dir', action='store',
-                            default="FIXME",
+                            default=self.dest_dir_default,
                             help='destination directory (something like '
                             '"plugin_name/step_name")')
 

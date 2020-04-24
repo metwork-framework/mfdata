@@ -1,107 +1,36 @@
 import os.path
-import time
-
-from acquisition import AcquisitionStep
-from mfutil import mkdir_p_or_die, mkdir_p, get_unique_hexa_identifier
-from xattrfile import XattrFile
+from acquisition.move_step import AcquisitionMoveStep
+from mfutil import mkdir_p
 
 
-class AcquisitionArchiveStep(AcquisitionStep):
+class AcquisitionArchiveStep(AcquisitionMoveStep):
     """
     Class to describe an archive acquisition step.
 
-    Attributes:
-        archive_dir (string): the root directory where files will be archived
-        keep_tags (boolean): keep tags into another file ?
-        keep_tags_suffix (string): suffix to add to the filename to keep tags
-        strftime_template (string): template to define the sub-directory
-                                    inside archive directory
-
     """
 
-    archive_dir = None
-    keep_tags = True
-    keep_tags_suffix = None
-    strftime_template = None
-
     def add_extra_arguments(self, parser):
-        parser.add_argument('--dest-dir', action='store',
-                            default=None,
-                            help='destination directory (for archive)')
-        parser.add_argument('--keep-tags', action='store',
-                            type=bool, default=True,
-                            help='keep tags/attributes into another file ?')
-        parser.add_argument('--keep-tags-suffix', action='store',
-                            default=".tags",
-                            help='if keep-tags=True, suffix to add to the '
-                            'filename to keep tags')
-        parser.add_argument('--strftime-template', action='store',
-                            default="%Y%m%d/{RANDOM_ID}",
-                            help='template inside archive directory (strftime'
-                            'placeholders are allowed, / are allowed to define'
-                            'subdirectories, {ORIGINAL_BASENAME}, '
-                            '{ORIGINAL_DIRNAME}, {RANDOM_ID} and '
-                            '{STEP_COUNTER}, {ORIGINAL_UDI} are also '
-                            ' available)')
+        self.add_dest_arguments(parser)
+        self.add_force_chmod_argument(parser)
+        parser.add_argument(
+            '--keep-tags-suffix', action='store', default=".tags",
+            help='suffix to add to the basename to keep tags'
+            ' (put a null or empty value to have no tags at all')
 
-    def init(self):
-        if self.args.dest_dir is None:
-            module_runtime_home = os.environ.get('MFMODULE_RUNTIME_HOME',
-                                                 '/tmp')
-            self.archive_dir = os.path.join(module_runtime_home,
-                                            'var', 'archive')
-        else:
-            self.archive_dir = self.args.dest_dir
-        self.strftime_template = self.args.strftime_template
-        self.keep_tags = self.args.keep_tags
-        self.keep_tags_suffix = self.args.keep_tags_suffix
-        mkdir_p_or_die(self.archive_dir)
+    def _init(self):
+        AcquisitionMoveStep._init(self)
+        if not self.args.dest_dir.startswith('/'):
+            raise Exception("dest-dir must be an absolute directory")
+        self.drop_tags = True
+        self.keep_tags_suffix = self.args.keep_tags_suffix.strip()
 
-    def process(self, xaf):
-        original_dirname = self.get_original_dirname(xaf)
-        original_basename = self.get_original_basename(xaf)
-        original_uid = self.get_original_uid(xaf)
-        random_basename = get_unique_hexa_identifier()
-        step_counter = self._get_counter_tag_value(xaf, not_found_value='999')
-        if step_counter != 999 and step_counter != 0:
-            step_counter_minus_1 = step_counter - 1
-        else:
-            step_counter_minus_1 = step_counter
-        rendered_template = os.path.join(self.archive_dir,
-                                         self.strftime_template)
-        rendered_template = rendered_template.replace('{RANDOM_ID}',
-                                                      random_basename)
-        rendered_template = rendered_template.replace('{ORIGINAL_BASENAME}',
-                                                      original_basename)
-        rendered_template = rendered_template.replace('{ORIGINAL_UID}',
-                                                      original_uid)
-        rendered_template = rendered_template.replace('{ORIGINAL_DIRNAME}',
-                                                      original_dirname)
-        rendered_template = rendered_template.replace('{STEP_COUNTER}',
-                                                      str(step_counter))
-        rendered_template = \
-            rendered_template.replace('{STEP_COUNTER_MINUS_1}',
-                                      str(step_counter_minus_1))
-        new_filepath = time.strftime(rendered_template)
-        dirname = os.path.dirname(new_filepath)
-        res = mkdir_p(dirname)
-        if not res:
-            self.warning("can't mkdir %s" % dirname)
+    def before_move(self, xaf):
+        basename = self.compute_basename(xaf)
+        filepath = os.path.join(self.dest_dir, basename)
+        directory = os.path.dirname(filepath)
+        if not mkdir_p(directory):
             return False
-        # Store old xaf filepath to display in the logs
-        old_filepath = xaf.filepath
-        success, moved = xaf.move_or_copy(new_filepath)
-        if success:
-            if moved:
-                self.info("%s moved into %s", old_filepath, new_filepath)
-            else:
-                self.info("%s copied into %s", xaf.filepath, new_filepath)
-            if self.keep_tags:
-                tags_filepath = new_filepath + self.keep_tags_suffix
-                xaf.write_tags_in_a_file(tags_filepath)
-            XattrFile(new_filepath).clear_tags()
-            return True
-        else:
-            self.warning("Can't move/copy %s to %s", xaf.filepath,
-                         new_filepath)
-            return False
+        if self.keep_tags_suffix not in ("", "null"):
+            tags_filepath = filepath + self.keep_tags_suffix
+            xaf.write_tags_in_a_file(tags_filepath)
+        return filepath

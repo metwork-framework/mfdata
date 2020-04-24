@@ -1,5 +1,7 @@
 {% extends "templates/config.ini" %}
 
+{% set CMD_AND_ARGS_EXTRA_ARGS = "--dest-dir={CUSTOM_DEST_DIR}" %}
+
 {% block custom %}
 [custom]
 
