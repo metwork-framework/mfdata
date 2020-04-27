@@ -1,6 +1,7 @@
 import fnmatch
 import re
 from mflog import get_logger
+from opinionated_configparser import OpinionatedConfigParser
 
 LOGGER = get_logger("switch/rules")
 
@@ -95,6 +96,13 @@ class FnmatchRulesBlock(OneParameterRulesBlock):
         return res
 
 
+class NotfnmatchRulesBlock(FnmatchRulesBlock):
+
+    def eval(self, xaf, rule_pattern):
+        parent = FnmatchRulesBlock.eval(self, xaf, rule_pattern)
+        return not parent
+
+
 class RegexRulesBlock(OneParameterRulesBlock):
 
     def eval(self, xaf, rule_pattern):
@@ -103,6 +111,13 @@ class RegexRulesBlock(OneParameterRulesBlock):
         LOGGER.debug("fnmatch.fnmatch(%s, %s) switch rule => %s" %
                      (val, rule_pattern, res))
         return res
+
+
+class NotregexRulesBlock(RegexRulesBlock):
+
+    def eval(self, xaf, rule_pattern):
+        parent = RegexRulesBlock.eval(self, xaf, rule_pattern)
+        return not parent
 
 
 class AlwaystrueRulesBlock(ZeroParameterRulesBlock):
@@ -154,41 +169,33 @@ class RulesReader(object):
                                action_type)
             raise BadSyntax()
 
-    def read(self, path):
+    def read(self, path, section_prefix="switch_rules"):
         self.log = self.log.bind(path=path)
         result = RulesSet()
-        with open(path, "r") as f:
-            lines = f.readlines()
+        x = OpinionatedConfigParser(delimiters=("=",), comment_prefixes=("#",))
+        x.optionxform = str
+        x.read([path])
         rules_block = None
-        line_number = 0
-        for line in lines:
-            line_number += 1
-            self.log = self.log.bind(line_number=line_number)
-            tmp = line.strip()
-            if len(tmp) == 0:
-                continue
-            if tmp[0] == "#":
-                continue
-            self._raw_lines.append(tmp)
-            if fnmatch.fnmatch(tmp, "?rules:*:*") and tmp[0] == '[' and \
-                    tmp[-1] == ']':
-                tempo = tmp.split(':')
+        LOGGER.debug("section_prefix = %s" % section_prefix)
+        for section in x.sections():
+            if fnmatch.fnmatch(section, "%s:*:*" % section_prefix):
+                tempo = section.split(':')
                 typ = tempo[1]
-                params = tempo[-1][:-1].split(',')
-                if rules_block is not None:
-                    result.add_rules_block(rules_block)
+                params = tempo[-1].split(',')
                 rules_block = self.rules_block_factory(typ, params)
-            elif fnmatch.fnmatch(tmp, "?rules:*") and tmp[0] == '[' and \
-                    tmp[-1] == ']':
-                tempo = tmp.split(':')
-                typ = tempo[1][:-1]
-                if rules_block is not None:
-                    result.add_rules_block(rules_block)
+                result.add_rules_block(rules_block)
+            elif fnmatch.fnmatch(section, "%s:*" % section_prefix):
+                tempo = section.split(':')
+                typ = tempo[1]
                 rules_block = self.rules_block_factory(typ)
-            elif fnmatch.fnmatch(tmp, "*=>*/*"):
-                tempo = tmp.split('=>')
-                actions = [x.strip() for x in tempo[-1].split(',')]
-                pattern = '=>'.join(tempo[0:-1]).strip()
+                result.add_rules_block(rules_block)
+            else:
+                continue
+            LOGGER.debug("section = %s" % section)
+            for option in x.options(section):
+                val = x.get(section, option)
+                actions = [y.strip() for y in val.split(',')]
+                pattern = option.replace('@@@@@@', '=').replace('~~~~~~', '#')
                 switch_rule = SwitchRule(pattern)
                 for action in actions:
                     tempo2 = action.split('/')
@@ -200,16 +207,10 @@ class RulesReader(object):
                             act = self.action_factory("copy", tempo2[0],
                                                       tempo2[1])
                     else:
-                        self.log.error("bad action [%s]" % action)
+                        self.log.error("bad action [%s] for section [%s] "
+                                       "and pattern: %s" % (action, section,
+                                                            option))
                         raise BadSyntax()
                     switch_rule.add_action(act)
-                if rules_block is None:
-                    self.log.error("switch rule line before a rule block")
-                    raise BadSyntax()
                 rules_block.add_switch_rule(switch_rule)
-            else:
-                self.log.error("bad line syntax: %s" % tmp)
-                raise BadSyntax()
-        if rules_block is not None:
-            result.add_rules_block(rules_block)
         return result

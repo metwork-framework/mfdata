@@ -1,5 +1,6 @@
 {% extends "templates/config.ini" %}
 
+{% set CMD_AND_ARGS_CMD = "archive_step" %}         
 {% set CMD_AND_ARGS_EXTRA_ARGS = "--dest-dir={CUSTOM_DEST_DIR} --keep-tags-suffix={CUSTOM_KEEP_TAGS_SUFFIX} --force-chmod={CUSTOM_FORCE_CHMOD} --dest-basename={CUSTOM_DEST_BASENAME}" %}
 
 {% block custom %}
@@ -24,7 +25,7 @@ dest_dir = {% raw %}{{MFMODULE_RUNTIME_HOME}}{% endraw %}/var/archive
 # (note: this is not exactly a basename as you can add some subdirectories inside
 #  which will be dynamically created, the final archive absolute file path will
 #  be dest_dir + "/" + dest_basename
-dest_basename=%Y%m%d/{RANDOM_ID}
+dest_basename=%Y%m%d/{ORIGINAL_UID}
 
 # If set force chmod on files after move with well known
 # octal value (example : '0700')

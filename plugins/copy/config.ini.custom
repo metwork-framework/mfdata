@@ -1,5 +1,6 @@
 {% extends "templates/config.ini" %}
 
+{% set CMD_AND_ARGS_CMD = "copy_step" %} 
 {% set CMD_AND_ARGS_EXTRA_ARGS = "--dest-dirs={CUSTOM_DEST_DIRS}" %}
 
 {% block custom %}

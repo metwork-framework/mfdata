@@ -80,21 +80,25 @@ class AcquisitionCopyStep(AcquisitionStep):
                 if fix_uid:
                     # We force a copy here to be sure that the file will be
                     # owned by current user
-                    return self.copy_to_plugin_step(xaf, plugin_name,
-                                                    step_name, info=True)
+                    return self.copy_to_plugin_step(
+                        xaf, plugin_name, step_name, info=True,
+                        keep_original_basename=True)
                 else:
                     # A single move is ok here
-                    return self.move_to_plugin_step(xaf, plugin_name,
-                                                    step_name, info=True)
+                    return self.move_to_plugin_step(
+                        xaf, plugin_name, step_name, info=True,
+                        keep_original_basename=True)
             else:
                 if fix_uid:
                     # No optmization here
-                    return self.copy_to_plugin_step(xaf, plugin_name,
-                                                    step_name, info=True)
+                    return self.copy_to_plugin_step(
+                        xaf, plugin_name, step_name, info=True,
+                        keep_original_basename=True)
                 else:
                     # a single move is ok here
-                    return self.move_to_plugin_step(xaf, plugin_name,
-                                                    step_name, info=True)
+                    return self.move_to_plugin_step(
+                        xaf, plugin_name, step_name, info=True,
+                        keep_original_basename=True)
         # len(actions) > 1
         can_hardlink = any([x for _, _, x in dest_dirs])
         if fix_uid and can_hardlink:
@@ -105,12 +109,14 @@ class AcquisitionCopyStep(AcquisitionStep):
             if hardlink:
                 result = result and \
                     self.hardlink_to_plugin_step(xaf, plugin_name,
-                                                 step_name, info=True)
+                                                 step_name, info=True,
+                                                 keep_original_basename=True)
                 hardlink_used = True
             else:
                 result = result and \
-                    self.copy_to_plugin_step(xaf, plugin_name, step_name,
-                                             info=True)
+                    self.copy_to_plugin_step(
+                        xaf, plugin_name, step_name,
+                        info=True, keep_original_basename=True)
         # Special case for last directory (we can optimize a little bit)
         # If there is no error:
         #     If the last directory allow hardlinking => move
@@ -124,22 +130,31 @@ class AcquisitionCopyStep(AcquisitionStep):
                 # we can hardlink here, so we can move last one
                 result = result and \
                     self.move_to_plugin_step(xaf, plugin_name,
-                                             step_name, info=True)
+                                             step_name, info=True,
+                                             keep_original_basename=True)
             else:
                 if hardlink_used:
                     # we have to copy
                     result = result and \
-                        self.copy_to_plugin_step(xaf, plugin_name, step_name,
-                                                 info=True)
+                        self.copy_to_plugin_step(
+                            xaf, plugin_name, step_name,
+                            info=True, keep_original_basename=True)
                 else:
                     # no hardlink used, we can move the last one
                     result = result and \
                         self.move_to_plugin_step(xaf, plugin_name, step_name,
-                                                 info=True)
+                                                 info=True,
+                                                 keep_original_basename=True)
         else:
             # there are some errors, we prefer to copy to keep the original
             # file for trash policy
             result = result and \
-                self.copy_to_plugin_step(xaf, plugin_name, step_name,
-                                         info=True)
+                self.copy_to_plugin_step(
+                    xaf, plugin_name, step_name,
+                    info=True, keep_original_basename=True)
         return result
+
+
+def main():
+    x = AcquisitionCopyStep()
+    x.run()

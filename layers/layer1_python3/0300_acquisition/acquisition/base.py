@@ -21,50 +21,31 @@ class AcquisitionBase(object):
     You have to override this class.
 
     Attributes:
-        args (Namespace): argparser Namespace object with parsed cli args.
         unit_tests (boolean): if True, we are in unit tests mode.
         unit_tests_args (string): cli args (for unit tests).
-        __logger (Logger): Logger object.
-        plugin_name (string): the name of the plugin.
-        step_name (string): the name of the step (if you inherits from
-            AcquisitionStep).
-        daemon_name (string): the name of the daemon (if you inherits from
-            AcquisitionListener).
 
     """
-
-    args = None
     unit_tests = False
     unit_tests_args = None
-    __logger = None
-    plugin_name = None
-    step_name = "main"  # default value
-    daemon_name = None
 
     def __init__(self):
         """Constructor."""
-        step_or_daemon_name = self._get_step_or_daemon_name()
         self.plugin_name = os.environ.get("MFDATA_CURRENT_PLUGIN_NAME",
-                                          self.__class__.plugin_name)
+                                          None)
         if self.plugin_name is None:
             raise Exception("you have to execute this inside a plugin_env")
         validate_plugin_name(self.plugin_name)
-        regexp = "^[A-Za-z0-9_]+$"
-        if not re.match(regexp, step_or_daemon_name):
-            self.error_and_die(
-                "step_name or daemon_name: %s must match with %s",
-                step_or_daemon_name,
-                regexp,
-            )
-        _set_custom_environment(self.plugin_name, step_or_daemon_name)
+        self.args = None
+        self.__logger = None
 
     def _init(self):
-        description = "%s/%s acquisition %s" % (
+        description = "%s/%s acquisition step" % (
             self.plugin_name,
-            self._get_step_or_daemon_name(),
             self.__class__.__name__,
         )
         parser = argparse.ArgumentParser(description=description)
+        parser.add_argument("--step-name", action="store", default="main",
+                            help="step name")
         self._add_extra_arguments_before(parser)
         self.add_extra_arguments(parser)
         self._add_extra_arguments_after(parser)
@@ -72,6 +53,15 @@ class AcquisitionBase(object):
             self.args, unknown = parser.parse_known_args(self.unit_tests_args)
         else:
             self.args, unknown = parser.parse_known_args()
+        self.step_name = self.args.step_name
+        regexp = "^[A-Za-z0-9_]+$"
+        if not re.match(regexp, self.step_name):
+            self.error_and_die(
+                "step_name: %s must match with %s",
+                self.step_name,
+                regexp,
+            )
+        _set_custom_environment(self.plugin_name, self.step_name)
         return self.init()
 
     def init(self):
@@ -102,19 +92,6 @@ class AcquisitionBase(object):
     def _add_extra_arguments_after(self, parser):
         pass
 
-    def _get_step_or_daemon_name(self):
-        try:
-            if self.daemon_name is not None:
-                return self.daemon_name
-        except Exception:
-            pass
-        try:
-            if self.step_name is not None:
-                return self.step_name
-        except Exception:
-            pass
-        return "main"
-
     def get_plugin_directory_path(self):
         """Return the plugin directory (fullpath).
 
@@ -138,7 +115,7 @@ class AcquisitionBase(object):
 
         """
         return _get_tmp_filepath(
-            self.plugin_name, self._get_step_or_daemon_name(),
+            self.plugin_name, self.step_name,
             forced_basename=forced_basename
         )
 
@@ -147,7 +124,7 @@ class AcquisitionBase(object):
         if not self.__logger:
             logger_name = "mfdata.%s.%s" % (
                 self.plugin_name,
-                self._get_step_or_daemon_name(),
+                self.step_name,
             )
             self.__logger = mflog.getLogger(logger_name)
         return self.__logger
@@ -230,7 +207,7 @@ class AcquisitionBase(object):
         force_plugin_name=None,
     ):
         plugin_name = self.plugin_name
-        process_name = self._get_step_or_daemon_name()
+        process_name = self.step_name
         if force_process_name is not None:
             process_name = force_process_name
         if force_plugin_name is not None:

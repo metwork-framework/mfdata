@@ -59,6 +59,12 @@ MFDATA_SCHEMA_OVERRIDE = {
                 "coerce": float
             }
         }
+    },
+    "switch_rules:*": {
+        "required": False,
+        "type": "dict",
+        "allow_unknown": True,
+        "schema": {}
     }
 }
 
@@ -79,6 +85,15 @@ class MfdataConfiguration(Configuration):
         schema = Configuration.get_schema(self)
         dict_merge(schema, MFDATA_SCHEMA_OVERRIDE)
         return schema
+
+    @property
+    def switch_rules(self):
+        res = {}
+        for key in self._doc.keys():
+            if not key.startswith("switch_rules:"):
+                continue
+            res[key] = self._doc[key]
+        return res
 
 
 class MfdataApp(App):

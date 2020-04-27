@@ -35,3 +35,6 @@ ascii_header_max_length = 60
 add_size_tag = 1
 
 {% endblock %}
+
+{% block switch %}
+{% endblock %}

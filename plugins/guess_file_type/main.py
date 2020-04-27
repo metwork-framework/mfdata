@@ -7,8 +7,6 @@ from acquisition.transform_step import AcquisitionTransformStep
 
 class GuessFileTypeStep(AcquisitionTransformStep):
 
-    step_name = "main"
-
     def init(self):
         AcquisitionTransformStep.init(self)
         self.magic = magic.Magic()

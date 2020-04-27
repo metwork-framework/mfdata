@@ -14,8 +14,6 @@ class AcquisitionReinjectStep(AcquisitionStep):
     """
 
     debug_mode_allowed = False
-    __xafs = None
-    step_name = "reinject"
 
     def add_extra_arguments(self, parser):
         parser.add_argument(

@@ -13,3 +13,5 @@ __pycache__
 .git*
 *.plugin
 Makefile
+config.ini.custom
+templates

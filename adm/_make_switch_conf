@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
 import os
-import envtpl
+import datetime
 from mflog import get_logger
 from mfplugin.manager import PluginsManager
-from mfutil import get_unique_hexa_identifier
-from acquisition.switch_rules import RulesReader
 
 MFDATA_PLUGIN_HOME = os.path.join(os.environ["MFMODULE_RUNTIME_HOME"],
                                   "var", "plugins")
@@ -14,43 +12,18 @@ LOGGER = get_logger("_make_switch_conf")
 
 
 def make_switch_conf(plugin):
-    log = LOGGER.bind(plugin=plugin)
-    rules_path = "%s/switch_rules.ini" % plugin.home
-    if not os.path.isfile(rules_path):
-        return ""
-    try:
-        with open(rules_path, "r") as f:
-            content = f.read()
-    except Exception as e:
-        log.warning("can't read: %s, details: %s => ignoring" %
-                    (rules_path, e))
-        return ""
-    try:
-        new_content = envtpl.render_string(content)
-    except Exception as e:
-        log.warning("cant't decode: %s as jinja2 template, details: %s => "
-                    "ignoring" % (rules_path, e))
-    tmp = "%s/tmp/make_switch_conf_%s" % (MFMODULE_RUNTIME_HOME,
-                                          get_unique_hexa_identifier())
-    with open(tmp, "w") as f:
-        f.write(new_content)
-    r = RulesReader()
-    try:
-        r.read(tmp)
-    except Exception as e:
-        log.warning(
-            "invalid rules file: %s => ignoring the plugin, details: %s" %
-            (rules_path, e))
-        return ""
-    finally:
-        try:
-            os.unlink(tmp + "FIXME")
-        except Exception:
-            pass
-    return envtpl.render_string("\n".join(r._raw_lines))
+    res = []
+    rules = plugin.configuration.switch_rules
+    for section in rules:
+        res.append("[%s]" % section)
+        for key, value in rules[section].items():
+            res.append("%s = %s" % (key, value))
+    return "\n".join(res)
 
 
 manager = PluginsManager()
+print("# GENERATED FILE at %s" % datetime.datetime.now())
+print()
 for plugin in manager.plugins.values():
     try:
         plugin.load_full()

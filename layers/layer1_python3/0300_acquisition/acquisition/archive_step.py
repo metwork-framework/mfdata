@@ -34,3 +34,8 @@ class AcquisitionArchiveStep(AcquisitionMoveStep):
             tags_filepath = filepath + self.keep_tags_suffix
             xaf.write_tags_in_a_file(tags_filepath)
         return filepath
+
+
+def main():
+    x = AcquisitionArchiveStep()
+    x.run()

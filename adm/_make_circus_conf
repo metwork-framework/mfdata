@@ -15,6 +15,17 @@ def get_current_step_queue(plugin_name, step_name):
 
 def get_conf(plugin):
     plugin.reload()
+    for step in plugin.configuration.steps:
+        if step.retry_total > 0:
+            reinject_step = step.duplicate(step.name + "_reinject")
+            reinject_step.listened_directories = ""
+            reinject_step.failure_policy = "delete"
+            reinject_step.retry_total = 0
+            reinject_step.numprocesses = 1
+            reinject_step.max_age = 0
+            reinject_step._cmd_and_args = "reinject_step"
+            # FIXME
+            plugin.configuration.add_step(reinject_step)
     return plugin
 
 

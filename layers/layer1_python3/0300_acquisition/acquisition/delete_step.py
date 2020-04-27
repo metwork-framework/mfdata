@@ -1,13 +1,10 @@
-#!/usr/bin/env python3
-
 from acquisition import AcquisitionStep
 
 
-class DeleteMainStep(AcquisitionStep):
-
-    step_name = "main"
+class AcquisitionDeleteStep(AcquisitionStep):
 
     def process(self, xaf):
+        self.info("Processing file: %s" % xaf.filepath)
         res = xaf.delete_or_nothing()
         if not res:
             self.warning("can't delete %s" % xaf.filepath)
@@ -16,6 +13,6 @@ class DeleteMainStep(AcquisitionStep):
         return True
 
 
-if __name__ == "__main__":
-    x = DeleteMainStep()
+def main():
+    x = AcquisitionDeleteStep()
     x.run()

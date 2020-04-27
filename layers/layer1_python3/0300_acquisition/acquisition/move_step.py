@@ -50,7 +50,7 @@ class AcquisitionMoveStep(AcquisitionStep):
                             help='destination directory (can be an absolute '
                             'path or something like "plugin_name/step_name")')
         parser.add_argument('--dest-basename', action='store',
-                            default="{ORIGINAL_BASENAME}",
+                            default="{ORIGINAL_UID}",
                             help='target basename (under dest_dir)')
 
     def add_force_chmod_argument(self, parser):
@@ -69,9 +69,6 @@ class AcquisitionMoveStep(AcquisitionStep):
         self.add_force_chmod_argument(parser)
 
     def compute_basename(self, xaf):
-        if self.dest_basename == "{ORIGINAL_BASENAME}":
-            # shortpath for performance reasons
-            return get_unique_hexa_identifier()
         step_counter = self._get_counter_tag_value(xaf, not_found_value='999')
         replaces = {
             "{RANDOM_ID}": get_unique_hexa_identifier(),
@@ -122,3 +119,8 @@ class AcquisitionMoveStep(AcquisitionStep):
             self.warning("Can't move/copy %s to %s", xaf.filepath,
                          new_filepath)
             return False
+
+
+def main():
+    x = AcquisitionMoveStep()
+    x.run()

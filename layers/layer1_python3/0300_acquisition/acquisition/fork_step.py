@@ -75,3 +75,8 @@ class AcquisitionForkStep(AcquisitionTransformStep):
                                      "=> ignoring" % path)
                         return
                     self.debug("returned path = %s" % path)
+
+
+def main():
+    x = AcquisitionForkStep()
+    x.run()

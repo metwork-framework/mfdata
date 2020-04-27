@@ -10,9 +10,6 @@ templates/config.ini: ../../adm/templates/plugins/_common/config.ini
 config.ini: config.ini.custom templates/config.ini
 	export one_line_summary="$(SUMMARY)" ; export PLUGIN_NAME="$(PLUGIN_NAME)" ; cat $< |envtpl --reduce-multi-blank-lines --search-paths=.,.. >$@ || ( rm -f $@ ; exit 1 )
 
-switch_rules.ini: ../../adm/templates/plugins/_common/switch_rules.ini
-	@cp -f $< $@
-
 .layerapi2_label:
 	echo "plugin_$(PLUGIN_NAME)@mfdata" >$@
 
@@ -30,7 +27,6 @@ switch_rules.ini: ../../adm/templates/plugins/_common/switch_rules.ini
 	echo ".layerapi2_label" >>$@
 	echo ".release_ignore" >>$@
 	echo ".plugin_format_version" >>$@
-	echo "switch_rules.ini" >>$@
 	echo ".autorestart_includes" >>$@
 	echo ".autorestart_excludes" >>$@
 
@@ -46,6 +42,9 @@ clean::
 	rm -f .layerapi2_label
 	rm -f .release_ignore
 	rm -f .plugin_format_version
-	rm -f switch_rules.ini
 	rm -f .autorestart_includes
 	rm -f .autorestart_excludes
+
+install:
+	@mkdir -p "$(MFDATA_HOME)/share/plugins"
+	cp -f *.plugin "$(MFDATA_HOME)/share/plugins/"

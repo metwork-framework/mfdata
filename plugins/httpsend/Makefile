@@ -1,10 +1,4 @@
 include $(MFEXT_HOME)/share/plugin.mk
+include ../common.mk
 
-
-custom::
-	@# your custom build directives here
-
-
-
-
-
+SUMMARY=plugin to send files through http protocol (POST/PUT)
