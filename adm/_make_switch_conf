@@ -22,7 +22,7 @@ def make_switch_conf(plugin):
 
 
 manager = PluginsManager()
-print("# GENERATED FILE at %s" % datetime.datetime.now())
+print("# GENERATED FILE")
 print()
 for plugin in manager.plugins.values():
     try:

@@ -1,9 +1,12 @@
 import collections
+import os
 from mfplugin.configuration import Configuration
 from mfplugin.app import App, APP_SCHEMA
 from mfplugin.utils import NON_REQUIRED_STRING, \
-    NON_REQUIRED_BOOLEAN_DEFAULT_TRUE, BadPlugin, NON_REQUIRED_INTEGER
+    BadPlugin, NON_REQUIRED_INTEGER
 from acquisition.utils import get_plugin_step_directory_path
+
+MFMODULE_RUNTIME_HOME = os.environ['MFMODULE_RUNTIME_HOME']
 
 
 MFDATA_SCHEMA_OVERRIDE = {
@@ -24,13 +27,6 @@ MFDATA_SCHEMA_OVERRIDE = {
             },
             "failure_policy_move_dest_dir": {
                 **NON_REQUIRED_STRING
-            },
-            "failure_policy_move_keep_tags": {
-                **NON_REQUIRED_BOOLEAN_DEFAULT_TRUE
-            },
-            "failure_policy_move_keep_tags_suffix": {
-                **NON_REQUIRED_STRING,
-                "default": ".tags"
             },
             "timeout": {
                 **NON_REQUIRED_INTEGER,
@@ -105,10 +101,6 @@ class MfdataApp(App):
         self.failure_policy = doc_fragment["failure_policy"]
         self.failure_policy_move_dest_dir = \
             doc_fragment["failure_policy_move_dest_dir"]
-        self.failure_policy_move_keep_tags = \
-            doc_fragment["failure_policy_move_keep_tags"]
-        self.failure_policy_move_keep_tags_suffix = \
-            doc_fragment["failure_policy_move_keep_tags_suffix"]
         if self.failure_policy == "move":
             if self.failure_policy_move_dest_dir == "":
                 raise BadPlugin("failure_policy == 'move' but "
@@ -122,6 +114,16 @@ class MfdataApp(App):
             raise BadPlugin("retry_max_wait must be >= retry_min_wait")
         # we force graceful timeout with timeout
         self._doc_fragment["graceful_timeout"] = self._doc_fragment["timeout"]
+        self._type = "step"
+
+    def set_listened_directories(self, value):
+        self.__listened_directories = value
+
+    def set_numprocesses(self, value):
+        self._doc_fragment["numprocesses"] = value
+
+    def set_max_age(self, value):
+        self._doc_fragment["max_age"] = value
 
     @property
     def listened_directories(self):
@@ -130,15 +132,34 @@ class MfdataApp(App):
                            get_plugin_step_directory_path(self.plugin_name,
                                                           self.name))
 
+    def set_cmd_and_args(self, val):
+        self._doc_fragment['_cmd_and_args'] = val
+
+    def set_failure_policy(self, val):
+        self.failure_policy = val
+
+    def set_failure_policy_move_dest_dir(self, val):
+        self.failure_policy_move_dest_dir = val
+
     @property
     def cmd_and_args(self):
         old = self._doc_fragment['_cmd_and_args']
+        ssa = ""
+        if self.failure_policy != "keep":
+            ssa = ssa + f" --failure-policy={self.failure_policy}"
+            if self.failure_policy == "move":
+                ssa = ssa + " --failure-policy-move-dest-dir=%s" % \
+                    self.failure_policy_move_dest_dir
+        ssa = ssa + f" --step-name={self.name} --redis-unix-socket-path=" \
+            f"{MFMODULE_RUNTIME_HOME}/var/redis.socket " \
+            f"step.{self.plugin_name}.{self.name}"
         to_be_replaced = {
             "{MFDATA_CURRENT_STEP_NAME}": self.name,
             "{MFDATA_CURRENT_STEP_QUEUE}": "step.%s.%s" % (self.plugin_name,
                                                            self.name),
             "{MFDATA_CURRENT_STEP_DIR}":
-            get_plugin_step_directory_path(self.plugin_name, self.name)
+            get_plugin_step_directory_path(self.plugin_name, self.name),
+            "{STANDARD_STEP_ARGUMENTS}": ssa
         }
         for key in self._custom_fragment.keys():
             to_be_replaced["{CUSTOM_%s}" % key.upper()] = \

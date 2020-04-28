@@ -13,6 +13,21 @@ def get_plugin_step_directory_path(plugin_name, step_name):
     return os.path.join(IN_DIR, "step.%s.%s" % (plugin_name, step_name))
 
 
+def dest_dir_to_absolute_(dest_dir, allow_absolute=True):
+    if dest_dir is None or dest_dir == "" or dest_dir == "null" or \
+            dest_dir == "FIXME":
+        raise Exception("dest_dir must be set")
+    if allow_absolute and dest_dir.startswith('/'):
+        return (dest_dir, True)
+    tmp = dest_dir.split('/')
+    if len(tmp) != 2:
+        raise Exception("bad dest_dir: %s, must be something like "
+                        "plugin_name/step_name" % dest_dir)
+    plugin_name = tmp[0].strip()
+    step_name = tmp[1].strip()
+    return (get_plugin_step_directory_path(plugin_name, step_name), False)
+
+
 def _set_custom_environment(plugin_name, step_name):
     os.environ['MFDATA_CURRENT_PLUGIN_NAME'] = plugin_name
     os.environ['MFDATA_CURRENT_STEP_NAME'] = step_name

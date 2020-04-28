@@ -16,43 +16,40 @@ class AcquisitionReinjectStep(AcquisitionStep):
     debug_mode_allowed = False
 
     def add_extra_arguments(self, parser):
-        parser.add_argument(
-            '--reinject',
-            action='store',
-            default=None,
-            help="destination target (if it starts with slash => this is an "
-            "absolute directory, if it is a string like "
-            "'plugin_name/step_name' (a slash between two strings) => "
-            "this is a plugin_name/step_name, if it is a single string "
-            "(without slash) => it's a step name for the current plugin")
+        parser.add_argument('--dest-dir', action='store',
+                            default="FIXME",
+                            help='destination directory (can be an absolute '
+                            'path or something like "plugin_name/step_name")')
+        parser.add_argument('--retry-min-wait', action='store',
+                            type=float, default=10)
+        parser.add_argument('--retry-max-wait', action='store',
+                            type=float, default=120)
+        parser.add_argument('--retry-total', action='store',
+                            type=int, default=10)
+        parser.add_argument('--retry-backoff', action='store',
+                            type=float, default=0)
 
-    def init(self):
+    def _init(self):
+        AcquisitionStep._init(self)
         self.__xafs = {}
-        if self.args.reinject is None:
-            self.error_and_die('you have to set a reinject argument')
-        if self.args.reinject.startswith('/'):
-            self.reinject_dir = self.args.reinject
-        else:
-            if '/' in self.args.reinject:
-                # plugin_name/step_name
-                self.reinject_dir = get_plugin_step_directory_path(
-                    self.args.reinject.split('/')[0].strip(),
-                    self.args.reinject.split('/')[1].strip()
-                )
-            else:
-                # step_name
-                self.reinject_dir = get_plugin_step_directory_path(
-                    self.plugin_name,
-                    self.args.reinject.strip()
-                )
-        mkdir_p_or_die(self.args.reinject_dir)
-        self.retry_total = self.get_config_value("retry_total", transform=int)
-        self.retry_min_wait = self.get_config_value("retry_min_wait",
-                                                    transform=float)
-        self.retry_max_wait = self.get_config_value("retry_max_wait",
-                                                    transform=float)
-        self.retry_backoff = self.get_config_value("retry_backoff",
-                                                   transform=float)
+        if self.args.dest_dir is None:
+            raise Exception('you have to set a dest-dir argument')
+        if self.args.dest_dir == "FIXME":
+            raise Exception('you have to set a dest-dir argument')
+        if '/' not in self.args.dest_dir:
+            raise Exception("invalid dest_dir: %s" % self.args.dest_dir)
+        if self.args.dest_dir.startswith('/'):
+            raise Exception("invalid dest_dir: %s, must be something like: "
+                            "plugin_name/step_name" % self.args.dest_dir)
+        plugin_name = self.args.dest_dir.split('/')[0]
+        step_name = self.args.dest_dir.split('/')[1]
+        self.dest_dir = get_plugin_step_directory_path(plugin_name,
+                                                       step_name)
+        mkdir_p_or_die(self.dest_dir)
+        self.retry_total = self.args.retry_total
+        self.retry_min_wait = self.args.retry_min_wait
+        self.retry_max_wait = self.args.retry_max_wait
+        self.retry_backoff = self.args.retry_backoff
 
     def destroy(self):
         self.debug("destroy called")
@@ -94,8 +91,8 @@ class AcquisitionReinjectStep(AcquisitionStep):
         self._set_tag_latest(xaf, "attempt", str(retry_attempt + 1))
         filepath = xaf.filepath
         self.info("reinjecting %s into %s/... attempt %d", filepath,
-                  self.args.reinject_dir, retry_attempt + 1)
-        new_filepath = os.path.join(self.args.reinject_dir,
+                  self.dest_dir, retry_attempt + 1)
+        new_filepath = os.path.join(self.dest_dir,
                                     get_unique_hexa_identifier())
         xaf.move_or_copy(new_filepath)
         self.get_stats_client().incr("number_of_processed_files", 1)

@@ -27,6 +27,15 @@ for plugin in manager.plugins.values():
         continue
     with plugin.plugin_env_context():
         plugin.reload()
+        steps_to_add = []
+        for step in plugin.configuration.steps:
+            if step.retry_total > 0:
+                reinject_step = step.duplicate(step.name + "_reinject")
+                reinject_step.set_listened_directories(
+                    "{MFDATA_CURRENT_STEP_DIR}")
+                steps_to_add.append(reinject_step)
+        for step in steps_to_add:
+            plugin.configuration.add_step(step)
         plugin_confs.append(plugin)
 
 extra_variables = {

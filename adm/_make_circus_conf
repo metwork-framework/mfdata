@@ -15,17 +15,27 @@ def get_current_step_queue(plugin_name, step_name):
 
 def get_conf(plugin):
     plugin.reload()
+    steps_to_add = []
     for step in plugin.configuration.steps:
         if step.retry_total > 0:
             reinject_step = step.duplicate(step.name + "_reinject")
-            reinject_step.listened_directories = ""
-            reinject_step.failure_policy = "delete"
-            reinject_step.retry_total = 0
-            reinject_step.numprocesses = 1
-            reinject_step.max_age = 0
-            reinject_step._cmd_and_args = "reinject_step"
-            # FIXME
-            plugin.configuration.add_step(reinject_step)
+            reinject_step.set_listened_directories("{MFDATA_CURRENT_STEP_DIR}")
+            reinject_step.set_numprocesses(1)
+            reinject_step.set_max_age(0)
+            reinject_step.set_cmd_and_args(
+                f"reinject_step "
+                f"--dest-dir={plugin.name}/{step.name} "
+                f"--retry-min-wait={step.retry_min_wait} "
+                f"--retry-max-wait={step.retry_max_wait} "
+                f"--retry-total={step.retry_total} "
+                f"--retry-backoff={step.retry_backoff} "
+                "{STANDARD_STEP_ARGUMENTS}")
+            steps_to_add.append(reinject_step)
+            step.set_failure_policy("move")
+            step.set_failure_policy_move_dest_dir(
+                "%s/%s" % (plugin.name, step.name + "_reinject"))
+    for step in steps_to_add:
+        plugin.configuration.add_step(step)
     return plugin
 
 

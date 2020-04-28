@@ -51,8 +51,13 @@ class HttpSendStep(AcquisitionStep):
         with open(xaf.filepath, 'rb') as f:
             url = self.get_url(xaf)
             self.info("invoking %s on %s ..." % (self.http_method, url))
-            reply = session.request(self.http_method, url,
-                                    timeout=self.http_timeout, data=f)
+            try:
+                reply = session.request(self.http_method, url,
+                                        timeout=self.http_timeout, data=f)
+            except Exception as e:
+                self.warning("exception: %s during %s on %s" %
+                             (e, self.http_method, url))
+                return False
             if reply.status_code in self.http_ok_status_codes:
                 self.info("ok (status_code=%i)" % reply.status_code)
                 return True
