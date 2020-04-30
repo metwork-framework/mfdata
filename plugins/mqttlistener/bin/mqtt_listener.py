@@ -55,7 +55,7 @@ class MqttListener(AcquisitionListener):
     def _on_disconnect(self, client, userdata, rc):
         self.info("the client is disconnected")
 
-    def _on_message(self, client, userdata, message):
+    def __on_message(self, client, userdata, message):
         self.info("message received on %s (size: %i)", message.topic,
                   len(message.payload))
         self.debug("message qos: %s", message.qos)
@@ -64,9 +64,12 @@ class MqttListener(AcquisitionListener):
         with open(tmp_filepath, "wb") as f:
             f.write(message.payload)
         xaf = xattrfile.XattrFile(tmp_filepath)
-        self.set_tag(xaf, "mqttlistener_topic", message.topic)
-        self.set_tag(xaf, "mqttlistener_hostname", self.mqtt_hostname)
-        self.set_tag(xaf, "mqttlistener_port", self.mqtt_port)
+        self.set_tag(xaf, "mqttlistener_topic", message.topic,
+                     add_latest=False)
+        self.set_tag(xaf, "mqttlistener_hostname", self.mqtt_hostname,
+                     add_latest=False)
+        self.set_tag(xaf, "mqttlistener_port", str(self.mqtt_port),
+                     add_latest=False)
         self._set_before_tags(xaf)
         target = self.get_target_filepath(xaf)
         res, _ = xaf.move_or_copy(target)
@@ -74,6 +77,12 @@ class MqttListener(AcquisitionListener):
             self.info("message saved in %s" % target)
         else:
             self.warning("can't save message in %s" % target)
+
+    def _on_message(self, client, userdata, message):
+        try:
+            return self.__on_message(client, userdata, message)
+        except Exception:
+            self.exception("exception catched during _on_message()")
 
     def get_target_filepath(self, xaf):
         return "%s/%s" % (self.dest_dir, get_unique_hexa_identifier())

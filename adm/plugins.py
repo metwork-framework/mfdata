@@ -6,7 +6,7 @@ from mfplugin.utils import NON_REQUIRED_STRING, \
     BadPlugin, NON_REQUIRED_INTEGER
 from acquisition.utils import get_plugin_step_directory_path
 
-MFMODULE_RUNTIME_HOME = os.environ['MFMODULE_RUNTIME_HOME']
+MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', None)
 
 
 MFDATA_SCHEMA_OVERRIDE = {

@@ -1,7 +1,6 @@
 include ../adm/root.mk
 
-# FIXME: amqp_listener mqtt_listener
-PLUGINS=ungzip unbzip2 switch move guess_file_type delete copy archive fork httpsend ftpsend
+PLUGINS=ungzip unbzip2 switch move guess_file_type delete copy archive fork httpsend ftpsend mqttlistener amqplistener
 
 all:: $(MFDATA_HOME)/share/plugins/.done
 

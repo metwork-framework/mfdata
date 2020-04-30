@@ -29,6 +29,9 @@ config.ini: config.ini.custom templates/config.ini
 	echo ".plugin_format_version" >>$@
 	echo ".autorestart_includes" >>$@
 	echo ".autorestart_excludes" >>$@
+	echo "python3_virtualenv_sources/src" >>$@
+	echo "python2_virtualenv_sources/src" >>$@
+	echo "local" >>$@
 
 .autorestart_includes: ../../adm/templates/plugins/_common/autorestart_includes
 	cp -f $< $@
@@ -44,6 +47,9 @@ clean::
 	rm -f .plugin_format_version
 	rm -f .autorestart_includes
 	rm -f .autorestart_excludes
+
+deploy:
+	P=`ls -rt *.plugin |tail -1`; if test "$${P}" != ""; then if test -f "$${P}"; then plugins.install --force "$${P}"; fi; fi
 
 install:
 	@mkdir -p "$(MFDATA_HOME)/share/plugins"

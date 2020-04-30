@@ -13,7 +13,7 @@ def get_plugin_step_directory_path(plugin_name, step_name):
     return os.path.join(IN_DIR, "step.%s.%s" % (plugin_name, step_name))
 
 
-def dest_dir_to_absolute_(dest_dir, allow_absolute=True):
+def dest_dir_to_absolute(dest_dir, allow_absolute=True):
     if dest_dir is None or dest_dir == "" or dest_dir == "null" or \
             dest_dir == "FIXME":
         raise Exception("dest_dir must be set")

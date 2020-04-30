@@ -1,9 +1,21 @@
 {% extends "templates/config.ini" %}
 
-{% set RETRY_TOTAL="10" %}
-{% set RETRY_MIN_WAIT="1" %}
-{% set RETRY_MAX_WAIT="120" %}
-{% set RETRY_BACKOFF="4" %}
+{% block step %}
+{% endblock %}
+{% block switch %}
+{% endblock %}
+
+{% block extra_daemons %}
+[extra_daemon_mqttlistener]
+_cmd_and_args = mqtt_listener.py --step-name=main
+numprocesses=1
+log_split_stdout_stderr=AUTO
+log_split_multiple_workers=AUTO
+rlimit_as = 1000000000
+rlimit_nofile = 1000
+rlimit_stack = 10000000
+rlimit_fsize = 100000000 
+{% endblock %}
 
 {% block custom %}
 
@@ -35,7 +47,7 @@ mqtt_keepalive=60
 
 # Destination 
 # (format: plugin_name/step_name or absolute directory)
-dest_dir={{MFDATA_DATA_IN_DIR}}/incoming
+dest_dir={% raw %}{{MFDATA_DATA_IN_DIR}}{% endraw %}/incoming
 
 
 {% endblock %}
