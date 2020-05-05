@@ -1,5 +1,6 @@
 import collections
 import os
+import shlex
 from mfplugin.configuration import Configuration
 from mfplugin.app import App, APP_SCHEMA
 from mfplugin.utils import NON_REQUIRED_STRING, \
@@ -56,7 +57,7 @@ MFDATA_SCHEMA_OVERRIDE = {
             }
         }
     },
-    "switch_rules:*": {
+    "switch_rules*:*": {
         "required": False,
         "type": "dict",
         "allow_unknown": True,
@@ -148,16 +149,16 @@ class MfdataApp(App):
         if self.failure_policy != "keep":
             ssa = ssa + f" --failure-policy={self.failure_policy}"
             if self.failure_policy == "move":
-                ssa = ssa + " --failure-policy-move-dest-dir=%s" % \
+                ssa = ssa + " --failure-policy-move-dest-dir='%s'" % \
                     self.failure_policy_move_dest_dir
-        ssa = ssa + f" --step-name={self.name} --redis-unix-socket-path=" \
-            f"{MFMODULE_RUNTIME_HOME}/var/redis.socket " \
+        ssa = ssa + f" --step-name={self.name} --redis-unix-socket-path='" \
+            f"{MFMODULE_RUNTIME_HOME}/var/redis.socket' " \
             f"step.{self.plugin_name}.{self.name}"
         to_be_replaced = {
             "{MFDATA_CURRENT_STEP_NAME}": self.name,
             "{MFDATA_CURRENT_STEP_QUEUE}": "step.%s.%s" % (self.plugin_name,
                                                            self.name),
-            "{MFDATA_CURRENT_STEP_DIR}":
+            "{MFDATA_CURRENT_STEP_DIR}": "'%s'" %
             get_plugin_step_directory_path(self.plugin_name, self.name),
             "{STANDARD_STEP_ARGUMENTS}": ssa
         }
@@ -166,5 +167,8 @@ class MfdataApp(App):
                 str(self._custom_fragment[key])
         res = old
         for key, value in to_be_replaced.items():
-            res = res.replace(key, value)
+            if key.startswith("{CUSTOM_"):
+                res = res.replace(key, shlex.quote(value))
+            else:
+                res = res.replace(key, value)
         return res

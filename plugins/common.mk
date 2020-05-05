@@ -48,7 +48,7 @@ clean::
 	rm -f .autorestart_includes
 	rm -f .autorestart_excludes
 
-deploy:
+deploy: clean release install
 	P=`ls -rt *.plugin |tail -1`; if test "$${P}" != ""; then if test -f "$${P}"; then plugins.install --force "$${P}"; fi; fi
 
 install:

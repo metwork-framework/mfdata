@@ -169,14 +169,13 @@ class RulesReader(object):
                                action_type)
             raise BadSyntax()
 
-    def read(self, path, section_prefix="switch_rules"):
+    def read(self, path, section_prefix="switch_rules*"):
         self.log = self.log.bind(path=path)
         result = RulesSet()
         x = OpinionatedConfigParser(delimiters=("=",), comment_prefixes=("#",))
         x.optionxform = str
         x.read([path])
         rules_block = None
-        LOGGER.debug("section_prefix = %s" % section_prefix)
         for section in x.sections():
             if fnmatch.fnmatch(section, "%s:*:*" % section_prefix):
                 tempo = section.split(':')
@@ -191,7 +190,6 @@ class RulesReader(object):
                 result.add_rules_block(rules_block)
             else:
                 continue
-            LOGGER.debug("section = %s" % section)
             for option in x.options(section):
                 val = x.get(section, option)
                 actions = [y.strip() for y in val.split(',')]

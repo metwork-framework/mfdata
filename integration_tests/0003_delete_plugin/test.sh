@@ -5,57 +5,23 @@
 # Check both files are deleted
 # Check no tags left in redis
 
-plugins.uninstall foobar3 >/dev/null 2>&1
-rm -R foobar3* >/dev/null 2>&1
+source ../support.sh
 
-DEST_DIR=${MFMODULE_RUNTIME_HOME}/var/in/dir_delete
-rm -R ${DEST_DIR} >/dev/null 2>&1
-mkdir ${DEST_DIR}
+check_no_tags_left_in_redis
+plugins.uninstall --clean foobar >/dev/null 2>&1
 
-set -x
-set -e
+plugins.install --new-name=foobar ${MFDATA_HOME}/share/plugins/delete-*.plugin
 
-bootstrap_plugin.py create --template=delete foobar3 < stdin
-cd foobar3
+cat >"${MFMODULE_RUNTIME_HOME}/config/plugins/foobar.ini" <<EOF
+[switch_rules:fnmatch:latest.guess_file_type.main.system_magic]
+PNG image* = {{MFDATA_CURRENT_PLUGIN_NAME}}/main
+EOF
 
-make release
-ls -l
-plugins.install "$(ls *.plugin)"
-cd ..
+wait_conf_monitor_idle
 
-mfdata.stop
-mfdata.start
-plugins.list
-_circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status
+inject_file ../data/Example.png
 
-cp ../data/Example.png ${MFMODULE_RUNTIME_HOME}/var/in/incoming
-cp ../data/Example.png.gz ${DEST_DIR}
-
-sleep 1
-n1=`ls -A ${DEST_DIR} | wc -l`
-if [ $n1 != 0 ]; then
-    echo ${DEST_DIR} is not empty
-    ls -l ${DEST_DIR}
-    exit 1
-fi
-n2=`ls -A ${MFMODULE_RUNTIME_HOME}/var/in/step.foobar3.main| wc -l`
-if [ $n2 != 0 ]; then
-    echo ${MFMODULE_RUNTIME_HOME}/var/in/step.foobar3.main is not empty
-    ls -l ${MFMODULE_RUNTIME_HOME}/var/in/step.foobar3.main
-    exit 1
-fi
-plugins.uninstall foobar3
-
-nb3=`redis-cli -s ${MFMODULE_RUNTIME_HOME}/var/redis.socket keys "*" |grep xattr |wc -l`
-if [ $nb3 -ne 0 ]; then
-    echo $nb3 "tags left in redis"
-    cat ${MFMODULE_RUNTIME_HOME}/log/*.stderr
-    exit 1
-else
-    echo "no tags left in redis : ok"
-fi
-
-rm -R foobar3*
-rm -R ${DEST_DIR}
+check_no_tags_left_in_redis
+plugins.uninstall --clean foobar
 
 exit 0

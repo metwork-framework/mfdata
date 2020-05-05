@@ -9,5 +9,5 @@
 # Destination plugin/step of the unbzipped file
 #
 # Use syntax like: plugin_name/step_name
-dest_dir = switch/main
+dest_dir = guess_file_type/main
 {% endblock %}

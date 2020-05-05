@@ -5,99 +5,51 @@
 # Check number of PNG file and corresponding tags files on archive
 # Check no tags left in redis
 
-plugins.uninstall foobar6 >/dev/null 2>&1
-rm -R foobar6* >/dev/null 2>&1
+source ../support.sh
+check_no_tags_left_in_redis
 
-DEST_DIR=${MFMODULE_RUNTIME_HOME}/var/archive/`date +%Y%m%d`
-rm -R ${DEST_DIR} >/dev/null 2>&1
+plugins.uninstall --clean foobar6 >/dev/null 2>&1
+DEST_DIR="${MFMODULE_RUNTIME_HOME}/var/archive/$(date +%Y%m%d)"
+rm -R "${DEST_DIR}" >/dev/null 2>&1
 
-set -x
-set -e
+plugins.install --new-name=foobar6 ${MFDATA_HOME}/share/plugins/archive-*.plugin
 
-bootstrap_plugin.py create --no-input --template=archive foobar6
-cd foobar6
+cat >"${MFMODULE_RUNTIME_HOME}/config/plugins/foobar6.ini" <<EOF
+[switch_rules:alwaystrue]
+* = {{MFDATA_CURRENT_PLUGIN_NAME}}/main
 
-cat config.ini | sed "s/switch_logical_condition = True/switch_logical_condition = ( x['latest.switch.main.system_magic'].startswith(b'PNG image'))/" > config.ini.1
-cat config.ini.1 | sed "s/arg_strftime-template = %Y%m%d\/{RANDOM_ID}/arg_strftime-template = %Y%m%d\/{ORIGINAL_BASENAME}/" > config.ini
-rm config.ini.1
-make release
-ls -l
-plugins.install "$(ls *.plugin)"
-cd ..
+[custom]
+dest_basename = %Y%m%d/{ORIGINAL_BASENAME}
+EOF
 
-mfdata.stop
-mfdata.start
-plugins.list
-_circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status
+wait_conf_monitor_idle
 
-set +x
 echo "Injecting 1000 files"
 for ((i=1;i<=1000;i++)); do
-    cp ../data/Example.png Example${i}.png
-    mv Example${i}.png ${MFMODULE_RUNTIME_HOME}/var/in/incoming
+    cp -f ../data/Example.png "${MFMODULE_RUNTIME_HOME}/var/in/incoming/Example$i.png.t"
+    mv "${MFMODULE_RUNTIME_HOME}/var/in/incoming/Example$i.png.t" "${MFMODULE_RUNTIME_HOME}/var/in/incoming/Example$i.png"
 done
 
-# We wait 60s maximum for all PNG files to be processed
-nb=0
-while [ ! -z "$(ls -A ${MFMODULE_RUNTIME_HOME}/var/in/incoming)" ]; do
-    nb=$(($nb + 1))
-    if [ $nb -eq 60 ]; then
-        exit 1
+wait_dir "${DEST_DIR}" 10
+wait_empty_dir "${MFMODULE_RUNTIME_HOME}/var/in/incoming" 60
+
+n=0
+while test $n -lt 60; do
+N1=$(ls ${DEST_DIR}/Example*.png |wc -l)
+N2=$(ls ${DEST_DIR}/Example*.png.tags |wc -l)
+if test "${N1}" = 1000; then
+    if test "${N2}" = 1000; then
+        break
     fi
-    echo "incoming not empty " $nb ", sleep 1s"
-    sleep 1
-done
-
-# We wait 10s maximum for creation of the archive directory
-nb=0
-while [ ! -d "$DEST_DIR" ]; do
-    nb=$(($nb + 1))
-    if [ $nb -eq 10 ]; then
-        echo $DEST_DIR " has not been create"
-        exit 1
-    fi
-    sleep 1
-done
-
-nb=0
-nb1=`ls -l ${DEST_DIR}/Example*.png | wc -l`
-while [ $nb1 -lt 1000 ]; do
-    nb=$(($nb + 1))
-    if [ $nb -eq 20 ]; then
-        echo "Data files are missing, only " $nb1
-        cat ${MFMODULE_RUNTIME_HOME}/log/*.stderr
-        exit 1
-    fi
-    sleep 1
-    nb1=`ls -l ${DEST_DIR}/Example*.png | wc -l`
-done
-echo "1000 data files : ok"
-
-nb=0
-nb2=`ls -l ${DEST_DIR}/Example*.png.tags | wc -l`
-while [ $nb2 -lt 1000 ]; do
-    nb=$(($nb + 1))
-    if [ $nb -eq 10 ]; then
-        echo "Tags files are missing, only " $nb2
-        cat ${MFMODULE_RUNTIME_HOME}/log/*.stderr
-        exit 1
-    fi
-    sleep 1
-    nb1=`ls -l ${DEST_DIR}/Example*.png.tags | wc -l`
-done
-echo "1000 tags files : ok"
-
-nb3=`redis-cli -s ${MFMODULE_RUNTIME_HOME}/var/redis.socket keys "*" |grep xattr |wc -l`
-if [ $nb3 -ne 0 ]; then
-    echo $nb3 "tags left in redis"
-    cat ${MFMODULE_RUNTIME_HOME}/log/*.stderr
-    exit 1
-else
-    echo "no tags left in redis : ok"
 fi
-set -x
+sleep 1
+n=$(expr $n + 1)
+done
+if test $n -ge 60; then
+    echo "ERROR: missing files"
+    exit 1
+fi
 
-plugins.uninstall foobar6
-
-rm -R foobar6*
-rm -R ${DEST_DIR}
+check_no_tags_left_in_redis
+plugins.uninstall --clean foobar6
+rm -Rf "${DEST_DIR}"

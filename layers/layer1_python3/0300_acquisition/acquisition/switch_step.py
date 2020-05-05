@@ -38,7 +38,7 @@ class AcquisitionSwitchStep(AcquisitionCopyStep):
             "custom dedicated directory) or delete (default)")
         parser.add_argument(
             '--switch-section-prefix', action='store',
-            default="switch_rules",
+            default="switch_rules*",
             help="section prefix for switch rules")
 
     def _keep(self, xaf):

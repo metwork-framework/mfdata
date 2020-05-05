@@ -25,11 +25,13 @@ command_template = FIXME
 # Parse command output to (possibly) find a filepath to move (with all tags)
 # to dest_dir.
 #
-# If set to 1, we will parse the command output (stdout only) to find the 
-# first line (if any) starting with "FILEPATH:". The following part on this 
+# If set to 1, we will parse the command output (stdout only) to find lines 
+# (if any) starting with "FILEPATH:". The following part on this 
 # "FILEPATH:" line will be interpreted as a result filepath which will be
 # moved to dest_dir (with all tags copied). If we can't find this special
 # tag in the output, nothing will be done after the command execution.
+# 
+# Note: you can return several FILEPATH: strings in the output.
 #
 # If you don't want to do anything after the command, you can use "0" here
 # (to avoid the parsing)
@@ -39,6 +41,6 @@ command_returning_path = 1
 #
 # Use something like "plugin_name/step_name" to target a specific plugin/step
 # (tip: you can use {% raw %}{{MFDATA_CURRENT_PLUGIN_NAME}}{% endraw %} to get the current plugin name)
-dest_dir = switch/main
+dest_dir = guess_file_type/main
 
 {% endblock %}

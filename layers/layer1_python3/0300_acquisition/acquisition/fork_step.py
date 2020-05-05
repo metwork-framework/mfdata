@@ -25,7 +25,7 @@ class AcquisitionForkStep(AcquisitionTransformStep):
             '--command-returning-path', action='store',
             help='if set to 1, we will parse the command output '
             '(on stdout only) '
-            'and the first line starting with FILEPATH: string will be '
+            'and lines starting with FILEPATH: string will be '
             'interpreted as a full filepath which will be injected in '
             'dest-dir with tags (WARNING: the returned filepath will be '
             'deleted')
@@ -54,7 +54,7 @@ class AcquisitionForkStep(AcquisitionTransformStep):
         cmd = self.get_command(xaf.filepath)
         self.info("Calling %s ...", cmd)
         x = BashWrapper(cmd)
-        if x:
+        if not x:
             self.warning("%s returned a bad return code: %i, details: %s",
                          cmd, x.code, x)
             return
@@ -62,6 +62,7 @@ class AcquisitionForkStep(AcquisitionTransformStep):
             self.debug("%s returned a good return code, output: %s",
                        cmd, x)
         if self.command_returning_path:
+            paths = []
             lines = [tmp.strip() for tmp in x.stdout.split("\n")]
             for line in lines:
                 if line.startswith("FILEPATH:"):
@@ -75,6 +76,8 @@ class AcquisitionForkStep(AcquisitionTransformStep):
                                      "=> ignoring" % path)
                         return
                     self.debug("returned path = %s" % path)
+                    paths.append(path)
+            return paths
 
 
 def main():

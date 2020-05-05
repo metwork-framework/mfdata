@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from xattrfile import XattrFile
 from acquisition.step import AcquisitionStep
 
@@ -29,6 +30,30 @@ class AcquisitionTransformStep(AcquisitionStep):
     def transform(self, xaf):
         return xaf
 
+    def process_out(self, xaf, out):
+        if out is None:
+            return True
+        if isinstance(out, XattrFile) or isinstance(out, str):
+            if isinstance(out, XattrFile):
+                if "first.core.original_basename" in out.tags:
+                    # we consider that original tags are already copied
+                    new_xaf = out
+                else:
+                    new_xaf = xaf.copy_tags_on(out.filepath)
+            else:
+                # out is str
+                new_xaf = xaf.copy_tags_on(out)
+            return self.move_to_plugin_step(
+                new_xaf, self.dest_plugin_name, self.dest_step_name,
+                keep_original_basename=self.keep_transformed_basename,
+                info=True)
+        elif isinstance(out, Iterable):
+            # let's iterate
+            return all([self.process_out(xaf, x) for x in out])
+        else:
+            raise Exception("wrong output type: %s for transform() call" %
+                            type(out).__name__)
+
     def process(self, xaf):
         self.info("Processing file: %s" % xaf.filepath)
         try:
@@ -39,14 +64,4 @@ class AcquisitionTransformStep(AcquisitionStep):
         if out is None:
             self.debug("transform() returned None => we do nothing more")
             return True
-        if isinstance(out, XattrFile):
-            if "first.core.original_basename" in out.tags:
-                # we consider that original tags are already copied
-                new_xaf = out
-            else:
-                new_xaf = xaf.copy_tags_on(out.filepath)
-        else:
-            new_xaf = xaf.copy_tags_on(out)
-        return self.move_to_plugin_step(
-            new_xaf, self.dest_plugin_name, self.dest_step_name,
-            keep_original_basename=self.keep_transformed_basename, info=True)
+        return self.process_out(xaf, out)

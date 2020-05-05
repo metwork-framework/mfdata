@@ -11,17 +11,19 @@ MFMODULE_RUNTIME_HOME = os.environ["MFMODULE_RUNTIME_HOME"]
 LOGGER = get_logger("_make_switch_conf")
 
 
-def make_switch_conf(plugin):
+def make_switch_conf(plugin, num):
     res = []
     rules = plugin.configuration.switch_rules
     for section in rules:
-        res.append("[%s]" % section)
+        res.append("[%s]" % section.replace("switch_rules:",
+                                            "switch_rules_%i:" % num, 1))
         for key, value in rules[section].items():
             res.append("%s = %s" % (key, value))
     return "\n".join(res)
 
 
 manager = PluginsManager()
+num = 0
 print("# GENERATED FILE")
 print()
 for plugin in manager.plugins.values():
@@ -32,7 +34,7 @@ for plugin in manager.plugins.values():
                        (plugin.name, plugin.home, e))
         continue
     with plugin.plugin_env_context():
-        tmp = make_switch_conf(plugin)
+        tmp = make_switch_conf(plugin, num)
     if len(tmp) > 0:
         print("# <CONTRIBUTION OF %s PLUGIN>" % plugin.name)
         print()
@@ -41,3 +43,4 @@ for plugin in manager.plugins.values():
         print("# </CONTRIBUTION OF %s PLUGIN>" % plugin.name)
         print()
         print()
+        num = num + 1
