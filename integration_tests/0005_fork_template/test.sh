@@ -5,40 +5,60 @@
 # Check command has succeeded
 # Check no tags left in redis
 
-plugins.uninstall foobar5 >/dev/null 2>&1
-rm -R foobar5* >/dev/null 2>&1
+source ../support.sh
+check_no_tags_left_in_redis
 
-set -x
-set -e
+plugins.uninstall --clean foobar4 >/dev/null 2>&1
+plugins.uninstall --clean foobar5 >/dev/null 2>&1
 
-bootstrap_plugin.py create --template=fork foobar5 < stdin
-cd foobar5
-make release
-ls -l
-plugins.install "$(ls *.plugin)"
-cd ..
+DEST_DIR="${MFMODULE_RUNTIME_HOME}/var/in/dir_move"
+rm -R "${DEST_DIR}" >/dev/null 2>&1
+mkdir -p "${DEST_DIR}"
+rm -f fork.sh
 
-mfdata.stop
-mfdata.start
-plugins.list
-_circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status
+plugins.install --new-name=foobar4 ${MFDATA_HOME}/share/plugins/move-*.plugin
+plugins.install --new-name=foobar5 ${MFDATA_HOME}/share/plugins/fork-*.plugin
 
-cp ../data/Example.png ${MFMODULE_RUNTIME_HOME}/var/in/incoming
+cat >fork.sh <<EOF
+#!/bin/bash
 
-sleep 1
-diff ../data/Example.png ${MFMODULE_RUNTIME_HOME}/var/in//tmp/foobar5.main/*.tst
+cat $1 >>${TMPDIR}/$$
+cat $1 >>${TMPDIR}/$$
+echo "FILEPATH: ${TMPDIR}/$$"
+EOF
+chmod +x fork.sh
 
-plugins.uninstall foobar5
+cat >"${MFMODULE_RUNTIME_HOME}/config/plugins/foobar5.ini" <<EOF
+[switch_rules:fnmatch:latest.guess_file_type.main.system_magic]
+PNG image* = {{MFDATA_CURRENT_PLUGIN_NAME}}/main
 
-nb3=`redis-cli -s ${MFMODULE_RUNTIME_HOME}/var/redis.socket keys "*" |grep xattr |wc -l`
-if [ $nb3 -ne 0 ]; then
-    echo $nb3 "tags left in redis"
-    cat ${MFMODULE_RUNTIME_HOME}/log/*.stderr
+[custom]
+dest_dir = foobar4/main
+command_template = $(pwd)/fork.sh {PATH}
+EOF
+
+cat >"${MFMODULE_RUNTIME_HOME}/config/plugins/foobar4.ini" <<EOF
+[custom]
+dest_dir = ${DEST_DIR}
+EOF
+
+wait_conf_monitor_idle
+inject_file ../data/Example.png
+
+wait_file "${DEST_DIR}/Example.png" 20 || {
+    echo "ERROR: ${DEST_DIR}/Example.png not found"
     exit 1
-else
-    echo "no tags left in redis : ok"
+}
+diff "${DEST_DIR}/Example.png" ../data/Example.png >/dev/null 2>&1
+if test $? -eq 0; then
+    echo "ERROR: no difference found"
+    exit 1
 fi
 
-rm -R foobar5*
+check_no_tags_left_in_redis
+plugins.uninstall --clean foobar4
+plugins.uninstall --clean foobar5
+rm -Rf "${DEST_DIR}"
+rm -f fork.sh
 
 exit 0

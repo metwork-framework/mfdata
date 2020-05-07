@@ -5,52 +5,50 @@
 # Check file is moved and test chmod
 # Check no tags left in redis
 
-plugins.uninstall foobar4 >/dev/null 2>&1
-rm -R foobar4* >/dev/null 2>&1
+source ../support.sh
+check_no_tags_left_in_redis
 
-DEST_DIR=${MFMODULE_RUNTIME_HOME}/var/in/dir_move
-rm -R ${DEST_DIR} >/dev/null 2>&1
-mkdir ${DEST_DIR}
+plugins.uninstall --clean foobar4 >/dev/null 2>&1
 
-set -x
-set -e
+DEST_DIR="${MFMODULE_RUNTIME_HOME}/var/in/dir_move"
+rm -R "${DEST_DIR}" >/dev/null 2>&1
+mkdir -p "${DEST_DIR}"
 
-bootstrap_plugin.py create --template=move foobar4 < stdin
-cd foobar4
+plugins.install --new-name=foobar4 ${MFDATA_HOME}/share/plugins/move-*.plugin
 
-make release
-ls -l
-plugins.install "$(ls *.plugin)"
-cd ..
+cat >"${MFMODULE_RUNTIME_HOME}/config/plugins/foobar4.ini" <<EOF
+[switch_rules:fnmatch:latest.guess_file_type.main.system_magic]
+PNG image* = {{MFDATA_CURRENT_PLUGIN_NAME}}/main
 
-mfdata.stop
-mfdata.start
-plugins.list
-_circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status
+[custom]
+dest_dir = ${DEST_DIR}
+force_chmod=0777
+EOF
 
-cp ../data/Example.png ${MFMODULE_RUNTIME_HOME}/var/in/incoming
+wait_conf_monitor_idle
+inject_file ../data/Example.png
+wait_file "${DEST_DIR}/Example.png" 20 || {
+    echo "ERROR: ${DEST_DIR}/Example.png not found"
+    exit 1
+}
 
-sleep 1
-ls -l ${DEST_DIR}
-diff ${DEST_DIR}/Example.png ../data/Example.png
-mod=`ls -l ${DEST_DIR}/Example.png | cut -d" " -f1`
-if [ "$mod" != "-rwxr-xr-x" ]; then
-    echo "chmod has not succeeded"
+N=$(ls -l "${DEST_DIR}/Example.png" |grep rwxrwxrwx |wc -l)
+if test "${N}" -eq 0; then
+    echo "ERROR: chmod not done"
+    exit 1
+fi
+diff "${DEST_DIR}/Example.png" ../data/Example.png || {
+    echo "ERROR: differences found"
+    exit 1
+}
+N=$(find ${DEST_DIR} -type f |wc -l)
+if test ${N} -ne 1; then
+    echo "ERROR: extra files found"
     exit 1
 fi
 
-plugins.uninstall foobar4
-
-nb3=`redis-cli -s ${MFMODULE_RUNTIME_HOME}/var/redis.socket keys "*" |grep xattr |wc -l`
-if [ $nb3 -ne 0 ]; then
-    echo $nb3 "tags left in redis"
-    cat ${MFMODULE_RUNTIME_HOME}/log/*.stderr
-    exit 1
-else
-    echo "no tags left in redis : ok"
-fi
-
-rm -R foobar4*
-rm -R ${DEST_DIR}
+check_no_tags_left_in_redis
+plugins.uninstall --clean foobar4
+rm -Rf "${DEST_DIR}"
 
 exit 0

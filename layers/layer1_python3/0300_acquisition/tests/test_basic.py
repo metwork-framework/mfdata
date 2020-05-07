@@ -95,17 +95,11 @@ class MiscTestCase(TestCase):
             AcquisitionTestStepWrongName()
         self.assertEqual(cm.exception.code, 2)
 
-    # get_plugin_name() not overridden
-    def test_constructor_get_plugin_name_not_overridden(self):
-        self.assertRaises(NotImplementedError,
-                          lambda: AcquisitionTestStepPluginNameNotOverriden())
-
     def test_contstructor_wrong_plugin_name_exit(self):
         # Mock os._exit() as sys.exit() to test the exiting and return code
         os._exit = sys.exit
-        with self.assertRaises(SystemExit) as cm:
+        with self.assertRaises(Exception):
             AcquisitionTestStepWrongPluginName()
-        self.assertEqual(cm.exception.code, 2)
 
     @redirect_stderr_on_stdout()
     def test_exception_during_process(self):
