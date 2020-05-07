@@ -29,13 +29,6 @@ class AcquisitionStep(AcquisitionBase):
     Attributes:
         stop_flag (boolean): if True, stop the daemon as soon as possible.
         debug_mode_allowed (boolean): if True, the debug mode is allowed.
-        failure_policy (string): failure policy ("move", "delete" or "keep").
-        failure_policy_move_dest_dir (string): destination directory when
-            failure policy is move.
-        failure_policy_move_keep_tags (boolean): keep tags into another file
-            when failure policy is move.
-        failure_policy_move_keep_tags_suffix (string): suffix to add to the
-            filename to keep tags when failure policy is move.
         step_limit (int): maximum step number (to avoid some loops).
 
     """
@@ -45,9 +38,6 @@ class AcquisitionStep(AcquisitionBase):
     unit_tests = False
     unit_tests_args = None
     failure_policy = None
-    failure_policy_move_dest_dir = None
-    failure_policy_move_keep_tags = True
-    failure_policy_move_keep_tags_suffix = None
     step_limit = DEFAULT_STEP_LIMIT
     __last_ping = None
     _debug_mode = False
@@ -55,25 +45,28 @@ class AcquisitionStep(AcquisitionBase):
     def _init(self):
         super(AcquisitionStep, self)._init()
         self.failure_policy = self.args.failure_policy
+        self.failure_policy_move_dest_dir = None
         if self.failure_policy not in ("keep", "delete", "move"):
             self.error_and_die(
                 "unknown failure policy: %s", self.failure_policy
             )
         if self.failure_policy == "move":
             fpmdd = self.args.failure_policy_move_dest_dir
-            if fpmdd is None:
+            if fpmdd is None or fpmdd == "" or fpmdd == "FIXME":
                 self.error_and_die(
                     "you have to set a "
                     "failure-policy-move-dest-dir"
                     " in case of move failure policy"
                 )
+            if "/" not in fpmdd or fpmdd.startswith('/'):
+                self.error_and_die(
+                    "failure-policy-move-dest-dir must be something like "
+                    "plugin_name/step_name")
             mkdir_p_or_die(fpmdd)
-            self.failure_policy_move_keep_tags = (
-                self.args.failure_policy_move_keep_tags
-            )
-            self.failure_policy_move_keep_tags_suffix = (
-                self.args.failure_policy_move_keep_tags_suffix
-            )
+            plugin_name = fpmdd.split('/')[0]
+            step_name = fpmdd.split('/')[1]
+            self.failure_policy_move_dest_dir = \
+                get_plugin_step_directory_path(plugin_name, step_name)
         signal.signal(signal.SIGTERM, self.__sigterm_handler)
 
     def _add_extra_arguments_before(self, parser):
@@ -106,22 +99,8 @@ class AcquisitionStep(AcquisitionBase):
             "--failure-policy-move-dest-dir",
             action="store",
             default=None,
-            help="dest-dir in case of move failure policy",
-        )
-        parser.add_argument(
-            "--failure-policy-move-keep-tags",
-            action="store",
-            type=int,
-            default=1,
-            help="keep tags into another file in case of "
-            "move failure policy ?",
-        )
-        parser.add_argument(
-            "--failure-policy-move-keep-tags-suffix",
-            action="store",
-            default=".tags",
-            help="suffix to add to the filename in case of "
-            "move failure policy keep tags",
+            help="dest-dir in case of move failure policy (must be something "
+            "like plugin_name/step_name",
         )
 
     def _add_extra_arguments_after(self, parser):
@@ -189,7 +168,14 @@ class AcquisitionStep(AcquisitionBase):
         return after_status
 
     def _before(self, xaf):
-        tmp_filepath = self.get_tmp_filepath()
+        if "first.core.original_uid" in xaf.tags:
+            forced_uid = \
+                xaf.tags['first.core.original_uid'].decode('utf8')
+            tmp_filepath = self.get_tmp_filepath(
+                forced_basename=forced_uid)
+        else:
+            tmp_filepath = self.get_tmp_filepath()
+            forced_uid = os.path.basename(tmp_filepath)
         self.info("Move %s to %s (to process it)", xaf.filepath, tmp_filepath)
         try:
             xaf.rename(tmp_filepath)
@@ -200,6 +186,7 @@ class AcquisitionStep(AcquisitionBase):
                 tmp_filepath,
             )
             return False
+        self._set_original_uid_if_necessary(xaf, forced_uid=forced_uid)
         xaf._before_process_filepath = xaf.filepath
         self._set_before_tags(xaf)
         if self._get_counter_tag_value(xaf) > self.step_limit:
@@ -226,15 +213,10 @@ class AcquisitionStep(AcquisitionBase):
                 xaf.delete_or_nothing()
         elif self.failure_policy == "move":
             new_filepath = os.path.join(
-                self.args.failure_policy_move_dest_dir, xaf.basename()
+                self.failure_policy_move_dest_dir, xaf.basename()
             )
             (success, move) = xaf.move_or_copy(new_filepath)
-            if success:
-                if self.failure_policy_move_keep_tags:
-                    suffix = self.failure_policy_move_keep_tags_suffix
-                    xaf.write_tags_in_a_file(new_filepath + suffix)
-                    xattrfile.XattrFile(new_filepath).clear_tags()
-            else:
+            if not success:
                 xaf.delete_or_nothing()
 
     def _after(self, xaf, process_status):
@@ -354,34 +336,96 @@ class AcquisitionStep(AcquisitionBase):
             MFMODULE_RUNTIME_HOME, "var", "plugins", self.plugin_name
         )
 
-    def move_to_plugin_step(self, xaf, plugin_name, step_name,
-                            keep_original_basename=False):
-        """Move a XattrFile to another plugin/step.
+    def __xxx_to_plugin_step_get_basename(self, xaf,
+                                          keep_original_basename):
+        if keep_original_basename is None:
+            if "first.core.original_uid" in xaf.tags:
+                return xaf.tags["first.core.original_uid"].decode('utf8')
+            else:
+                keep_original_basename = False
+        if keep_original_basename is True:
+            return xaf.basename()
+        elif keep_original_basename is False:
+            return get_unique_hexa_identifier()
+        else:
+            raise Exception("invalid value for keep_original_basename: %s "
+                            "(must be True, False or None)",
+                            keep_original_basename)
+
+    def hardlink_to_plugin_step(self, xaf, plugin_name, step_name,
+                                keep_original_basename=False,
+                                info=False):
+        """Hardlink (or copy) a XattrFile to another plugin/step.
 
         Args:
             xaf (XattrFile): XattrFile to move.
             plugin_name (string): plugin name.
             step_name (string): step name.
             keep_original_basename (boolean): if True, we keep the original
-                basename of xaf.
+                basename of xaf. If False, we generate a new basename, If None,
+                we use the value of first.core.original_uid tag as basename
+                (if exists).
+            info (boolean): if true, add INFO log messages.
 
         Returns:
             boolean: True if ok.
 
         """
-        if keep_original_basename:
-            basename = xaf.basename()
-        else:
-            basename = get_unique_hexa_identifier()
+        basename = \
+            self.__xxx_to_plugin_step_get_basename(xaf, keep_original_basename)
+        old_filepath = xaf.filepath
         target_path = os.path.join(
             get_plugin_step_directory_path(plugin_name, step_name),
             basename,
         )
-        result, _ = xaf.move_or_copy(target_path)
+        result, hardlinked = xaf.hardlink_or_copy(target_path)
+        if info and result:
+            if hardlinked:
+                self.info("File %s hardlinked to %s" %
+                          (old_filepath, target_path))
+            else:
+                self.info("File %s copied to %s (can't hardlink)" %
+                          (old_filepath, target_path))
+        return result
+
+    def move_to_plugin_step(self, xaf, plugin_name, step_name,
+                            keep_original_basename=False,
+                            info=False):
+        """Move (or copy) a XattrFile to another plugin/step.
+
+        Args:
+            xaf (XattrFile): XattrFile to move.
+            plugin_name (string): plugin name.
+            step_name (string): step name.
+            keep_original_basename (boolean): if True, we keep the original
+                basename of xaf. If False, we generate a new basename, If None,
+                we use the value of first.core.original_uid tag as basename
+                (if exists).
+            info (boolean): if true, add INFO log messages.
+
+        Returns:
+            boolean: True if ok.
+
+        """
+        basename = \
+            self.__xxx_to_plugin_step_get_basename(xaf, keep_original_basename)
+        old_filepath = xaf.filepath
+        target_path = os.path.join(
+            get_plugin_step_directory_path(plugin_name, step_name),
+            basename,
+        )
+        result, moved = xaf.move_or_copy(target_path)
+        if info and result:
+            if moved:
+                self.info("File %s moved to %s" %
+                          (old_filepath, target_path))
+            else:
+                self.info("File %s copied to %s (can't move)" %
+                          (old_filepath, target_path))
         return result
 
     def copy_to_plugin_step(self, xaf, plugin_name, step_name,
-                            keep_original_basename=False):
+                            keep_original_basename=False, info=False):
         """Copy a XattrFile (with tags) to another plugin/step.
 
         Args:
@@ -389,21 +433,25 @@ class AcquisitionStep(AcquisitionBase):
             plugin_name (string): plugin name.
             step_name (string): step name.
             keep_original_basename (boolean): if True, we keep the original
-                basename of xaf.
+                basename of xaf. If False, we generate a new basename, If None,
+                we use the value of first.core.original_uid tag as basename
+                (if exists).
+            info (boolean): if true, add INFO log messages.
 
         Returns:
             boolean: True if ok
 
         """
-        if keep_original_basename:
-            basename = xaf.basename()
-        else:
-            basename = get_unique_hexa_identifier()
+        basename = \
+            self.__xxx_to_plugin_step_get_basename(xaf, keep_original_basename)
+        old_filepath = xaf.filepath
         target_path = os.path.join(
             get_plugin_step_directory_path(plugin_name, step_name),
             basename,
         )
         result = xaf.copy_or_nothing(target_path)
+        if info and result:
+            self.info("File %s copied to %s" % (old_filepath, target_path))
         return result
 
     def process(self, xaf):

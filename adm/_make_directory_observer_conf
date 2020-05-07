@@ -1,61 +1,45 @@
 #!/usr/bin/env python3
 
 import os
-import glob
 import envtpl
-from opinionated_configparser import OpinionatedConfigParser
-from acquisition.utils import _set_custom_environment
+from mflog import get_logger
+from mfplugin.manager import PluginsManager
 
 MFDATA_PLUGIN_HOME = os.path.join(os.environ["MFMODULE_RUNTIME_HOME"],
                                   "var", "plugins")
-CONFIG = os.environ.get('MFCONFIG', 'GENERIC')
+LOGGER = get_logger("_make_directory_observer")
 
 
-def make_directory_observer_conf(plugin_configuration_file):
-    output = []
-    parser = OpinionatedConfigParser(interpolation=None)
-    plugin_name = os.path.basename(os.path.dirname(plugin_configuration_file))
-    parser.read(plugin_configuration_file)
-    steps = [x.replace("step_", "", 1).split(':')[0] for x in parser.sections()
-             if x.startswith("step_")]
-    for step in steps:
-        _set_custom_environment(plugin_name, step)
-        section = "step_%s" % step
-        tmp_listened_directories = "{{MFDATA_CURRENT_STEP_QUEUE}}"
-        if parser.has_option(section, "listened_directories"):
-            tmp_listened_directories = parser.get(section,
-                                                  "listened_directories")
-        tmp_listened_directories = \
-            tmp_listened_directories.replace('{{MFDATA_CURRENT_STEP_QUEUE}}',
-                                             "step.%s.%s" % (plugin_name,
-                                                             step))
-        # FIXME: find a better and more general way
-        special_value = 'MFDATA_INTERNAL_PLUGINS_SWITCH_DIRECTORIES'
-        tmp_listened_directories = \
-            tmp_listened_directories.replace('{{%s}}' % special_value,
-                                             os.environ[special_value])
-        listened_directories = ["{{MFMODULE_RUNTIME_HOME}}/var/in/%s" % x.strip()
-                                for x in tmp_listened_directories.split(';')
-                                if "/" not in x]
-        for i in range(0, len(listened_directories)):
-            output.append("")
-            if len(listened_directories) == 1:
-                output.append("[step_%s_%s]" % (plugin_name, step))
-            else:
-                output.append("[step_%s_%s_%i]" % (plugin_name,
-                                                          step, i))
-            output.append("active=true")
-            output.append("directory=%s" % listened_directories[i])
-            output.append("queue=step.%s.%s" % (plugin_name, step))
-    return "\n".join(output)
-
-
-directory_observer_ini_file = os.path.join(os.environ['MFMODULE_HOME'], 'config',
-                                           'directory_observer.ini')
+manager = PluginsManager()
+plugin_confs = []
+directory_observer_ini_file = \
+    os.path.join(os.environ['MFMODULE_HOME'], 'config',
+                 'directory_observer.ini')
 with open(directory_observer_ini_file, "r") as f:
     content = f.read()
 
-for config_file in glob.glob(MFDATA_PLUGIN_HOME + "/*/config.ini"):
-    content = content + make_directory_observer_conf(config_file)
+for plugin in manager.plugins.values():
+    try:
+        plugin.load_full()
+    except Exception as e:
+        LOGGER.warning("invalid plugin: %s (%s) => ignoring it ; details: %s" %
+                       (plugin.name, plugin.home, e))
+        continue
+    with plugin.plugin_env_context():
+        plugin.reload()
+        steps_to_add = []
+        for step in plugin.configuration.steps:
+            if step.retry_total > 0:
+                reinject_step = step.duplicate(step.name + "_reinject")
+                reinject_step.set_listened_directories(
+                    "{MFDATA_CURRENT_STEP_DIR}")
+                steps_to_add.append(reinject_step)
+        for step in steps_to_add:
+            plugin.configuration.add_step(step)
+        plugin_confs.append(plugin)
 
-print(envtpl.render_string(content, keep_multi_blank_lines=False))
+extra_variables = {
+    "PLUGINS": plugin_confs,
+}
+print(envtpl.render_string(content, extra_variables=extra_variables,
+                           keep_multi_blank_lines=False))

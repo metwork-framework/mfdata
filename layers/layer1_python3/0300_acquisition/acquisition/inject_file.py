@@ -16,8 +16,8 @@ def main():
     parser = argparse.ArgumentParser("Inject a file into a plugin/step")
     parser.add_argument("filepath", type=str, help="filepath to inject")
     parser.add_argument("--plugin", type=str,
-                        help="plugin name (default :switch)",
-                        default="switch")
+                        help="plugin name (default :guess_file_type)",
+                        default="guess_file_type")
     parser.add_argument("--step", type=str,
                         help="step name (default: main)",
                         default="main")
@@ -27,10 +27,11 @@ def main():
     parser.add_argument("--random-basename", action="store_true",
                         help="use a random basename for copying/moving "
                         "the file (default: keep the original basename)")
-    parser.add_argument("--incoming", action="store_true",
-                        help="ignore plugin and step parameter and inject "
-                        "the file into the first configured directory listened"
-                        " by the switch plugin")
+    parser.add_argument(
+        "--incoming", action="store_true",
+        help="ignore plugin and step parameter and inject "
+        "the file into the first configured directory listened"
+        " by the MFDATA_INTERNAL_PLUGINS_LISTENED_DIRECTORIES env var")
 
     args = parser.parse_args()
     try:
@@ -43,8 +44,8 @@ def main():
     else:
         basename = os.path.basename(args.filepath)
     if args.incoming:
-        env_var = 'MFDATA_INTERNAL_PLUGINS_SWITCH_DIRECTORIES'
-        first_directory = os.environ[env_var].split(';')[0]
+        env_var = 'MFDATA_INTERNAL_PLUGINS_LISTENED_DIRECTORIES'
+        first_directory = os.environ[env_var].split(',')[0]
         new_filepath = os.path.join(os.environ['MFDATA_DATA_IN_DIR'],
                                     first_directory, basename)
     else:

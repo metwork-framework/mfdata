@@ -1,0 +1,44 @@
+{% extends "templates/config.ini" %}
+
+{% set RETRY_TOTAL="10" %}
+{% set RETRY_MIN_WAIT="1" %}
+{% set RETRY_MAX_WAIT="120" %}
+{% set RETRY_BACKOFF="4" %}
+
+{% block custom %}
+[custom]
+
+# FTP server hostname or ip
+ftp_hostname=FIXME
+
+# FTP username
+ftp_username=FIXME
+
+# FTP password
+ftp_password=FIXME
+
+# FTP directory (in which upload files)
+ftp_directory=.
+
+# FTP basename
+# you can use following placeholders in this configuration value:
+# - {ORIGINAL_BASENAME}      
+# - {RANDOM_ID}
+# - {STEP_COUNTER}
+# - {ORIGINAL_UID}
+# - strftime placeholders like %Y%m%d
+ftp_basename={ORIGINAL_BASENAME}
+
+# Timeout (in seconds) for all blocking operations
+ftp_timeout = 60
+
+# Timeout (in seconds) for connecting to ftp server 
+ftp_connect_timeout = 30
+
+# Try to keep FTP session open until this lifetime (in seconds)
+ftp_session_lifetime = 10
+
+# Temporary suffix while transferring
+tmp_suffix=.t
+
+{% endblock %}

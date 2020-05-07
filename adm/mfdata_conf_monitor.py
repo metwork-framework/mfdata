@@ -37,7 +37,7 @@ def get_old_directory_observer_conf():
 
 def get_old_switch_conf():
     old_switch_conf = \
-        "%s/tmp/config_auto/switch.ini" % MFMODULE_RUNTIME_HOME
+        "%s/tmp/config_auto/switch_rules.ini" % MFMODULE_RUNTIME_HOME
     return (old_switch_conf,
             md5sumfile(old_switch_conf))
 
