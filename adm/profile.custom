@@ -1,0 +1,7 @@
+{% extends "profile" %}
+
+{% block custom %}
+export MFPLUGIN_CONFIGURATION_CLASS=mfdata.plugins.MfdataConfiguration
+export MFPLUGIN_APP_CLASS=mfdata.plugins.MfdataApp
+{% endblock %}
+

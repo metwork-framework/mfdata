@@ -1,8 +1,8 @@
 from acquisition.utils import MFMODULE_RUNTIME_HOME
 from acquisition.utils import _set_custom_environment
 from acquisition.utils import _get_tmp_filepath
-from acquisition.utils import _make_config_file_parser_class
 from mfutil import get_unique_hexa_identifier
+from mfplugin.utils import validate_plugin_name
 from acquisition.utils import _get_current_utc_datetime_with_ms
 import re
 import os
@@ -10,8 +10,9 @@ import sys
 import six
 import mflog
 import traceback
-import configargparse
-from functools import partial
+import argparse
+
+MFMODULE = os.environ.get("MFMODULE", "GENERIC")
 
 
 class AcquisitionBase(object):
@@ -20,63 +21,34 @@ class AcquisitionBase(object):
     You have to override this class.
 
     Attributes:
-        args (Namespace): argparser Namespace object with parsed cli args.
         unit_tests (boolean): if True, we are in unit tests mode.
         unit_tests_args (string): cli args (for unit tests).
-        __logger (Logger): Logger object.
-        plugin_name (string): the name of the plugin.
-        step_name (string): the name of the step (if you inherits from
-            AcquisitionStep).
-        daemon_name (string): the name of the daemon (if you inherits from
-            AcquisitionListener).
 
     """
-
-    args = None
     unit_tests = False
     unit_tests_args = None
-    __logger = None
-    plugin_name = None
-    step_name = "main"  # default value
-    daemon_name = None
 
     def __init__(self):
         """Constructor."""
+        self.plugin_name = os.environ.get("MFDATA_CURRENT_PLUGIN_NAME",
+                                          None)
         if self.plugin_name is None:
-            raise NotImplementedError("plugin_name property must be overriden "
-                                      "and set")
-        step_or_daemon_name = self._get_step_or_daemon_name()
-        plugin_name = self.plugin_name
-        regexp = "^[A-Za-z0-9_]+$"
-        if not re.match(regexp, step_or_daemon_name):
-            self.error_and_die(
-                "step_name or daemon_name: %s must match with %s",
-                step_or_daemon_name,
-                regexp,
-            )
-        if not re.match(regexp, plugin_name):
-            self.error_and_die(
-                "plugin_name: %s must match with %s", plugin_name, regexp
-            )
-        _set_custom_environment(plugin_name, step_or_daemon_name)
+            if self.unit_tests:
+                self.plugin_name = "unittests"
+            else:
+                raise Exception("you have to execute this inside a plugin_env")
+        validate_plugin_name(self.plugin_name)
+        self.args = None
+        self.__logger = None
 
     def _init(self):
-        description = "%s/%s acquisition %s" % (
+        description = "%s/%s acquisition step" % (
             self.plugin_name,
-            self._get_step_or_daemon_name(),
             self.__class__.__name__,
         )
-        parser = configargparse.ArgumentParser(
-            description=description,
-            add_env_var_help=False,
-            ignore_unknown_config_file_keys=True,
-            args_for_setting_config_path=["-c", "--config-file"],
-            config_file_parser_class=partial(
-                _make_config_file_parser_class,
-                self.plugin_name,
-                self._get_step_or_daemon_name(),
-            ),
-        )
+        parser = argparse.ArgumentParser(description=description)
+        parser.add_argument("--step-name", action="store", default="main",
+                            help="step name")
         self._add_extra_arguments_before(parser)
         self.add_extra_arguments(parser)
         self._add_extra_arguments_after(parser)
@@ -84,6 +56,15 @@ class AcquisitionBase(object):
             self.args, unknown = parser.parse_known_args(self.unit_tests_args)
         else:
             self.args, unknown = parser.parse_known_args()
+        self.step_name = self.args.step_name
+        regexp = "^[A-Za-z0-9_]+$"
+        if not re.match(regexp, self.step_name):
+            self.error_and_die(
+                "step_name: %s must match with %s",
+                self.step_name,
+                regexp,
+            )
+        _set_custom_environment(self.plugin_name, self.step_name)
         return self.init()
 
     def init(self):
@@ -114,19 +95,6 @@ class AcquisitionBase(object):
     def _add_extra_arguments_after(self, parser):
         pass
 
-    def _get_step_or_daemon_name(self):
-        try:
-            if self.daemon_name is not None:
-                return self.daemon_name
-        except Exception:
-            pass
-        try:
-            if self.step_name is not None:
-                return self.step_name
-        except Exception:
-            pass
-        return "main"
-
     def get_plugin_directory_path(self):
         """Return the plugin directory (fullpath).
 
@@ -138,15 +106,20 @@ class AcquisitionBase(object):
             MFMODULE_RUNTIME_HOME, "var", "plugins", self.plugin_name
         )
 
-    def get_tmp_filepath(self):
+    def get_tmp_filepath(self, forced_basename=None):
         """Get a full temporary filepath (including unique filename).
+
+        Args:
+            forced_basename (string): if not None, use the given string as
+                basename. If None, the basename is a random identifier.
 
         Returns:
             (string) full temporary filepath (including unique filename).
 
         """
         return _get_tmp_filepath(
-            self.plugin_name, self._get_step_or_daemon_name()
+            self.plugin_name, self.step_name,
+            forced_basename=forced_basename
         )
 
     def _get_logger(self):
@@ -154,7 +127,7 @@ class AcquisitionBase(object):
         if not self.__logger:
             logger_name = "mfdata.%s.%s" % (
                 self.plugin_name,
-                self._get_step_or_daemon_name(),
+                self.step_name,
             )
             self.__logger = mflog.getLogger(logger_name)
         return self.__logger
@@ -200,6 +173,35 @@ class AcquisitionBase(object):
         logger = self._get_logger()
         logger.exception(str(msg), *args, **kwargs)
 
+    def __get_config_value(self, section, key, transform=None, default=None):
+        env_var = "%s_CURRENT_PLUGIN_%s_%s" % \
+            (MFMODULE, section.replace('-', '_').upper(),
+             key.replace('-', '_').upper())
+        if env_var not in os.environ:
+            raise Exception("%s does not exist in the environment" % env_var)
+        val = os.environ.get(env_var, default)
+        if isinstance(val, Exception):
+            # pylint: disable=E0702
+            raise val
+        if transform is not None:
+            try:
+                val = transform(val)
+            except Exception as e:
+                raise Exception("can't call transform function on "
+                                "configuration key: [%s]/%s with "
+                                "exception: %s" % (section, key, e))
+        return val
+
+    def get_config_value(self, key, transform=None, default=Exception()):
+        return self.__get_config_value("step_%s" % self.step_name, key,
+                                       transform=transform,
+                                       default=default)
+
+    def get_custom_config_value(self, key, transform=None,
+                                default=Exception()):
+        return self.__get_config_value("custom", key, transform=transform,
+                                       default=default)
+
     def _get_tag_name(
         self,
         name,
@@ -208,7 +210,7 @@ class AcquisitionBase(object):
         force_plugin_name=None,
     ):
         plugin_name = self.plugin_name
-        process_name = self._get_step_or_daemon_name()
+        process_name = self.step_name
         if force_process_name is not None:
             process_name = force_process_name
         if force_plugin_name is not None:
@@ -223,15 +225,16 @@ class AcquisitionBase(object):
                 name,
             )
 
-    def _set_tag_latest(self, xaf, name, value):
+    def _set_tag_latest(self, xaf, name, value, info=False):
         tag_name = self._get_tag_name(name, "latest")
-        self._set_tag(xaf, tag_name, value)
+        self._set_tag(xaf, tag_name, value, info=info)
 
-    def _set_tag(self, xaf, name, value):
-        self.debug("Setting tag %s = %s" % (name, value))
+    def _set_tag(self, xaf, name, value, info=False):
+        log = self.info if info else self.debug
+        log("Setting tag %s = %s" % (name, value))
         xaf.tags[name] = value
 
-    def set_tag(self, xaf, name, value, add_latest=True):
+    def set_tag(self, xaf, name, value, add_latest=True, info=False):
         """Set a tag on a file with good prefixes.
 
         Args:
@@ -239,13 +242,14 @@ class AcquisitionBase(object):
             name (string): name of the tag (without prefixes)
             value (string): value of the tag
             add_latest (boolean): add latest prefix
+            info (boolean): if True, a log info message is send (else debug)
 
         """
         counter_str_value = str(self._get_counter_tag_value(xaf))
         tag_name = self._get_tag_name(name, counter_str_value)
-        self._set_tag(xaf, tag_name, value)
+        self._set_tag(xaf, tag_name, value, info=info)
         if add_latest:
-            self._set_tag_latest(xaf, name, value)
+            self._set_tag_latest(xaf, name, value, info=info)
 
     def get_tag(
         self,
@@ -314,13 +318,16 @@ class AcquisitionBase(object):
                 original_basename = str(
                     os.path.basename(xaf._original_filepath)
                 )
-                self._set_tag(xaf, tag_name, original_basename)
+                self._set_tag(xaf, tag_name, original_basename, info=True)
 
-    def __set_original_uid_if_necessary(self, xaf):
+    def _set_original_uid_if_necessary(self, xaf, forced_uid=None):
         tag_name = self._get_original_uid_tag_name()
         if tag_name not in xaf.tags:
-            original_uid = get_unique_hexa_identifier()
-            self._set_tag(xaf, tag_name, original_uid)
+            if forced_uid is None:
+                original_uid = get_unique_hexa_identifier()
+            else:
+                original_uid = forced_uid
+            self._set_tag(xaf, tag_name, original_uid, info=True)
 
     def __set_original_dirname_if_necessary(self, xaf):
         if hasattr(xaf, "_original_filepath") and xaf._original_filepath:
@@ -328,12 +335,12 @@ class AcquisitionBase(object):
             if tag_name not in xaf.tags:
                 dirname = os.path.dirname(xaf._original_filepath)
                 original_dirname = str(os.path.basename(dirname))
-                self._set_tag(xaf, tag_name, original_dirname)
+                self._set_tag(xaf, tag_name, original_dirname, info=True)
 
     def _set_before_tags(self, xaf):
         current = _get_current_utc_datetime_with_ms()
         self.__increment_and_set_counter_tag_value(xaf)
-        self.set_tag(xaf, "enter_step", current, add_latest=False)
+        self.set_tag(xaf, "enter_step", current, add_latest=False, info=False)
         self.__set_original_basename_if_necessary(xaf)
-        self.__set_original_uid_if_necessary(xaf)
+        self._set_original_uid_if_necessary(xaf)
         self.__set_original_dirname_if_necessary(xaf)

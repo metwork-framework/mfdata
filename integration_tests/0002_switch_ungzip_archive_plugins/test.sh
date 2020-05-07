@@ -6,75 +6,49 @@
 # Check PNG file and his tags on archive
 # Check no tags left in redis
 
-plugins.uninstall ungzip >/dev/null 2>&1
-plugins.uninstall foobar2 >/dev/null 2>&1
-rm -R foobar2* >/dev/null 2>&1
+source ../support.sh
+check_no_tags_left_in_redis
 
-DEST_DIR=${MFMODULE_RUNTIME_HOME}/var/archive/`date +%Y%m%d`
-rm -R ${DEST_DIR} >/dev/null 2>&1
+plugins.uninstall --clean foobar >/dev/null 2>&1
+plugins.uninstall --clean foobar2 >/dev/null 2>&1
 
-set -x
-set -e
+DEST_DIR="${MFMODULE_RUNTIME_HOME}/var/archive/$(date +%Y%m%d)"
+rm -Rf "${DEST_DIR}" >/dev/null 2>&1
 
-plugins.install ${MFDATA_HOME}/share/plugins/ungzip*.plugin
+# foobar: ungzip
+plugins.install --new-name=foobar ${MFDATA_HOME}/share/plugins/ungzip-*.plugin
 
-bootstrap_plugin.py create --no-input --template=archive foobar2
-cd foobar2
+# foobar2: archive
+plugins.install --new-name=foobar2 ${MFDATA_HOME}/share/plugins/archive-*.plugin
 
-cat config.ini | sed "s/switch_logical_condition = True/switch_logical_condition = ( x['latest.switch.main.system_magic'].startswith(b'PNG image'))/" > config.ini.1
-cat config.ini.1 | sed "s/arg_strftime-template = %Y%m%d\/{RANDOM_ID}/arg_strftime-template = %Y%m%d\/Example.png/" > config.ini
-rm config.ini.1
-make release
-ls -l
-plugins.install "$(ls *.plugin)"
-cd ..
+cat >"${MFMODULE_RUNTIME_HOME}/config/plugins/foobar2.ini" <<EOF
+[switch_rules:fnmatch:latest.guess_file_type.main.system_magic]
+PNG image* = {{MFDATA_CURRENT_PLUGIN_NAME}}/main
 
-mfdata.stop
-mfdata.start
-plugins.list
-_circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status
+[custom]
+dest_basename=%Y%m%d/{ORIGINAL_BASENAME}
+EOF
 
-cp ../data/Example.png.gz ${MFMODULE_RUNTIME_HOME}/var/in/incoming
-ls -l ${MFMODULE_RUNTIME_HOME}/var/in/incoming
-
-# We wait 10s maximum for the gzipped PNG file to be processed
-nb=0
-while [ ! -z "$(ls -A ${MFMODULE_RUNTIME_HOME}/var/in/incoming)" ]; do
-    nb=$(($nb + 1))
-    if [ $nb -eq 10 ]; then
-        exit 1
-    fi
-    sleep 1
-done
-ls -l ${MFMODULE_RUNTIME_HOME}/var/in/incoming
-
-# We wait 10s maximum for creation of the archive directory
-nb=0
-while [ ! -d "$DEST_DIR" ]; do
-    nb=$(($nb + 1))
-    if [ $nb -eq 10 ]; then
-        exit 1
-    fi
-    sleep 1
-done
-
-ls -l ${DEST_DIR}
-diff ${DEST_DIR}/Example.png ../data/Example.png
-cat ${DEST_DIR}/Example.png.tags | grep first.core.original_basename | grep Example.png.gz
-
-plugins.uninstall foobar2
-plugins.uninstall ungzip
-
-nb3=`redis-cli -s ${MFMODULE_RUNTIME_HOME}/var/redis.socket keys "*" |grep xattr |wc -l`
-if [ $nb3 -ne 0 ]; then
-    echo $nb3 "tags left in redis"
-    cat ${MFMODULE_RUNTIME_HOME}/log/*.stderr
+wait_conf_monitor_idle
+inject_file ../data/Example.png.gz
+wait_dir "$DEST_DIR" 20 || {
+    echo "ERROR: ${DEST_DIR} not found after 20 seconds"
     exit 1
-else
-    echo "no tags left in redis : ok"
+}
+
+diff "${DEST_DIR}/Example.png.gz" ../data/Example.png || {
+    echo "ERROR: differences found"
+    exit 1
+}
+N=$(cat "${DEST_DIR}/Example.png.gz.tags" |grep first.core.original_basename |grep Example.png.gz |wc -l)
+if test "${N}" -eq 0; then
+    echo "ERROR: problem in tags?"
+    exit 1
 fi
 
-rm -R foobar2*
-rm -R ${DEST_DIR}
+check_no_tags_left_in_redis
+plugins.uninstall --clean foobar2
+plugins.uninstall --clean foobar
+rm -Rf "${DEST_DIR}"
 
 exit 0

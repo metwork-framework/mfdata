@@ -2,7 +2,7 @@
 
 import os
 from unittest import TestCase
-from acquisition import AcquisitionDeleteStep
+from acquisition.delete_step import AcquisitionDeleteStep
 from xattrfile import XattrFile
 
 
