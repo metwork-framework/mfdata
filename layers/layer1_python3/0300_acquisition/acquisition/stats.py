@@ -8,7 +8,7 @@ except ImportError:
 
 from statsd import StatsClient
 
-HOSTNAME = os.environ.get("MFCOM_HOSTNAME", "unknown")
+HOSTNAME = os.environ.get("MFHOSTNAME", "unknown")
 MFMODULE = os.environ["MFMODULE"]
 ADMIN_HOSTNAME_IP = os.environ.get("%s_ADMIN_HOSTNAME_IP" % MFMODULE, "null")
 STATSD_PORT = int(os.environ.get("%s_TELEGRAF_STATSD_PORT" % MFMODULE, "0"))

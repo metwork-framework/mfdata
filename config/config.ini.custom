@@ -72,7 +72,7 @@ upload_dir=@@@MFMODULE_RUNTIME_HOME@@@/var/in/incoming
 clientbody_temp_path=@@@MFMODULE_RUNTIME_HOME@@@/var/in/tmp/nginx
 # MB
 upload_max_body_size=100
-workers=@@@MFCOM_HARDWARE_NUMBER_OF_CPU_CORES_MULTIPLIED_BY_2@@@
+workers={{MFHARDWARE_NUMBER_OF_CPU_CORES_MULTIPLIED_BY_2}}
 logging=1
 
 
