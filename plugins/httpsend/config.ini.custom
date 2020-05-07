@@ -1,0 +1,33 @@
+{% extends "templates/config.ini" %}
+
+{% set RETRY_TOTAL="10" %}
+{% set RETRY_MIN_WAIT="1" %}
+{% set RETRY_MAX_WAIT="120" %}
+{% set RETRY_BACKOFF="4" %}
+
+{% block custom %}
+[custom]
+
+# HTTP method to use (PUT, POST, GET, OPTIONS, HEAD, PATCH or DELETE)
+# for uploading files
+http_method=POST
+
+# HTTP full URL to use for uploading files
+# You can use following placeholders in this url:
+# - {ORIGINAL_BASENAME}
+# - {ORIGINAL_DIRNAME}
+# - {RANDOM_ID}
+# - {STEP_COUNTER}
+# - {ORIGINAL_UID}
+# - strftime placeholders like %Y%m%d
+# Example for feeding another mfdata with HTTP
+# http://FIXME:9091/incoming/{ORIGINAL_BASENAME}
+http_url=FIXME
+
+# HTTP timeout (in seconds)
+http_timeout=60
+
+# HTTP status codes which are considered as an upload success
+# (coma separated list)
+http_ok_status_codes=200,201
+{% endblock %}

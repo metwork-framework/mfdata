@@ -1,0 +1,13 @@
+{% extends "templates/config.ini" %}
+
+{% set CMD_AND_ARGS_CMD = "unbzip2_step" %}     
+{% set CMD_AND_ARGS_EXTRA_ARGS = "--dest-dir={CUSTOM_DEST_DIR}" %}
+
+{% block custom %}
+[custom]
+
+# Destination plugin/step of the unbzipped file
+#
+# Use syntax like: plugin_name/step_name
+dest_dir = guess_file_type/main
+{% endblock %}

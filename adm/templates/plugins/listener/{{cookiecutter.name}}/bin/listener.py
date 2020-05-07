@@ -6,9 +6,6 @@ from acquisition.listener import AcquisitionListener
 
 class Listener(AcquisitionListener):
 
-    plugin_name = "{{cookiecutter.name}}"
-    daemon_name = "listener"
-
     def listen(self):
         self.info("Listening...")
         while True:

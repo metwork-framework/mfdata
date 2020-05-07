@@ -1,0 +1,73 @@
+{% extends "templates/config.ini" %}
+
+{% block step %}
+{% endblock %}
+{% block switch %}
+{% endblock %}
+
+{% block extra_daemons %}
+[extra_daemon_amqplistener]
+_cmd_and_args = amqp_listener.py --step-name=main
+numprocesses=1
+log_split_stdout_stderr=AUTO
+log_split_multiple_workers=AUTO
+rlimit_as = 1000000000
+rlimit_nofile = 1000
+rlimit_stack = 10000000
+rlimit_fsize = 100000000 
+{% endblock %}
+
+{% block custom %}
+
+[custom]
+
+# AMQP broker hostname (or IP)
+amqp_hostname = localhost
+
+# AMQP virtualhost
+amqp_virtualhost = /
+
+# AMQP broker port
+amqp_port = 5672
+
+# AMQP credentials type (only plain is supported for now)
+amqp_credentials_type = plain
+
+# AMQP credentials username
+amqp_credentials_username = guest
+
+# AMQP credentials password
+amqp_credentials_password = guest
+
+# AMQP exchange type
+amqp_exchange_type = topic
+
+# AMQP exchange name
+amqp_exchange_name = foo
+
+# AMQP queue name
+amqp_queue_name = bar
+
+# AMQP routing key
+amqp_routing_key = 
+
+# Destination 
+# (format: plugin_name/step_name or absolute directory)
+dest_dir={% raw %}{{MFDATA_DATA_IN_DIR}}{% endraw %}/incoming
+
+# AMQP prefetch_count [ADVANCED PARAMETER, BE SURE OF WHAT YOU ARE DOING]
+amqp_prefetch_count = 1
+
+# AMQP Auto Ack [ADVANCED PARAMETER, BE SURE OF WHAT YOU ARE DOING]
+# (1 (yes) or 0 (no))
+amqp_auto_ack = 1
+
+# AMQP requeue [ADVANCED PARAMETER, BE SURE OF WHAT YOU ARE DOING]
+# (1 (yes) or 0 (no))
+# (only if amqp_auto_ack == 0)
+amqp_requeue = 0
+
+# AMQP exclusive [ADVANCED PARAMETER, BE SURE OF WHAT YOU ARE DOING]
+# (1 (don't allow other consumers on the queue), 0 (allow...))
+amqp_exclusive = 0
+{% endblock %}

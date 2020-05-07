@@ -37,6 +37,16 @@ pubsub_endpoint = ipc://@@@MFMODULE_RUNTIME_HOME@@@/var/circus_pubsub.socket
 # 0 => means "no timeout"
 monitor_inactivitytimeout=300
 
+# forced poll (advanced configuration option)
+forced_poll=300
+
+# poll queue limit (advanced configuration option)
+poll_queue_limit=10000
+
+# ignore default pattern (list separated by ';') specifying file name patterns
+# to be ignored
+ignore=^.*\.t$;^.*\.tmp$
+
 
 #################
 ##### REDIS #####
@@ -70,43 +80,19 @@ logging=1
 ##### INTERNAL PLUGINS #####
 ############################
 [internal_plugins]
+install_guess_file_type=1
 install_switch=1
-install_ungzip=0
-install_unbzip2=0
-install_mqtt_listener=0
-install_amqp_listener=0
-
-# directories listened by the switch plugin
-# (separated by ";")
-switch_directories=incoming
+switch_numprocesses={{MFCOM_HARDWARE_NUMBER_OF_CPU_CORES_DIVIDED_BY_2}}
+switch_debug=0
+guess_file_type_numprocesses={{MFCOM_HARDWARE_NUMBER_OF_CPU_CORES_DIVIDED_BY_2}}
+guess_file_type_debug=0
+listened_directories=incoming
 
 # "no match" policy for the switch plugin:
 # delete => we delete the file
 # keep => we keep the file in trash
-# move => we move the file in another directory (see below)
 switch_no_match_policy=delete
 
-# if switch_no_match_policy = move, set the destination directory
-switch_no_match_move_policy_dest_dir=/dev/null
-
-# if switch_no_match_policy = keep, you can choose to keep attributes/tags
-# in another file (if the value is 1) or not (the value is 0)
-switch_no_match_keep_policy_keep_tags=1
-
-# if switch_no_match_policy = keep and switch_no_match_keep_policy_keep_tags=1
-# you can set the suffix used to store attributes/tags
-switch_no_match_keep_policy_keep_tags_suffix=.tags
-
-# if set to 0, don't compute magic tags
-# (change this only if you know exactly what you are doing)
-switch_use_magic_tags=1
-
-# maximum length for ascii_header tag
-# (0 => no ascii_header tag)
-switch_max_header_length=60
-
-# number of processes
-switch_numprocesses=1
 
 ####################
 #####   MQTT   #####

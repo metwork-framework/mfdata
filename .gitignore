@@ -54,3 +54,4 @@ doc/changelogs.rst
 doc/components.*
 doc/installation_guide.*
 doc/README.*
+plugins/*/.plugin_format_version
