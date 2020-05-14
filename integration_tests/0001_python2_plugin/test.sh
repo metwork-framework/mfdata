@@ -6,6 +6,10 @@ rm -Rf foobar*
 set -x
 set -e
 
+if test `is_layer_installed python2@mfext` -eq 0; then
+    exit 0
+fi
+
 bootstrap_plugin.py create --no-input --template=python2 foobar
 
 cd foobar
