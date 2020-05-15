@@ -5,9 +5,9 @@ from mfplugin.configuration import Configuration
 from mfplugin.app import App, APP_SCHEMA
 from mfplugin.utils import NON_REQUIRED_STRING, \
     BadPlugin, NON_REQUIRED_INTEGER
-from acquisition.utils import get_plugin_step_directory_path
 
 MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', None)
+IN_DIR = os.path.join(MFMODULE_RUNTIME_HOME, "var", "in")
 
 
 MFDATA_SCHEMA_OVERRIDE = {
@@ -74,6 +74,10 @@ def dict_merge(dct, merge_dct):
             dict_merge(dct[k], merge_dct[k])
         else:
             dct[k] = merge_dct[k]
+
+
+def get_plugin_step_directory_path(plugin_name, step_name):
+    return os.path.join(IN_DIR, "step.%s.%s" % (plugin_name, step_name))
 
 
 class MfdataConfiguration(Configuration):
