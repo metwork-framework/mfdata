@@ -1,5 +1,4 @@
 from acquisition.utils import MFMODULE_RUNTIME_HOME
-from acquisition.utils import _set_custom_environment
 from acquisition.utils import _get_tmp_filepath
 from mfutil import get_unique_hexa_identifier
 from mfplugin.utils import validate_plugin_name
@@ -64,7 +63,6 @@ class AcquisitionBase(object):
                 self.step_name,
                 regexp,
             )
-        _set_custom_environment(self.plugin_name, self.step_name)
         return self.init()
 
     def init(self):
