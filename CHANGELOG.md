@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- allow binary packages with pip by default for plugins
 - new plugin system
 - remove xattrfile (moved in a dedicated repo)
 - remove all references to MFCOM or mfcom, including backward compatibility stuff
