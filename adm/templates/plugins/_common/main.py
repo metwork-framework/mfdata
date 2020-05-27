@@ -7,7 +7,6 @@ from acquisition import Acquisition{{typeStep}}Step
 class {{cookiecutter.name|capitalize}}{{typeStep}}MainStep(
         Acquisition{{typeStep}}Step):
 
-    plugin_name = "{{cookiecutter.name}}"
     step_name = "main"
 
 {% block process %}
