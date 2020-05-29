@@ -27,6 +27,7 @@
 
 
 ### Bug Fixes
+- typo in .releaseignore file
 - fix syslog nginx conf
 - fix bug in amqp topic mode
 - fix typo in configuration key for amqp (topic mode)
