@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-import datetime
 from mflog import get_logger
 from mfplugin.manager import PluginsManager
 
@@ -15,8 +14,12 @@ def make_switch_conf(plugin, num):
     res = []
     rules = plugin.configuration.switch_rules
     for section in rules:
-        res.append("[%s]" % section.replace("switch_rules:",
-                                            "switch_rules_%i:" % num, 1))
+        tmp = section.replace("switch_rules:", "switch_rules_%i:" % num, 1)
+        tmp = tmp.replace('{{MFDATA_CURRENT_PLUGIN_DIR}}',
+                          os.environ['MFDATA_CURRENT_PLUGIN_DIR'])
+        tmp = tmp.replace('{{MFDATA_CURRENT_PLUGIN_NAME}}',
+                          os.environ['MFDATA_CURRENT_PLUGIN_NAME'])
+        res.append("[%s]" % tmp)
         for key, value in rules[section].items():
             res.append("%s = %s" % (key, value))
     return "\n".join(res)
