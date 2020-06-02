@@ -24,6 +24,12 @@ class AcquisitionSwitchStep(AcquisitionCopyStep):
         if self.no_match_policy not in ("delete", "keep"):
             raise Exception("invalid no_match_policy: %s "
                             "must be keep or delete" % self.no_match_policy)
+        for plugin_name, step_name in self.rules_set.get_virtual_targets():
+            self.add_virtual_trace(plugin_name, step_name)
+        if self.no_match_policy == "keep":
+            self.add_virtual_trace(">nomatch", "keep")
+        else:
+            self.add_virtual_trace(">nomatch", "delete")
 
     def add_extra_arguments(self, parser):
         AcquisitionCopyStep.add_extra_arguments(self, parser)
@@ -56,6 +62,7 @@ class AcquisitionSwitchStep(AcquisitionCopyStep):
             tags_filepath = new_filepath + ".tags"
             xaf.write_tags_in_a_file(tags_filepath)
             XattrFile(new_filepath).clear_tags()
+            self.add_trace(xaf, ">nomatch", "keep")
 
     def before_copy(self, xaf):
         actions = self.rules_set.evaluate(xaf)
@@ -68,6 +75,7 @@ class AcquisitionSwitchStep(AcquisitionCopyStep):
                 # delete
                 self.info("Deleting %s" % xaf.filepath)
                 xaf.delete_or_nothing()
+                self.add_trace(xaf, ">nomatch", "delete")
             return None
         res = []
         for action in actions:
