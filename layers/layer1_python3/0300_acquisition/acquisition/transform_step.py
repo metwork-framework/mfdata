@@ -19,6 +19,7 @@ class AcquisitionTransformStep(AcquisitionStep):
             raise Exception("invalid dest_dir: %s" % self.args.dest_dir)
         self.dest_plugin_name = tmp[0]
         self.dest_step_name = tmp[1]
+        self.add_virtual_trace(self.dest_plugin_name, self.dest_step_name)
         self.keep_transformed_basename = True
 
     def add_extra_arguments(self, parser):

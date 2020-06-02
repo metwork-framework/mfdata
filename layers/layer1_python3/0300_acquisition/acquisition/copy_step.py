@@ -25,6 +25,7 @@ class AcquisitionCopyStep(AcquisitionStep):
                     hardlink = False
                     step_name = tmp2[1].strip()
                 self.dest_dirs.append((plugin_name, step_name, hardlink))
+                self.add_virtual_trace(plugin_name, step_name)
 
     def add_extra_arguments(self, parser):
         parser.add_argument(

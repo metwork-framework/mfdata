@@ -1,11 +1,48 @@
 import os
 import datetime
+import redis
+import time
 from mfutil import mkdir_p_or_die, get_unique_hexa_identifier
 
 MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', '/tmp')
 IN_DIR = os.path.join(MFMODULE_RUNTIME_HOME, "var", "in")
 TMP_DIR = os.path.join(MFMODULE_RUNTIME_HOME, "var", "in", "tmp")
 TRASH_DIR = os.path.join(MFMODULE_RUNTIME_HOME, "var", "in", "trash")
+REDIS_CONN = None
+
+
+def __get_redis_conn():
+    global REDIS_CONN
+    if REDIS_CONN is None:
+        REDIS_CONN = redis.Redis(
+            unix_socket_path="%s/var/redis.socket" % MFMODULE_RUNTIME_HOME)
+    return REDIS_CONN
+
+
+def add_trace(xaf, from_plugin, from_step, to_plugin, to_step="",
+              virtual=False):
+    r = __get_redis_conn()
+    if to_plugin.startswith(IN_DIR + "/step."):
+        tmp = to_plugin.replace(IN_DIR + "/step.", "").split('.')
+        if len(tmp) == 2:
+            to_plugin = tmp[0]
+            to_step = tmp[1].replace('/', '')
+    key = "trace@%s~%s/%s~%s/%s" % \
+        (datetime.datetime.utcnow().isoformat()[0:10],
+         from_plugin, from_step, to_plugin, to_step)
+    if r.exists(key):
+        if not virtual:
+            r.incr(key)
+    else:
+        if virtual:
+            r.set(key, 0)
+        else:
+            r.incr(key)
+        r.expire(key, 86400)
+
+
+def add_virtual_trace(from_plugin, from_step, to_plugin, to_step=""):
+    add_trace(None, from_plugin, from_step, to_plugin, to_step, virtual=True)
 
 
 def get_plugin_step_directory_path(plugin_name, step_name):
