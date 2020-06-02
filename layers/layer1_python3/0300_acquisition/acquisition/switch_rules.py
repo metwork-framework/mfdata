@@ -1,9 +1,29 @@
 import fnmatch
 import re
+import importlib
+import os
+import sys
 from mflog import get_logger
 from opinionated_configparser import OpinionatedConfigParser
 
 LOGGER = get_logger("switch/rules")
+
+
+class add_sys_path():
+
+    def __init__(self, path):
+        self.path = path
+
+    def __enter__(self):
+        if self.path is not None and self.path != "":
+            sys.path.insert(0, self.path)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            if self.path is not None and self.path != "":
+                sys.path.remove(self.path)
+        except ValueError:
+            pass
 
 
 class BadSyntax(Exception):
@@ -103,6 +123,23 @@ class NotfnmatchRulesBlock(FnmatchRulesBlock):
         return not parent
 
 
+class EqualRulesBlock(OneParameterRulesBlock):
+
+    def eval(self, xaf, rule_pattern):
+        val = self.get_val_from_xaf(xaf)
+        res = (val == rule_pattern)
+        LOGGER.debug("(%s == %s) switch rule => %s" %
+                     (val, rule_pattern, res))
+        return res
+
+
+class NotequalRulesBlock(EqualRulesBlock):
+
+    def eval(self, xaf, rule_pattern):
+        parent = EqualRulesBlock.eval(self, xaf, rule_pattern)
+        return not parent
+
+
 class RegexRulesBlock(OneParameterRulesBlock):
 
     def eval(self, xaf, rule_pattern):
@@ -125,6 +162,36 @@ class AlwaystrueRulesBlock(ZeroParameterRulesBlock):
     def eval(self, xaf, rule_pattern):
         LOGGER.debug("alwaystrue switch rule => True")
         return True
+
+
+class PythonRulesBlock(OneParameterRulesBlock):
+
+    def __init__(self, *args, **kwargs):
+        OneParameterRulesBlock.__init__(self, *args, **kwargs)
+        if ":" in self.params[0]:
+            self.sys_path = self.params[0].split(':')[0]
+            self.func_path = self.params[0].split(':')[1]
+        else:
+            self.sys_path = ""
+            self.func_path = self.params[0]
+        self.func_name = self.func_path.split('.')[-1]
+        self.module_path = ".".join(self.func_path.split('.')[0:-1])
+        self._func = None
+
+    @property
+    def func(self):
+        if self._func is None:
+            with add_sys_path(self.sys_path):
+                mod = importlib.import_module(self.module_path)
+                self._func = getattr(mod, self.func_name)
+        return self._func
+
+    def eval(self, xaf, rule_pattern):
+        func = self.func
+        res = func(xaf, rule_pattern)
+        LOGGER.debug("%s(xaf, %s) switch rule => %s" %
+                     (self.func_path, rule_pattern, res))
+        return res
 
 
 class RulesSet(object):
@@ -180,7 +247,7 @@ class RulesReader(object):
             if fnmatch.fnmatch(section, "%s:*:*" % section_prefix):
                 tempo = section.split(':')
                 typ = tempo[1]
-                params = tempo[-1].split(',')
+                params = ':'.join(tempo[2:]).split(',')
                 rules_block = self.rules_block_factory(typ, params)
                 result.add_rules_block(rules_block)
             elif fnmatch.fnmatch(section, "%s:*" % section_prefix):
