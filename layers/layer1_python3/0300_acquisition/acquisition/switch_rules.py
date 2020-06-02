@@ -1,7 +1,6 @@
 import fnmatch
 import re
 import importlib
-import os
 import sys
 from mflog import get_logger
 from opinionated_configparser import OpinionatedConfigParser
@@ -85,6 +84,13 @@ class RulesBlock(object):
                              ", ".join([str(x) for x in rule.actions]))
                 actions = actions.union(rule.actions)
         return actions
+
+    def get_virtual_targets(self):
+        targets = set()
+        for rule in self.switch_rules:
+            for action in rule.actions:
+                targets.add((action.plugin_name, action.step_name))
+        return targets
 
 
 class OneParameterRulesBlock(RulesBlock):
@@ -208,6 +214,12 @@ class RulesSet(object):
             res = rule_block.evaluate(xaf)
             actions = actions.union(res)
         return actions
+
+    def get_virtual_targets(self):
+        targets = set()
+        for rule_block in self.rule_blocks:
+            targets = targets.union(rule_block.get_virtual_targets())
+        return targets
 
 
 class RulesReader(object):

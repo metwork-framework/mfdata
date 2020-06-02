@@ -2,7 +2,8 @@ from acquisition.utils import MFMODULE_RUNTIME_HOME
 from acquisition.utils import _get_tmp_filepath
 from mfutil import get_unique_hexa_identifier
 from mfplugin.utils import validate_plugin_name
-from acquisition.utils import _get_current_utc_datetime_with_ms
+from acquisition.utils import _get_current_utc_datetime_with_ms, add_trace, \
+    add_virtual_trace
 import re
 import os
 import sys
@@ -333,6 +334,8 @@ class AcquisitionBase(object):
             if tag_name not in xaf.tags:
                 dirname = os.path.dirname(xaf._original_filepath)
                 original_dirname = str(os.path.basename(dirname))
+                add_trace(xaf, "<%s" % original_dirname, "",
+                          self.plugin_name, self.step_name)
                 self._set_tag(xaf, tag_name, original_dirname, info=True)
 
     def _set_before_tags(self, xaf):
@@ -342,3 +345,11 @@ class AcquisitionBase(object):
         self.__set_original_basename_if_necessary(xaf)
         self._set_original_uid_if_necessary(xaf)
         self.__set_original_dirname_if_necessary(xaf)
+
+    def add_trace(self, xaf, to_plugin_name, to_step_name=""):
+        add_trace(xaf, self.plugin_name, self.step_name,
+                  to_plugin_name, to_step_name)
+
+    def add_virtual_trace(self, to_plugin_name, to_step_name=""):
+        add_virtual_trace(self.plugin_name, self.step_name,
+                          to_plugin_name, to_step_name)
