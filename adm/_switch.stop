@@ -10,7 +10,7 @@ from mflog import getLogger
 LOG = getLogger('switch.stop')
 USER = os.environ.get('MFMODULE_RUNTIME_USER', None)
 MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', None)
-MFMODULE_HOME = os.environ.get('MFMODULE_HOME', None)
+MFEXT_HOME = os.environ.get('MFEXT_HOME', None)
 
 
 def get_switch_master_pids():
@@ -22,7 +22,7 @@ def get_switch_master_pids():
             cmdline = " ".join(proc.cmdline())
             if 'step.switch.main' not in cmdline:
                 continue
-            if "%s/opt/python3/bin/switch_step" % MFMODULE_HOME not in cmdline:
+            if "%s/opt/python3/bin/switch_step" % MFEXT_HOME not in cmdline:
                 continue
             cwd = proc.cwd()
             if not cwd.startswith(MFMODULE_RUNTIME_HOME):
