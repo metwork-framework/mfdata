@@ -42,15 +42,15 @@ When you create a plugin with the :ref:`bootstap_plugin <mfdata_create_plugins:C
 
 By default, the `.layerapi2_dependencies` file contains only minimal dependencies, e.g.:
 ```cfg
-python3@mfdata
+python3@mfext
 ```
-means the plugin will use Python3 from the python3 package supplied in MFDATA.
+means the plugin will use Python3 from the python3 package supplied in MFEXT.
 
 For more details on `layerapi2`, check :doc:`MFEXT layerapi2 <mfext:layerapi2>` and :ref:`MFEXT layerapi2 syntax <mfext:layerapi2_syntax>` documentation.
 
 Let's assume you need a module or package which is available in the MFEXT 'scientific' package, you have to add this dependencies to the `.layerapi2_dependencies` file:
 ```cfg
-python3@mfdata
+python3@mfext
 python3_scientific@mfext
 ```
 

@@ -230,7 +230,7 @@ For further about `grib_to_netcdf`, see https://confluence.ecmwf.int/pages/viewp
 
 Tell the plugin to use MFEXT 'scientific' package. Edit the `.layerapi2_dependencies` in the `convert_grib2` directory and add the `python3_scientific@mfext` at the end:
 ```cfg
-python3@mfdata
+python3@mfext
 python3_scientific@mfext
 ```
 
