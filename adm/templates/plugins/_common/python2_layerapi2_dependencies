@@ -1,4 +1,4 @@
-python2@mfdata
+python2@mfext
 root@mfdata
 -python2_devtools@mfext
 -python2_vim@mfext
