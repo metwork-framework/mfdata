@@ -43,6 +43,8 @@ class AcquisitionReinjectStep(AcquisitionStep):
                             "plugin_name/step_name" % self.args.dest_dir)
         plugin_name = self.args.dest_dir.split('/')[0]
         step_name = self.args.dest_dir.split('/')[1]
+        self.add_virtual_trace(plugin_name, step_name)
+        self.add_virtual_trace(">delete", "giveup")
         self.dest_dir = get_plugin_step_directory_path(plugin_name,
                                                        step_name)
         mkdir_p_or_die(self.dest_dir)
@@ -95,12 +97,14 @@ class AcquisitionReinjectStep(AcquisitionStep):
         new_filepath = os.path.join(self.dest_dir,
                                     get_unique_hexa_identifier())
         xaf.move_or_copy(new_filepath)
+        self.add_trace(xaf, self.dest_dir)
         self.get_stats_client().incr("number_of_processed_files", 1)
         self.get_stats_client().incr("bytes_of_processed_files", xaf.getsize())
 
     def give_up(self, xaf):
         self.warning("max retry attempt for %s => deleting", xaf.filepath)
         self.get_stats_client().incr("number_of_processing_errors", 1)
+        self.add_trace(xaf, ">delete", "giveup")
         xaf.delete_or_nothing()
 
     def ping(self):

@@ -21,6 +21,7 @@ class AcquisitionMoveStep(AcquisitionStep):
             self.dest_dir = get_plugin_step_directory_path(plugin_name,
                                                            step_name)
         mkdir_p_or_die(self.dest_dir)
+        self.add_virtual_trace(self.dest_dir)
         try:
             if self.args.drop_tags == "AUTO":
                 self.drop_tags = self.args.dest_dir.startswith('/')

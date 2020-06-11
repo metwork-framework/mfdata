@@ -12,7 +12,7 @@ from mfutil import get_utc_unix_timestamp
 from acquisition.utils import (
     get_plugin_step_directory_path,
     MFMODULE_RUNTIME_HOME,
-    _get_or_make_trash_dir,
+    _get_or_make_trash_dir
 )
 from acquisition.stats import get_stats_client
 
@@ -65,6 +65,7 @@ class AcquisitionStep(AcquisitionBase):
             mkdir_p_or_die(fpmdd)
             plugin_name = fpmdd.split('/')[0]
             step_name = fpmdd.split('/')[1]
+            self.add_virtual_trace(plugin_name, step_name)
             self.failure_policy_move_dest_dir = \
                 get_plugin_step_directory_path(plugin_name, step_name)
         signal.signal(signal.SIGTERM, self.__sigterm_handler)
@@ -200,7 +201,9 @@ class AcquisitionStep(AcquisitionBase):
     def _trash(self, xaf):
         if self.failure_policy == "delete":
             xaf.delete_or_nothing()
+            self.add_trace(xaf, ">trash", "delete")
         elif self.failure_policy == "keep":
+            self.add_trace(xaf, ">trash", "keep")
             new_filepath = os.path.join(
                 _get_or_make_trash_dir(self.plugin_name, self.step_name),
                 xaf.basename(),
@@ -218,6 +221,8 @@ class AcquisitionStep(AcquisitionBase):
             (success, move) = xaf.move_or_copy(new_filepath)
             if not success:
                 xaf.delete_or_nothing()
+            else:
+                self.add_trace(xaf, self.failure_policy.move_dest_dir)
 
     def _after(self, xaf, process_status):
         if process_status:
@@ -386,6 +391,8 @@ class AcquisitionStep(AcquisitionBase):
             else:
                 self.info("File %s copied to %s (can't hardlink)" %
                           (old_filepath, target_path))
+        if result:
+            self.add_trace(xaf, plugin_name, step_name)
         return result
 
     def move_to_plugin_step(self, xaf, plugin_name, step_name,
@@ -422,6 +429,8 @@ class AcquisitionStep(AcquisitionBase):
             else:
                 self.info("File %s copied to %s (can't move)" %
                           (old_filepath, target_path))
+        if result:
+            self.add_trace(xaf, plugin_name, step_name)
         return result
 
     def copy_to_plugin_step(self, xaf, plugin_name, step_name,
@@ -452,6 +461,8 @@ class AcquisitionStep(AcquisitionBase):
         result = xaf.copy_or_nothing(target_path)
         if info and result:
             self.info("File %s copied to %s" % (old_filepath, target_path))
+        if result:
+            self.add_trace(xaf, plugin_name, step_name)
         return result
 
     def process(self, xaf):
