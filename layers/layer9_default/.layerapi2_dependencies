@@ -1,3 +1,4 @@
 root@mfdata
-python3@mfdata
+python3@mfext
 default@mfext
+-python3_scientific_core@mfext

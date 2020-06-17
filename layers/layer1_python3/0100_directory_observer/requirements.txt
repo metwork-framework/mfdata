@@ -1,3 +1,0 @@
-redis >= 2.10.5
-pyinotify >= 0.9.6
-opinionated_configparser >= 0.0.1
