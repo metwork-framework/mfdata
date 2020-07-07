@@ -55,3 +55,4 @@ doc/components.*
 doc/installation_guide.*
 doc/README.*
 plugins/*/.plugin_format_version
+_docs_build
