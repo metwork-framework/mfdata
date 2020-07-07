@@ -13,15 +13,24 @@ LOGGER = get_logger("_make_switch_conf")
 def make_switch_conf(plugin, num):
     res = []
     rules = plugin.configuration.switch_rules
+    plugin_name = os.environ['MFDATA_CURRENT_PLUGIN_NAME']
+    plugin_dir = os.environ['MFDATA_CURRENT_PLUGIN_DIR']
     for section in rules:
         tmp = section.replace("switch_rules:", "switch_rules_%i:" % num, 1)
-        tmp = tmp.replace('{{MFDATA_CURRENT_PLUGIN_DIR}}',
-                          os.environ['MFDATA_CURRENT_PLUGIN_DIR'])
-        tmp = tmp.replace('{{MFDATA_CURRENT_PLUGIN_NAME}}',
-                          os.environ['MFDATA_CURRENT_PLUGIN_NAME'])
+        tmp = tmp.replace('{{MFDATA_CURRENT_PLUGIN_DIR}}', plugin_dir)
+        tmp = tmp.replace('{{MFDATA_CURRENT_PLUGIN_NAME}}', plugin_name)
         res.append("[%s]" % tmp)
         for key, value in rules[section].items():
-            res.append("%s = %s" % (key, value))
+            key_prefix = ""
+            # FIXME: hack for python rules
+            if section.strip() == "switch_rules:python":
+                if ":" not in key:
+                    key_prefix = plugin_dir + ":"
+            if '/' not in value:
+                res.append("%s%s = %s/%s" %
+                           (key_prefix, key, plugin_name, value))
+            else:
+                res.append("%s%s = %s" % (key_prefix, key, value))
     return "\n".join(res)
 
 
