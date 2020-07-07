@@ -20,13 +20,10 @@
 * [1\. What is it?](#1-what-is-it)
 * [2\. What is not in?](#2-what-is-not-in)
 * [3\. Quickstart](#3-quickstart)
-* [4\. Cheatsheet](#4-cheatsheet)
-* [5\. Reference documentation](#5-reference-documentation)
-* [6\. Installation guide](#6-installation-guide)
-* [7\. Configuration guide](#7-configuration-guide)
-* [8\. Contributing guide](#8-contributing-guide)
-* [9\. Code of Conduct](#9-code-of-conduct)
-* [10\. Sponsors](#10-sponsors)
+* [4\. Quickstart, installation guide\.\.\.](#4-quickstart-installation-guide)
+* [5\. Contributing guide](#5-contributing-guide)
+* [6\. Code of Conduct](#6-code-of-conduct)
+* [7\. Sponsors](#7-sponsors)
 
 
 
@@ -182,24 +179,9 @@ latest.switch.main.system_magic = ASCII text
 
 
 
+## 4. Quickstart, installation guide...
 
-
-
-
-
-
-
-
-## 4. Cheatsheet
-
-A cheatsheet for this module is available [here](.metwork-framework/cheatsheet.md)
-
-
-
-## 5. Reference documentation
-
-- (for **master (development)** version), see [this dedicated site](http://metwork-framework.org/pub/metwork/continuous_integration/docs/master/mfdata/) for reference documentation.
-- (for **latest released stable** version), see [this dedicated site](http://metwork-framework.org/pub/metwork/releases/docs/stable/mfdata/) for reference documentation.
+Please consult the [reference documentation](http://metwork-framework.org/pub/metwork/continuous_integration/docs/master/mfdata/).
 
 For very specific use cases, you might be interested in
 [reference documentation for integration branch](http://metwork-framework.org/pub/metwork/continuous_integration/docs/integration/mfdata/).
@@ -207,33 +189,19 @@ For very specific use cases, you might be interested in
 And if you are looking for an old released version, you can search [here](http://metwork-framework.org/pub/metwork/releases/docs/).
 
 
-
-## 6. Installation guide
-
-See [this document](.metwork-framework/install_a_metwork_package.md).
-
-
-## 7. Configuration guide
-
-See [this document](.metwork-framework/configure_a_metwork_package.md).
-
-
-
-
-
-## 8. Contributing guide
+## 5. Contributing guide
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 
 
-## 9. Code of Conduct
+## 6. Code of Conduct
 
 See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) file.
 
 
 
-## 10. Sponsors
+## 7. Sponsors
 
 *(If you are officially paid to work on MetWork Framework, please contact us to add your company logo here!)*
 
