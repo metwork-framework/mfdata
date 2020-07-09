@@ -182,7 +182,13 @@ Particularly useful tags in *switch rules* are:
 In the `config.ini` file of your plugin, you can add several *rules blocks*:
 
 ```
-[switch_rules:{rule_type}:{rule_type_param1,rule_type_param2,...}]
+[switch_rules:{rule_type}:{rule_type_param}]
+```
+
+or (depending on the *rule type*):
+
+```
+[switch_rules:{rule_type}]
 ```
 
 Each *rules block* defined a rule type and some rule parameters.
@@ -419,3 +425,92 @@ def myrule(xaf):
 !!! warning
     This function should be fast and don't rely on external services as its call
     can block the whole `switch` plugin.
+
+## Advanced usage
+
+### Without any switch plugin
+
+In some use cases (for example, you have only one plugin which takes care of
+all incoming files and you are sure it will never change), you can work without
+any `switch` or `guess_file_type` plugin.
+
+To do that, set in the `mfdata` configuration:
+
+- `install_switch=0` under `[internal_plugins]` section
+- `install_guess_file_type=0` under `[internal_plugins]` section
+
+(if you don't do that, these two plugins will be reinstalled after services restart)
+
+Then (only if they were already installed):
+
+- `plugins.uninstall switch` (as `mfdata` user)
+- `plugins.uninstall guess_file_type` (as `mfdata` user)
+
+To remove them.
+
+Last, change your plugin `config.ini` file to add a new watched directory. For
+example, set `watched_directories={MFDATA_CURRENT_STEP_DIR},incoming`
+
+!!! warning
+    Please don't remove `{MFDATA_CURRENT_STEP_DIR}` from `watched_directories` key
+    unless you know exactly what you are doing.
+
+You will get the following workflow:
+
+```mermaid
+graph LR;
+    incoming["${MFMODULE_RUNTIME_HOME}/<br/>var/in/incoming/"]-->yourplugin(your plugin)
+```
+
+### With multiple switch plugins
+
+Starting with MetWork 1.0, for very complex workflows, you can use several `switch` plugins.
+
+To install another `switch` plugin, first you have to find the released `.plugin`
+corresponding to the `switch` plugin.
+
+You will find the full path with: `ls ${MFMODULE_HOME}/share/plugins/switch-*.plugin`.
+
+??? question "${MFMODULE_HOME}?"
+    In most cases, `${MFMODULE_HOME=/opt/metwork-mfdata`.
+
+Then install the switch plugin a second time (but with another name). For example:
+
+`plugins.install --new-name=myswitch /full/path/of/the/switch.plugin`
+
+To configure this new `switch` plugin called `myswitch`, you can use the same
+principles described above but *rules block* must be changed to something like that:
+
+```
+[switch_rules@myswitch:{rule_type}:{rule_type_param}]
+```
+
+or (depending on the *rule type*):
+
+```
+[switch_rules@myswitch:{rule_type}]
+```
+
+(*we add `@myswitch` to target the additional `switch` plugin called `myswitch`*)
+
+??? question "what about `@switch`?"
+    If you add `@switch` suffix, you target the default system `switch` plugin. For this,
+    you can omit `@switch` suffix at all.
+
+With this kind of configuration, you can build very complex workflows with several level
+of routing like:
+
+```mermaid
+graph TD;
+    incoming1["${MFMODULE_RUNTIME_HOME}/<br/>var/in/incoming1/"]-->gft("guess_file_type<br/>plugin")
+    incoming2["${MFMODULE_RUNTIME_HOME}/<br/>var/in/incoming2/"]-->gft
+    gft-->switch("switch<br/>(default) plugin")
+    switch--depending on rules eval-->plugin1
+    switch--depending on rules eval-->plugin2
+    plugin1-->myswitch1("myswitch1<br/>(non default) plugin")
+    plugin2-->myswitch2("myswitch2<br/>(non default) plugin")
+    myswitch1--depending on rules eval-->plugin3
+    myswitch1--depending on rules eval-->plugin4
+    myswitch2--depending on rules eval-->plugin5
+    myswitch2--depending on rules eval-->plugin6
+```

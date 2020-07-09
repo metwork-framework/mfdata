@@ -20,8 +20,7 @@ for directory in SWITCH_DIRECTORIES.split(','):
         st = os.stat(path)
         os.chmod(path, st.st_mode | stat.S_IWGRP)
 
-x = BashWrapper("_make_switch_conf >%s/tmp/config_auto/switch_rules.ini" %
-                MFMODULE_RUNTIME_HOME)
+x = BashWrapper("_make_and_write_switch_confs")
 if not x:
     log.warning("%s" % x)
     sys.exit(1)
