@@ -11,8 +11,8 @@ This default system switch plugin has a special dynamically generated
 configuration. This configuration is generated from *switch rules* read
 in installed plugins `config.ini` files.
 
-So, there is editable configuration file for this plugin. Its configuration
-is generated from other plugins configurations.
+So, there is no editable configuration file for this plugin. Its configuration
+is generated from other plugins configuration files.
 
 ```mermaid
 graph LR;
@@ -27,9 +27,9 @@ It feeds other plugins depending of *rules* evaluated **for each incoming file**
 
 Let's say for the example that we have 3 *rules*:
 
-- a *rule#1* (from the installed plugin: `plugin1`) which is `True` if the incoming filename starts with `A`
-- a *rule#2* (from the installed plugin: `plugin2`) which is `True` if the incoming filename starts with `B`
-- a *rule#2* (from the installed plugin: `plugin3`) which is `True` if the incoming filename starts with `AB`
+- a *rule#1* (from the installed plugin `plugin1`) which is `True` if the incoming filename starts with `A`
+- a *rule#2* (from the installed plugin `plugin2`) which is `True` if the incoming filename starts with `B`
+- a *rule#3* (from the installed plugin `plugin3`) which is `True` if the incoming filename starts with `AB`
 
 For an incoming filename: `Afoo`, only *rule#1* is `True`, so the `switch` plugin is routing
 the incoming file to the plugin: `plugin1`:
@@ -68,7 +68,7 @@ graph LR;
 ```
 
 ??? info "With a copy?"
-    In this particular case, for performances reasons and to avoid too many copies
+    In this particular case, for performances reasons and to avoid too many copies,
     some optimizations are done (hardlinking, copy and moving the last one...) but
     you can consider that each plugin receives a copy of the incoming file
     (at the first order of complexity)
@@ -90,7 +90,7 @@ graph LR;
 This plugin is also installed by default. In the default configuration, this
 plugin listens to some directories and feeds the `switch` system plugin.
 
-As its name suggests, it also try to guess the file type with the [file](https://en.wikipedia.org/wiki/File_(command))/[libmagic](https://linux.die.net/man/3/libmagic) unix tools.
+As its name suggests, it also tries to guess the file type with the [file](https://en.wikipedia.org/wiki/File_(command))/[libmagic](https://linux.die.net/man/3/libmagic) unix tools.
 
 So before giving the file to the `switch` plugin, it will add some interesting "tags" to the file, tags which will be usable in *switch rules* to route (for example) some files of a given type to a specific plugin.
 
@@ -120,10 +120,10 @@ graph LR;
 
 ### Tags
 
-Tags are a kind of context for each file in a `mfdata` workflow in the form a several
-key/values. "Good" plugins
-keep the context from the beginning of the workflow to the end. So, you can trace
-the complete life of a life in the `mfdata` workflow.
+Tags are a kind of context for each file in a `mfdata` workflow in the form of several
+keys/values. "Good" plugins
+keep the context from the beginning of the workflow to its end. So, you can trace
+the complete life of a file in the `mfdata` workflow.
 
 Here is a little example:
 
@@ -222,7 +222,7 @@ given step.
 
 ### Example
 
-Let's say your add these lines in your plugin `config.ini`:
+Let's say you add these lines in your plugin `config.ini`:
 
 ```ini
 [switch_rules:fnmatch:first.core.original_basename]
@@ -246,7 +246,7 @@ Let's say we have an incoming file with:
 - `first.core.original_dirname` (original dirname of the file) = `foo`
 
 For the first *rules blocks*, we try the pattern `A*` with `fnmatch` on `first.core.original_basename` value (`Bar`).
-It is evaluated to `False.
+It is evaluated to `False`.
 
 ??? question "fnmatch?"
     `fnmatch` rule type is a basic rule type which use [fnmatch patterns](https://docs.python.org/3.7/library/fnmatch.html)
@@ -347,7 +347,7 @@ foo = main
 
 This is the **inverse rule** than `equal`.
 
-Files which `orginal_basename` are different than `foo` will be routed to the `main` step.
+Files which `orginal_basename` are different from `foo` will be routed to the `main` step.
 
 ### `notfnmatch`
 
@@ -411,7 +411,7 @@ def myrule(xaf):
     if original_basename and original_dirname:
         # WARNING: original_basename and original_dirname are bytes
         if original_basename.startswith(b'A'):
-            if orginal_dirname.startswith(b'B'):
+            if original_dirname.startswith(b'B'):
                 return True
     return False
 ```
