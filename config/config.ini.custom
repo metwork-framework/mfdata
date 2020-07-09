@@ -32,9 +32,9 @@ pubsub_endpoint = ipc://@@@MFMODULE_RUNTIME_HOME@@@/var/circus_pubsub.socket
 ##### DIRECTORY OBSERVER #####
 ##############################
 [directory_observer]
-# inactivity timeout, if no event are received after this timeout (in seconds)
-# a CRITICAL message is loggued and the programe is restarted
-# 0 => means "no timeout"
+# inactivity timeout : if no event are received after this timeout (in seconds)
+# a CRITICAL message is logged and the programe is restarted
+# 0 => no timeout
 monitor_inactivitytimeout=300
 
 # forced poll (advanced configuration option)
@@ -53,7 +53,7 @@ ignore=^.*\.t$;^.*\.tmp$
 #################
 [redis]
 # redis will listen on a unix socket
-# but, if you set a value != 0 bellow, it will also listen this tcp port
+# but, if you set a value != 0 below, it will also listen this tcp port
 port=0
 max_memory=2048
 pubsubclient_output_buffer_hard_limit = 1600
@@ -66,7 +66,7 @@ pubsubclient_output_buffer_soft_limit = 1200
 [nginx]
 flag=1
 # nginx will listen on a unix socket
-# but, if you set a value != 0 bellow, it will also listen this tcp port
+# but, if you set a value != 0 below, it will also listen this tcp port
 port=9091
 upload_dir=@@@MFMODULE_RUNTIME_HOME@@@/var/in/incoming
 clientbody_temp_path=@@@MFMODULE_RUNTIME_HOME@@@/var/in/tmp/nginx
@@ -112,16 +112,16 @@ switch_no_match_policy=delete
 # (see corresponding env variables)
 guess_file_type_numprocesses={{MFHARDWARE_NUMBER_OF_CPU_CORES_DIVIDED_BY_2}}
 
-# Set debug mode only for the switch plugin
+# Set debug mode only for the guess_file_type plugin
 # (useless if you set the logging level to DEBUG globaly)
 # 0 => no
 # 1 => yes
 guess_file_type_debug=0
 
-# Coma separated of directory names to watch
+# Coma separated list of directory names to watch
 # (under ${MFDATA_RUNTIME_HOME}/var/in/)
 #
-# These directories will be watched by the guess_file_type
+# These directories will be watched by the guess_file_type plugin
 # (if [internal_plugins]/install_guess_file_type=1)
 # or directly by the switch plugin
 # (if [internal_plugins]/install_guess_file_type=0 and
@@ -135,13 +135,13 @@ watched_directories=incoming
 ####################
 #####   MQTT   #####
 ####################
-# the hostname or IP address of the remote broker
+# the hostname or IP address of the MQTT remote broker
 mqtt_listener_broker_hostname=localhost
 
-# the network port of the server host to connect to. Defaults to 1883.
+# the network port of the server host to connect to. Default to 1883.
 mqtt_listener_broker_port=1883
 
-# a string specifying the subscription topic to subscribe to.Default to # (all)
+# a string specifying the subscription topic to subscribe to. Default to # (all)
 mqtt_listener_subscription_topic=#
 
 
@@ -151,10 +151,10 @@ mqtt_listener_subscription_topic=#
 # the mode of amqp subscription (fanout or topic). Default to fanout
 amqp_consumer_mode=fanout
 
-# the hostname or IP address of the remote broker
+# the hostname or IP address of the AMQP remote broker
 amqp_consumer_broker_hostname=localhost
 
-# the network port of the server host to connect to
+# the network port of the server host to connect to. Default to 5672.
 amqp_consumer_broker_port=5672
 
 # The username to use to connect to the broker
