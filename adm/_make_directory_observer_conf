@@ -31,7 +31,7 @@ for plugin in manager.plugins.values():
         for step in plugin.configuration.steps:
             if step.retry_total > 0:
                 reinject_step = step.duplicate(step.name + "_reinject")
-                reinject_step.set_listened_directories(
+                reinject_step.set_watched_directories(
                     "{MFDATA_CURRENT_STEP_DIR}")
                 steps_to_add.append(reinject_step)
         for step in steps_to_add:

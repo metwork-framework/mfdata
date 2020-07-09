@@ -12,9 +12,9 @@ INSTALL_GUESS_FILE_TYPE = \
     os.environ.get('MFDATA_INTERNAL_PLUGINS_INSTALL_GUESS_FILE_TYPE',
                    '1').strip() == '1'
 MFMODULE_RUNTIME_HOME = os.environ['MFMODULE_RUNTIME_HOME']
-LISTENED_DIRECTORIES = \
+WATCHED_DIRECTORIES = \
     [x.strip()
-     for x in os.environ.get('MFDATA_INTERNAL_PLUGINS_LISTENED_DIRECTORIES',
+     for x in os.environ.get('MFDATA_INTERNAL_PLUGINS_WATCHED_DIRECTORIES',
                              'incoming').split(',')]
 SWITCH_NUMPROCESSES = \
     os.environ.get('MFDATA_INTERNAL_PLUGINS_SWITCH_NUMPROCESSES', '1')
@@ -49,10 +49,10 @@ if INSTALL_SWITCH:
         add_warning(f)
         f.write("[step_main]\n")
         if not INSTALL_GUESS_FILE_TYPE:
-            f.write("listened_directories={MFDATA_CURRENT_STEP_DIR},%s\n" %
-                    ",".join(LISTENED_DIRECTORIES))
+            f.write("watched_directories={MFDATA_CURRENT_STEP_DIR},%s\n" %
+                    ",".join(WATCHED_DIRECTORIES))
         else:
-            f.write("listened_directories={MFDATA_CURRENT_STEP_DIR}\n")
+            f.write("watched_directories={MFDATA_CURRENT_STEP_DIR}\n")
         f.write("numprocesses=%s\n" % SWITCH_NUMPROCESSES)
         f.write("debug=%s\n" % SWITCH_DEBUG)
         f.write("\n")
@@ -65,8 +65,8 @@ if INSTALL_GUESS_FILE_TYPE:
               "guess_file_type.ini", "w") as f:
         add_warning(f)
         f.write("[step_main]\n")
-        f.write("listened_directories={MFDATA_CURRENT_STEP_DIR},%s\n" %
-                ",".join(LISTENED_DIRECTORIES))
+        f.write("watched_directories={MFDATA_CURRENT_STEP_DIR},%s\n" %
+                ",".join(WATCHED_DIRECTORIES))
         f.write("numprocesses=%s\n" % GUESS_FILE_TYPE_NUMPROCESSES)
         f.write("debug=%s\n" % GUESS_FILE_TYPE_DEBUG)
         f.write("\n")

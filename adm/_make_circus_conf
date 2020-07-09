@@ -19,7 +19,7 @@ def get_conf(plugin):
     for step in plugin.configuration.steps:
         if step.retry_total > 0:
             reinject_step = step.duplicate(step.name + "_reinject")
-            reinject_step.set_listened_directories("{MFDATA_CURRENT_STEP_DIR}")
+            reinject_step.set_watched_directories("{MFDATA_CURRENT_STEP_DIR}")
             reinject_step.set_numprocesses(1)
             reinject_step.set_max_age(0)
             reinject_step.set_cmd_and_args(

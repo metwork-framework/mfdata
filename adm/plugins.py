@@ -17,7 +17,7 @@ MFDATA_SCHEMA_OVERRIDE = {
         "allow_unknown": False,
         "schema": {
             **APP_SCHEMA,
-            "listened_directories": {
+            "watched_directories": {
                 **NON_REQUIRED_STRING,
                 "default": "{MFDATA_CURRENT_STEP_DIR}"
             },
@@ -114,15 +114,15 @@ class MfdataApp(App):
         self.retry_min_wait = doc_fragment["retry_min_wait"]
         self.retry_max_wait = doc_fragment["retry_max_wait"]
         self.retry_backoff = doc_fragment["retry_backoff"]
-        self.__listened_directories = doc_fragment["listened_directories"]
+        self.__watched_directories = doc_fragment["watched_directories"]
         if self.retry_max_wait < self.retry_min_wait:
             raise BadPlugin("retry_max_wait must be >= retry_min_wait")
         # we force graceful timeout with timeout
         self._doc_fragment["graceful_timeout"] = self._doc_fragment["timeout"]
         self._type = "step"
 
-    def set_listened_directories(self, value):
-        self.__listened_directories = value
+    def set_watched_directories(self, value):
+        self.__watched_directories = value
 
     def set_numprocesses(self, value):
         self._doc_fragment["numprocesses"] = value
@@ -131,8 +131,8 @@ class MfdataApp(App):
         self._doc_fragment["max_age"] = value
 
     @property
-    def listened_directories(self):
-        old = self.__listened_directories
+    def watched_directories(self):
+        old = self.__watched_directories
         return old.replace('{MFDATA_CURRENT_STEP_DIR}',
                            get_plugin_step_directory_path(self.plugin_name,
                                                           self.name))
