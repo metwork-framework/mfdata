@@ -7,7 +7,7 @@ from mfutil import mkdir_p, BashWrapper
 from mflog import getLogger
 
 SWITCH_DIRECTORIES =\
-    os.environ.get("MFDATA_INTERNAL_PLUGINS_LISTENED_DIRECTORIES")
+    os.environ.get("MFDATA_INTERNAL_PLUGINS_WATCHED_DIRECTORIES")
 MFMODULE_RUNTIME_HOME = os.environ['MFMODULE_RUNTIME_HOME']
 log = getLogger('before_start_step.switch.main')
 

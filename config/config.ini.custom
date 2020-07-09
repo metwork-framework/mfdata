@@ -80,18 +80,56 @@ logging=1
 ##### INTERNAL PLUGINS #####
 ############################
 [internal_plugins]
+# Install guess_file_type plugin (during module startup)
+# 1 (default) => yes
+# 0           => no
 install_guess_file_type=1
+
+# Install switch plugin (during module startup)
+# 1 (default) => yes
+# 0           => no
 install_switch=1
+
+# Number of worker processes for the switch plugin
+# {{MFHARDWARE_...}} values are automatically computed
+# (see corresponding env variables)
 switch_numprocesses={{MFHARDWARE_NUMBER_OF_CPU_CORES_DIVIDED_BY_2}}
+
+# Set debug mode only for the switch plugin
+# (useless if you set the logging level to DEBUG globaly)
+# 0 => no
+# 1 => yes (can be really useful if you have some routing issues
+#           as it will dump all tags and rules evaluation in logs)
 switch_debug=0
-guess_file_type_numprocesses={{MFHARDWARE_NUMBER_OF_CPU_CORES_DIVIDED_BY_2}}
-guess_file_type_debug=0
-listened_directories=incoming
 
 # "no match" policy for the switch plugin:
 # delete => we delete the file
-# keep => we keep the file in trash
+# keep   => we keep the file in trash
 switch_no_match_policy=delete
+
+# Number of worker processes for the guess_file_type plugin
+# {{MFHARDWARE_...}} values are automatically computed
+# (see corresponding env variables)
+guess_file_type_numprocesses={{MFHARDWARE_NUMBER_OF_CPU_CORES_DIVIDED_BY_2}}
+
+# Set debug mode only for the switch plugin
+# (useless if you set the logging level to DEBUG globaly)
+# 0 => no
+# 1 => yes
+guess_file_type_debug=0
+
+# Coma separated of directory names to watch
+# (under ${MFDATA_RUNTIME_HOME}/var/in/)
+#
+# These directories will be watched by the guess_file_type
+# (if [internal_plugins]/install_guess_file_type=1)
+# or directly by the switch plugin
+# (if [internal_plugins]/install_guess_file_type=0 and
+#     [internal_plugins]/install_swich=1)
+#
+# Note: if [internal_plugins]/install_guess_file_type=0 and
+#          [internal_plugins]/install_swich=0, this parameter is useless
+watched_directories=incoming
 
 
 ####################

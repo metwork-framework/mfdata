@@ -11,7 +11,7 @@ This default system switch plugin has a special dynamically generated
 configuration. This configuration is generated from *switch rules* read
 in installed plugins `config.ini` files.
 
-So, there is editable configuration file for this plugin. Its configuration
+So, there is no editable configuration file for this plugin. Its configuration
 is generated from other plugins configurations.
 
 ```mermaid
@@ -29,7 +29,7 @@ Let's say for the example that we have 3 *rules*:
 
 - a *rule#1* (from the installed plugin: `plugin1`) which is `True` if the incoming filename starts with `A`
 - a *rule#2* (from the installed plugin: `plugin2`) which is `True` if the incoming filename starts with `B`
-- a *rule#2* (from the installed plugin: `plugin3`) which is `True` if the incoming filename starts with `AB`
+- a *rule#3* (from the installed plugin: `plugin3`) which is `True` if the incoming filename starts with `AB`
 
 For an incoming filename: `Afoo`, only *rule#1* is `True`, so the `switch` plugin is routing
 the incoming file to the plugin: `plugin1`:
@@ -106,7 +106,7 @@ graph LR;
 ??? question "${MFMODULE_RUNTIME_HOME}?"
     In most cases, `${MFMODULE_RUNTIME_HOME}=/home/mfdata`
 
-After installing some plugins and configuring another "incoming" directory (see `mfdata` configuration `[internal_plugins]/listened_directories`, you can get something like that:
+After installing some plugins and configuring another "incoming" directory (see `mfdata` configuration `[internal_plugins]/watched_directories`, you can get something like that:
 
 ```mermaid
 graph LR;
