@@ -1,7 +1,7 @@
 {% extends "templates/config.ini" %}     
 
 {% set CMD_AND_ARGS_CMD = "switch_step" %}
-{% set CMD_AND_ARGS_EXTRA_ARGS = "--rules-file={{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/switch_rules.ini --no-match-policy={CUSTOM_NO_MATCH_POLICY}" %}
+{% set CMD_AND_ARGS_EXTRA_ARGS = "--rules-file={CUSTOM_RULES_FILE} --no-match-policy={CUSTOM_NO_MATCH_POLICY}" %}
 
 {% block retry_policy %}
 {% endblock %}
@@ -9,6 +9,9 @@
 [custom]
 # keep or delete
 no_match_policy = delete
+
+# rules_file
+rules_file={% raw %}{{MFMODULE_RUNTIME_HOME}}/tmp/config_auto/plugin_{{MFDATA_CURRENT_PLUGIN_NAME}}_rules.ini{% endraw %}
 {% endblock %}
 {% block extra_daemons %}
 {% endblock %}

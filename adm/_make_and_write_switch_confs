@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+
+import os
+import fnmatch
+from mflog import get_logger
+from mfplugin.manager import PluginsManager
+
+MFDATA_PLUGIN_HOME = os.path.join(os.environ["MFMODULE_RUNTIME_HOME"],
+                                  "var", "plugins")
+MFMODULE_RUNTIME_HOME = os.environ["MFMODULE_RUNTIME_HOME"]
+LOGGER = get_logger("_make_and_write_switch_confs")
+
+
+def make_switch_confs(plugin):
+    confs = {}
+    rules = plugin.configuration.switch_rules
+    plugin_name = os.environ['MFDATA_CURRENT_PLUGIN_NAME']
+    plugin_dir = os.environ['MFDATA_CURRENT_PLUGIN_DIR']
+    switches = set()
+    for section in rules:
+        if fnmatch.fnmatch(section, "switch_rules:*"):
+            switches.add("switch")
+        if fnmatch.fnmatch(section, "switch_rules@*:*"):
+            tmp = section.split(':')[0].split('@')[1]
+            switches.add(tmp)
+    for switch in switches:
+        res = []
+        for section in rules:
+            if switch == "switch":
+                # default system switch (@plugin_name is optional)
+                if not fnmatch.fnmatch(section, "switch_rules:*") and \
+                        not fnmatch.fnmatch(section, "switch_rules@switch:*"):
+                    continue
+            else:
+                if not fnmatch.fnmatch(section, "switch_rules@%s:*" % switch):
+                    continue
+            tmp = section.replace("switch_rules:",
+                                  "switch_rules_%s:" %
+                                  plugin.name, 1)
+            tmp = tmp.replace("switch_rules@%s:" % switch,
+                              "switch_rules_%s:" %
+                              plugin.name, 1)
+            tmp = tmp.replace('{{MFDATA_CURRENT_PLUGIN_DIR}}', plugin_dir)
+            tmp = tmp.replace('{{MFDATA_CURRENT_PLUGIN_NAME}}', plugin_name)
+            res.append("[%s]" % tmp)
+            for key, value in rules[section].items():
+                key_prefix = ""
+                # FIXME: hack for python rules
+                if section.strip() == "switch_rules:python" or \
+                        section.strip() == "switch_rules@%s:python" % switch:
+                    if ":" not in key:
+                        key_prefix = plugin_dir + ":"
+                if '/' not in value:
+                    res.append("%s%s = %s/%s" %
+                               (key_prefix, key, plugin_name, value))
+                else:
+                    res.append("%s%s = %s" % (key_prefix, key, value))
+        confs[switch] = "\n".join(res)
+    return confs
+
+
+manager = PluginsManager()
+confs_by_switch = {}
+for plugin in manager.plugins.values():
+    try:
+        plugin.load_full()
+    except Exception as e:
+        LOGGER.warning("invalid plugin: %s (%s) => ignoring it ; details: %s" %
+                       (plugin.name, plugin.home, e))
+        continue
+    with plugin.plugin_env_context():
+        confs = make_switch_confs(plugin)
+        for switch in confs.keys():
+            if switch not in confs_by_switch:
+                confs_by_switch[switch] = []
+            confs_by_switch[switch].append((plugin, confs[switch]))
+
+for switch in confs_by_switch.keys():
+    fpath = "%s/tmp/config_auto/plugin_%s_rules.ini" % \
+        (MFMODULE_RUNTIME_HOME, switch)
+    print("Generating %s..." % fpath)
+    with open(fpath, "w") as f:
+        f.write("# GENERATED FILE\n")
+        f.write("\n")
+    for plugin, conf in sorted(confs_by_switch[switch],
+                               key=lambda x: x[0].name):
+        with open(fpath, "a") as f:
+            f.write("# <CONTRIBUTION OF %s PLUGIN>\n" % plugin.name)
+            f.write("\n")
+            f.write(conf)
+            f.write("\n")
+            f.write("# </CONTRIBUTION OF %s PLUGIN>\n" % plugin.name)
+            f.write("\n")
+            f.write("\n")

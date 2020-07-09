@@ -91,7 +91,8 @@ class MfdataConfiguration(Configuration):
     def switch_rules(self):
         res = {}
         for key in self._doc.keys():
-            if not key.startswith("switch_rules:"):
+            if not key.startswith("switch_rules:") and \
+                    not key.startswith("switch_rules@"):
                 continue
             res[key] = self._doc[key]
         return res

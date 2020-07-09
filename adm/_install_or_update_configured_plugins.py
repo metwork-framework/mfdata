@@ -55,10 +55,6 @@ if INSTALL_SWITCH:
             f.write("watched_directories={MFDATA_CURRENT_STEP_DIR}\n")
         f.write("numprocesses=%s\n" % SWITCH_NUMPROCESSES)
         f.write("debug=%s\n" % SWITCH_DEBUG)
-        f.write("\n")
-        f.write("[custom]\n")
-        f.write(f"rules_path = {MFMODULE_RUNTIME_HOME}/tmp/config_auto/"
-                "switch_rules.ini\n")
 
 if INSTALL_GUESS_FILE_TYPE:
     with open(f"{MFMODULE_RUNTIME_HOME}/config/plugins/"

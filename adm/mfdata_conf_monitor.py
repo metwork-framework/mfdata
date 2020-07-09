@@ -19,13 +19,9 @@ def make_new_directory_observer_conf():
             md5sumfile(new_directory_observer_conf))
 
 
-def make_new_switch_conf():
-    new_switch_conf = \
-        "%s/tmp/tmp_switch_conf2" % MFMODULE_RUNTIME_HOME
-    cmd = "_make_switch_conf >%s" % new_switch_conf
+def make_new_switch_confs():
+    cmd = "_make_and_write_switch_confs"
     BashWrapperOrRaise(cmd)
-    return (new_switch_conf,
-            md5sumfile(new_switch_conf))
 
 
 def get_old_directory_observer_conf():
@@ -37,7 +33,7 @@ def get_old_directory_observer_conf():
 
 def get_old_switch_conf():
     old_switch_conf = \
-        "%s/tmp/config_auto/switch_rules.ini" % MFMODULE_RUNTIME_HOME
+        "%s/tmp/config_auto/plugin_switch_rules.ini" % MFMODULE_RUNTIME_HOME
     return (old_switch_conf,
             md5sumfile(old_switch_conf))
 
@@ -79,15 +75,7 @@ class MfdataConfMonitorRunner(ConfMonitorRunner):
         return True
 
     def manage_switch(self):
-        new_conf, new_md5 = make_new_switch_conf()
-        old_conf, old_md5 = get_old_switch_conf()
-        if new_md5 != old_md5:
-            LOGGER.info("switch conf changed => "
-                        "restart switch...")
-            restart_switch(old_conf, new_conf)
-            time.sleep(3)
-        else:
-            LOGGER.debug("switch conf didn't change")
+        make_new_switch_confs()
         return True
 
     def handle_event(self):
