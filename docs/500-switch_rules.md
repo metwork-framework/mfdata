@@ -106,7 +106,7 @@ graph LR;
 ??? question "${MFMODULE_RUNTIME_HOME}?"
     In most cases, `${MFMODULE_RUNTIME_HOME}=/home/mfdata`
 
-After installing some plugins and configuring another "incoming" directory (see `mfdata` configuration `[internal_plugins]/listened_directories`, you can get something like that:
+After installing some plugins and configuring another "incoming" directory (see `mfdata` configuration `[internal_plugins]/watched_directories`, you can get something like that:
 
 ```mermaid
 graph LR;
