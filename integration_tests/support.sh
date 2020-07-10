@@ -32,6 +32,8 @@ wait_conf_monitor_idle() {
         echo "ERROR: conf_monitor is not idle after 60s => exit"
         exit 1
     }
+    sleep 1 # because restart of switch process is done every second
+            # if the rules file was modified
 }
 
 check_no_tags_left_in_redis() {

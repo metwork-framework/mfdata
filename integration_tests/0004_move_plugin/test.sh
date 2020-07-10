@@ -31,6 +31,7 @@ wait_file "${DEST_DIR}/Example.png" 20 || {
     echo "ERROR: ${DEST_DIR}/Example.png not found"
     exit 1
 }
+sleep 1
 
 N=$(ls -l "${DEST_DIR}/Example.png" |grep rwxrwxrwx |wc -l)
 if test "${N}" -eq 0; then
