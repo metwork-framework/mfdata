@@ -222,6 +222,14 @@ The naming schema if (of course) always the same:
     as these values can be overriden with other files by an administrator
     during deployment (see further).
 
+#### Configuring cron jobs
+
+FIXME
+
+#### Configuring "extra-daemons"
+
+FIXME
+
 #### Releasing
 
 When the development is done, the developer can release his plugin with:

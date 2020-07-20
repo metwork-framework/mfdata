@@ -1,7 +1,5 @@
 # Configuration guide
 
-
-
 ## Concepts
 
 There are several concepts about configuration in MetWork framework.
