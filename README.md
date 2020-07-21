@@ -17,17 +17,26 @@
 
 **Table of contents**
 
-* [1\. What is it?](#1-what-is-it)
-* [2\. What is not in?](#2-what-is-not-in)
-* [3\. Quickstart](#3-quickstart)
-* [4\. Quickstart, installation guide\.\.\.](#4-quickstart-installation-guide)
-* [5\. Contributing guide](#5-contributing-guide)
-* [6\. Code of Conduct](#6-code-of-conduct)
-* [7\. Sponsors](#7-sponsors)
+* [1\. What is MetWork FrameWork?](#1-what-is-metwork-framework)
+* [2\. What is it?](#2-what-is-it)
+* [3\. What is not in?](#3-what-is-not-in)
+* [4\. Quickstart](#4-quickstart)
+* [5\. Quickstart, installation guide\.\.\.](#5-quickstart-installation-guide)
+* [6\. Contributing guide](#6-contributing-guide)
+* [7\. Code of Conduct](#7-code-of-conduct)
+* [8\. Sponsors](#8-sponsors)
 
 
 
-## 1. What is it?
+
+## 1. What is MetWork FrameWork?
+
+[MetWork Framework](https://metwork-framework.org) is an opensource system
+for building and managing production grade applications or micro-services
+(from development to operations).
+
+
+## 2. What is it?
 
 This is the **M**etwork **F**ramework **DATA** processing **module**. This module is a "production ready" framework
 for processing "incoming files".
@@ -66,15 +75,15 @@ It's designed to process terrabytes of data every day in a very robust way:
 Last but not least, thanks to the "no polling at all" principle, you can process
 several thousands of file by second.
 
-## 2. What is not in?
+## 3. What is not in?
 
 Of course, you can code the behavior you want but **mfdata module** is
 mainly designed to be "stateless". If you want to store durably something,
 have a look at **mfbase module**.
 
-## 3. Quickstart
+## 4. Quickstart
 
-### 3.1 Installation
+### 4.1 Installation
 
 **On a Linux CentOS 7 box** (please refer to reference documentation for other Linux distributions)
 
@@ -113,7 +122,7 @@ Then, to start mfdata services:
 service metwork start mfdata
 ```
 
-### 3.2 Usage
+### 4.2 Usage
 
 ```console
 $ # AS mfdata user (created automatically during installation)
@@ -179,7 +188,7 @@ latest.switch.main.system_magic = ASCII text
 
 
 
-## 4. Quickstart, installation guide...
+## 5. Quickstart, installation guide...
 
 Please consult the [reference documentation](http://metwork-framework.org/pub/metwork/continuous_integration/docs/master/mfdata/).
 
@@ -189,19 +198,19 @@ For very specific use cases, you might be interested in
 And if you are looking for an old released version, you can search [here](http://metwork-framework.org/pub/metwork/releases/docs/).
 
 
-## 5. Contributing guide
+## 6. Contributing guide
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 
 
-## 6. Code of Conduct
+## 7. Code of Conduct
 
 See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) file.
 
 
 
-## 7. Sponsors
+## 8. Sponsors
 
 *(If you are officially paid to work on MetWork Framework, please contact us to add your company logo here!)*
 
