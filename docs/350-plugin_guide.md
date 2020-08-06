@@ -210,8 +210,8 @@ bar=value2
 => you will get two environment variables in your *plugin env*:
 
 ```
-MFSERV_CURRENT_PLUGIN_CUSTOM_FOO=value1
-MFSERV_CURRENT_PLUGIN_CUSTOM_BAR=value2
+MFDATA_CURRENT_PLUGIN_CUSTOM_FOO=value1
+MFDATA_CURRENT_PLUGIN_CUSTOM_BAR=value2
 ```
 
 The naming schema if (of course) always the same:
@@ -249,12 +249,12 @@ at the internet as they are plenty of beginners guide about that.
 {% raw %}
 
 ```
-{{MFDATA_HOME}}/bin/cronwrap.sh --lock --log-capture-to your_command.log -- plugin_wrapper {{MFSERV_CURRENT_PLUGIN_NAME}} --
+{{MFDATA_HOME}}/bin/cronwrap.sh --lock --log-capture-to your_command.log -- plugin_wrapper {{MFDATA_CURRENT_PLUGIN_NAME}} --
 ```
 
 It will:
 
-- replace automatically `{{MFDATA_HOME}} }}`, `{{MFDATA_CURRENT_PLUGIN_NAME}}`, `{{MFDATA_CURRENT_PLUGIN_DIR + " }}`, `{{MFDATA_CURRENT_PLUGIN_CUSTOM_*}}` variables (to avoid hardcoding things) ([full list of available variables](../850-reference/700-env/)
+- replace automatically `{{MFDATA_HOME}} }}`, `{{MFDATA_CURRENT_PLUGIN_NAME}}`, `{{MFDATA_CURRENT_PLUGIN_DIR + " }}`, `{{MFDATA_CURRENT_PLUGIN_CUSTOM_*}}` variables (to avoid hardcoding things) ([full list of available variables](../850-reference/700-env/))
 - load the MetWork environment
 - define an execution timeout of 3600 seconds (you can change this with a `--timeout` option after `--lock` for example)
 - avoid multiple execution of the same command (thanks to the `--lock` option you can remove if you don't want this and if you know exactly what you are doing)
@@ -340,17 +340,17 @@ To install a released plugin manually, the *administrator* use:
 
 `plugins.install /path/to/the/dot/plugin/file.plugin`
 
-as `mfserv/mfdata/mfbase` user (or in corresponding MetWork env for custom installations).
+as `mfdata` user (or in corresponding MetWork env for custom installations).
 
 After that, the `.plugin` is no longer useful.
 
 ##### Automatically with the provisioning feature
 
 To automatically install a released plugin with the provisioning feature, just put the
-`.plugin` file in `/etc/metwork.config.d/mfserv/plugins/` directory (change `mfserv` by `mfdata` or `mfbase` depending on the module).
+`.plugin` file in `/etc/metwork.config.d/mfdata/plugins/` directory.
 
 Then, restart the corresponding module by restarting the corresponding service with
-your favorite system services manager or with `/etc/rc.d/init.d/metwork restart mfserv` (as root user) (change `mfserv` by `mfdata` or `mfbase` depending on the module).
+your favorite system services manager or with `/etc/rc.d/init.d/metwork restart mfdata` (as root user).
 
 #### Configuring a plugin
 
@@ -358,7 +358,7 @@ When a plugin is installed, some configuration options can be changed by OPs (af
 
 ##### Manually
 
-These keys are available in `${MFMODULE_RUNTIME_HOME}/config/plugins/{plugin_name}.ini`. So for example in `~mfserv/config/config.ini` (for a standard `MFSERV` module). By default, all keys
+These keys are available in `${MFMODULE_RUNTIME_HOME}/config/plugins/{plugin_name}.ini`. So for example in `~mfdata/config/config.ini` (for a standard `MFDATA` module). By default, all keys
 are commented, so standard values (defined by the developer) are used. If you want (as an OP)
 to override these default values, uncomment the corresponding key in `${MFMODULE_RUNTIME_HOME}/config/plugins/{plugin_name}.ini` and change its value.
 
@@ -366,7 +366,7 @@ Note: this file itself can be overriden by the provisioning feature (see further
 
 ##### Automatically with the provisioning feature
 
-If you create a file in `/etc/metwork.config.d/mfserv/plugins/{plugin_name}.ini` (change `mfserv` by `mfdata` or `mfbase` depending on the module) with a configuration part you want to override:
+If you create a file in `/etc/metwork.config.d/mfdata/plugins/{plugin_name}.ini` with a configuration part you want to override:
 
 For example:
 
@@ -397,7 +397,7 @@ plugins.uninstall {plugin_name}
 
 !!! note
     The uninstallation process (with or without the `--clean` option) can't delete
-    the `/etc/metwork.config.d/mfserv/plugins/{plugin_name}.ini` configuration
+    the `/etc/metwork.config.d/mfdata/plugins/{plugin_name}.ini` configuration
     override root file (as this file belongs to the root account).
 
 ### Updating a plugin
@@ -446,7 +446,7 @@ plugins.install --new-name bar /path/foo.plugin
 ```
 
 !!! warning
-    It can't work if the plugin hardcodes its name in its code. Developers should use `MFSERV_CURRENT_PLUGIN_NAME` or `MFDATA_CURRENT_PLUGIN_NAME` env var to avoid that.
+    It can't work if the plugin hardcodes its name in its code. Developers should use `MFDATA_CURRENT_PLUGIN_NAME` env var to avoid that.
 
 
 
