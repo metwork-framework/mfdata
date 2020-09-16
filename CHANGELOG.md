@@ -1,9 +1,16 @@
-# CHANGELOG
+# release_1.0 CHANGELOG
 
 
 ## [Unreleased]
 
 ### New Features
+- add psycopg2 usability (by loading of optional layer python3_scientific_core@mfext)
+- remove directory_observer (now in a dedicated repository)
+- remove acquisition (now in a specific repository)
+- preparing issue227
+- preparing issue227
+- add python switch rule
+- add python switch rule
 - allow binary packages with pip by default for plugins
 - new plugin system
 - remove xattrfile (moved in a dedicated repo)
@@ -27,6 +34,7 @@
 
 
 ### Bug Fixes
+- typo in .releaseignore file
 - typo in .releaseignore file
 - fix syslog nginx conf
 - fix bug in amqp topic mode
