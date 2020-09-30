@@ -1,7 +1,8 @@
 # release_1.0 CHANGELOG
 
 
-## [Unreleased]
+
+## v1.0.1 (2020-09-26)
 
 ### New Features
 - load the pythonX_scientific_core layer by default in plugins (if the layer is installed) (bp #331) (#332)
