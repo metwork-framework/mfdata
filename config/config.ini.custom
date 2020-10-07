@@ -133,47 +133,6 @@ watched_directories=incoming
 
 
 ####################
-#####   MQTT   #####
-####################
-# the hostname or IP address of the MQTT remote broker
-mqtt_listener_broker_hostname=localhost
-
-# the network port of the server host to connect to. Default to 1883.
-mqtt_listener_broker_port=1883
-
-# a string specifying the subscription topic to subscribe to. Default to # (all)
-mqtt_listener_subscription_topic=#
-
-
-####################
-#####   AMQP   #####
-####################
-# the mode of amqp subscription (fanout or topic). Default to fanout
-amqp_consumer_mode=fanout
-
-# the hostname or IP address of the AMQP remote broker
-amqp_consumer_broker_hostname=localhost
-
-# the network port of the server host to connect to. Default to 5672.
-amqp_consumer_broker_port=5672
-
-# The username to use to connect to the broker
-amqp_consumer_credential_user=guest
-
-# The password to use to connect to the broker (use \ to escape special chars)
-amqp_consumer_credential_password=\$guest
-
-# The subscription exchange name
-amqp_consumer_subscription_exchange=test
-
-# The subscription queue (for "fanout" mode)
-amqp_consumer_subscription_queue=my_queue
-
-# The subscription routing key (wildcards allowed) (for "topic" mode)
-amqp_consumer_routing_topic_keys = "*"
-
-
-####################
 ##### TELEGRAF #####
 ####################
 [telegraf]
