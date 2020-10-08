@@ -482,6 +482,7 @@ class AmqpListener(AcquisitionListener):
                 self.info("Waiting 5s and reconnecting...")
                 time.sleep(5)
                 self._consumer = Consumer(*cargs, **ckwargs)
+                self._consumer.on_message = self._on_message
 
 
 if __name__ == "__main__":
