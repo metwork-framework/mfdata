@@ -34,6 +34,7 @@
 
 
 ### Bug Fixes
+- remove old parameters about AMQP/MQTT from the module configuration file (#336)
 - typo in .releaseignore file
 - fix syslog nginx conf
 - fix bug in amqp topic mode
