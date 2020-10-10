@@ -1,6 +1,18 @@
 # release_1.0 CHANGELOG
 
 
+## [Unreleased]
+
+### New Features
+
+
+### Bug Fixes
+- self._consumer.on_message is not set after exception (bp #338) (#340)
+- remove old parameters about AMQP/MQTT from the module configuration file (bp #336) (#337)
+
+
+
+
 
 ## v1.0.1 (2020-09-26)
 
