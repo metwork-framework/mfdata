@@ -35,7 +35,7 @@ def emptystring_to_none(val):
 class Consumer(object):
 
     def __init__(self, connection_parameters, exchange, exchange_type,
-                 exchange_passive, exchange_durable,exchange_auto_delete,
+                 exchange_passive, exchange_durable, exchange_auto_delete,
                  exchange_internal, queue, queue_passive,queue_durable,
                  queue_exclusive, queue_auto_delete,routing_key,
                  prefetch_count=1, auto_ack=True, exclusive=False):
