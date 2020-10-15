@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### New Features
+- add some new config options to amqp_listener plugin (see issue #317) (#345)
 - load the pythonX_scientific_core layer by default in plugins (if the layer is installed) (#331)
 - support multiple switch instances (and doc)
 - add psycopg2 usability (by loading of optional layer python3_scientific_core@mfext)
