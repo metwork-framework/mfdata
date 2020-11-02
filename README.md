@@ -1,10 +1,9 @@
 [![logo](https://raw.githubusercontent.com/metwork-framework/resources/master/logos/metwork-white-logo-small.png)](http://www.metwork-framework.org)
-#  mfdata
+# mfdata
 
-[//]: # (automatically generated from https://github.com/metwork-framework/resources/blob/master/cookiecutter/_%7B%7Bcookiecutter.repo%7D%7D/README.md)
+[//]: # (automatically generated from https://github.com/metwork-framework/github_organization_management/blob/master/common_files/README.md)
 
 **Status (master branch)**
-
 
 
 
@@ -15,19 +14,15 @@
 [![Gitter](https://github.com/metwork-framework/resources/blob/master/badges/community-fr.svg)](https://gitter.im/metwork-framework/community-fr?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
-**Table of contents**
 
-* [1\. What is it?](#1-what-is-it)
-* [2\. What is not in?](#2-what-is-not-in)
-* [3\. Quickstart](#3-quickstart)
-* [4\. Quickstart, installation guide\.\.\.](#4-quickstart-installation-guide)
-* [5\. Contributing guide](#5-contributing-guide)
-* [6\. Code of Conduct](#6-code-of-conduct)
-* [7\. Sponsors](#7-sponsors)
+## What is MetWork FrameWork?
+
+[MetWork Framework](https://metwork-framework.org) is an opensource system
+for building and managing production grade applications or micro-services
+(from development to operations).
 
 
-
-## 1. What is it?
+## What is it?
 
 This is the **M**etwork **F**ramework **DATA** processing **module**. This module is a "production ready" framework
 for processing "incoming files".
@@ -66,15 +61,15 @@ It's designed to process terrabytes of data every day in a very robust way:
 Last but not least, thanks to the "no polling at all" principle, you can process
 several thousands of file by second.
 
-## 2. What is not in?
+## What is not in?
 
 Of course, you can code the behavior you want but **mfdata module** is
 mainly designed to be "stateless". If you want to store durably something,
 have a look at **mfbase module**.
 
-## 3. Quickstart
+## Quickstart
 
-### 3.1 Installation
+### Installation
 
 **On a Linux CentOS 7 box** (please refer to reference documentation for other Linux distributions)
 
@@ -113,7 +108,7 @@ Then, to start mfdata services:
 service metwork start mfdata
 ```
 
-### 3.2 Usage
+### Usage
 
 ```console
 $ # AS mfdata user (created automatically during installation)
@@ -179,9 +174,17 @@ latest.switch.main.system_magic = ASCII text
 
 
 
-## 4. Quickstart, installation guide...
 
-Please consult the [reference documentation](http://metwork-framework.org/pub/metwork/continuous_integration/docs/master/mfdata/).
+## Cheatsheet
+
+A cheatsheet for this module is available [here](https://metwork-framework.org/pub/metwork/continuous_integration/docs/master/mfdata/800-cheatsheet/)
+
+
+
+## Reference documentation
+
+- (for **master (development)** version), see [this dedicated site](http://metwork-framework.org/pub/metwork/continuous_integration/docs/master/mfdata/) for reference documentation.
+- (for **latest released stable** version), see [this dedicated site](http://metwork-framework.org/pub/metwork/releases/docs/stable/mfdata/) for reference documentation.
 
 For very specific use cases, you might be interested in
 [reference documentation for integration branch](http://metwork-framework.org/pub/metwork/continuous_integration/docs/integration/mfdata/).
@@ -189,19 +192,32 @@ For very specific use cases, you might be interested in
 And if you are looking for an old released version, you can search [here](http://metwork-framework.org/pub/metwork/releases/docs/).
 
 
-## 5. Contributing guide
+
+
+## Installation guide
+
+See [this document](https://metwork-framework.org/pub/metwork/continuous_integration/docs/master/mfdata/100-installation_guide/).
+
+
+## Configuration guide
+
+See [this document](https://metwork-framework.org/pub/metwork/continuous_integration/docs/master/mfdata/300-configuration_guide/).
+
+
+
+## Contributing guide
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 
 
-## 6. Code of Conduct
+## Code of Conduct
 
 See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) file.
 
 
 
-## 7. Sponsors
+## Sponsors
 
 *(If you are officially paid to work on MetWork Framework, please contact us to add your company logo here!)*
 

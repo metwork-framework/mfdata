@@ -25,14 +25,21 @@ def zero_or_one_to_boolean(val):
         return True
     raise Exception("val: %s must be 0 or 1" % val)
 
+def emptystring_to_none(val):
+    if val ==  "":
+        return None
+
 
 # A lot of copy/paste from https://github.com/pika/pika/blob/master/examples/
 #     asynchronous_consumer_example.py
 class Consumer(object):
 
-    def __init__(self, connection_parameters, exchange, exchange_type, queue,
-                 routing_key, prefetch_count=1, auto_ack=True,
-                 exclusive=False):
+    def __init__(self, connection_parameters, exchange, exchange_type,
+                 exchange_passive, exchange_durable, exchange_auto_delete,
+                 exchange_internal, queue, queue_passive,queue_durable,
+                 queue_exclusive, queue_auto_delete,routing_key,
+                 prefetch_count=1, auto_ack=True, exclusive=False):
+                 
         self.should_reconnect = False
         self.was_consuming = False
         self._connection = None
@@ -43,7 +50,15 @@ class Consumer(object):
         self._consuming = False
         self._exchange = exchange
         self._exchange_type = exchange_type
+        self._exchange_passive = exchange_passive
+        self._exchange_durable = exchange_durable
+        self._exchange_auto_delete = exchange_auto_delete
+        self._exchange_internal = exchange_internal
         self._queue = queue
+        self._queue_passive = queue_passive
+        self._queue_durable = queue_durable
+        self._queue_exclusive = queue_exclusive
+        self._queue_auto_delete = queue_auto_delete
         self._routing_key = routing_key
         self._prefetch_count = prefetch_count
         self._auto_ack = auto_ack
@@ -158,15 +173,23 @@ class Consumer(object):
         be invoked by pika.
         :param str|unicode exchange_name: The name of the exchange to declare
         """
-        LOGGER.info('Declaring exchange: %s', exchange_name)
-        # Note: using functools.partial is not required, it is demonstrating
-        # how arbitrary data can be passed to the callback when it is called
-        cb = functools.partial(
-            self.on_exchange_declareok, userdata=exchange_name)
-        self._channel.exchange_declare(
-            exchange=exchange_name,
-            exchange_type=self._exchange_type,
-            callback=cb)
+        # If name is empty, just declare the queue
+        if exchange_name is None:
+            self.setup_queue(self._queue)
+        else:
+	        LOGGER.info('Declaring exchange: %s', exchange_name)
+	        # Note: using functools.partial is not required, it is demonstrating
+	        # how arbitrary data can be passed to the callback when it is called
+	        cb = functools.partial(
+	            self.on_exchange_declareok, userdata=exchange_name)
+	        self._channel.exchange_declare(
+	            exchange=exchange_name,
+	            exchange_type=self._exchange_type,
+	            passive=self._exchange_passive,
+	            durable=self._exchange_durable,
+	            auto_delete=self._exchange_auto_delete,
+	            internal=self._exchange_internal,
+	            callback=cb)
 
     def on_exchange_declareok(self, _unused_frame, userdata):
         """Invoked by pika when RabbitMQ has finished the Exchange.Declare RPC
@@ -186,7 +209,12 @@ class Consumer(object):
         """
         LOGGER.info('Declaring queue %s', queue_name)
         cb = functools.partial(self.on_queue_declareok, userdata=queue_name)
-        self._channel.queue_declare(queue=queue_name, callback=cb)
+        self._channel.queue_declare(queue=queue_name,
+                                    passive=self._queue_passive,
+                                    durable=self._queue_durable,
+                                    exclusive=self._queue_exclusive,
+                                    auto_delete=self._queue_auto_delete,
+                                    callback=cb)
 
     def on_queue_declareok(self, _unused_frame, userdata):
         """Method invoked by pika when the Queue.Declare RPC call made in
@@ -198,6 +226,10 @@ class Consumer(object):
         :param str|unicode userdata: Extra user data (queue name)
         """
         queue_name = userdata
+        if self._exchange is None:
+            LOGGER.info('(Work/Task Queue declared \'{}\'.'.format(queue_name))
+            self.start_consuming()
+            return
         LOGGER.info('Binding %s to %s with %s', self._exchange, queue_name,
                     self._routing_key)
         cb = functools.partial(self.on_bindok, userdata=queue_name)
@@ -363,18 +395,36 @@ class AmqpListener(AcquisitionListener):
             "amqp_virtualhost", default="/")
         self.amqp_port = self.get_custom_config_value(
             "amqp_port", default="5672", transform=int)
-        self.amqp_exchange_type = self.get_custom_config_value(
-            "amqp_exchange_type", default="topic")
+        # configuration exchange
         self.amqp_exchange_name = self.get_custom_config_value(
-            "amqp_exchange_name", default="foo")
+            "amqp_exchange_name", transform=emptystring_to_none)
+        self.amqp_exchange_type = self.get_custom_config_value(
+            "amqp_exchange_type")
+        self.amqp_exchange_passive = self.get_custom_config_value(
+            "amqp_exchange_passive", transform=zero_or_one_to_boolean)
+        self.amqp_exchange_durable = self.get_custom_config_value(
+            "amqp_exchange_durable", transform=zero_or_one_to_boolean)
+        self.amqp_exchange_auto_delete = self.get_custom_config_value(
+            "amqp_exchange_auto_delete", transform=zero_or_one_to_boolean)
+        self.amqp_exchange_internal = self.get_custom_config_value(
+            "amqp_exchange_internal", transform=zero_or_one_to_boolean)
+        # configuration queue
         self.amqp_queue_name = self.get_custom_config_value(
-            "amqp_queue_name", default="bar")
+            "amqp_queue_name")
+        self.amqp_queue_passive = self.get_custom_config_value(
+            "amqp_queue_passive", transform=zero_or_one_to_boolean)
+        self.amqp_queue_durable = self.get_custom_config_value(
+            "amqp_queue_durable", transform=zero_or_one_to_boolean)
+        self.amqp_queue_exclusive = self.get_custom_config_value(
+            "amqp_queue_exclusive", transform=zero_or_one_to_boolean)
+        self.amqp_queue_auto_delete = self.get_custom_config_value(
+            "amqp_queue_auto_delete", transform=zero_or_one_to_boolean)
         self.amqp_routing_key = self.get_custom_config_value(
-            "amqp_routing_key", default="")
+            "amqp_routing_key", transform=emptystring_to_none)
+
         tmp = self.get_custom_config_value("dest_dir", default=None)
         self.dest_dir, _ = dest_dir_to_absolute(tmp, allow_absolute=True)
-        self.amqp_routing_key = \
-            self.get_custom_config_value("amqp_routing_key", default="")
+
         self.amqp_prefetch_count = self.get_custom_config_value(
             "amqp_prefetch_count", default=1, transform=int)
         self.amqp_auto_ack = self.get_custom_config_value(
@@ -405,7 +455,15 @@ class AmqpListener(AcquisitionListener):
             },
             self.amqp_exchange_name,
             self.amqp_exchange_type,
+            self.amqp_exchange_passive,
+            self.amqp_exchange_durable,
+            self.amqp_exchange_auto_delete,
+            self.amqp_exchange_internal,
             self.amqp_queue_name,
+            self.amqp_queue_passive,
+            self.amqp_queue_durable,
+            self.amqp_queue_exclusive,
+            self.amqp_queue_auto_delete,
             self.amqp_routing_key
         ]
         self.consumer_kwargs = {
@@ -482,6 +540,7 @@ class AmqpListener(AcquisitionListener):
                 self.info("Waiting 5s and reconnecting...")
                 time.sleep(5)
                 self._consumer = Consumer(*cargs, **ckwargs)
+                self._consumer.on_message = self._on_message
 
 
 if __name__ == "__main__":

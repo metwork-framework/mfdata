@@ -39,16 +39,51 @@ amqp_credentials_username = guest
 # AMQP credentials password
 amqp_credentials_password = guest
 
-# AMQP exchange type
-amqp_exchange_type = topic
+# AMQP exchange type (direct, fanout, topic, headers)
+# Default direct
+amqp_exchange_type = direct
 
 # AMQP exchange name
-amqp_exchange_name = foo
+# Default No string (None)
+amqp_exchange_name = 
+
+# AMQP exchange passive. Perform a declare or just check to see if it exists. (Set 0 or 1. 0 is False and 1 is True)
+# Default 0 (False)
+amqp_exchange_passive = 0
+
+# AMQP exchange durable. Survive a reboot of RabbitMQ. (Set 0 or 1. 0 is False and 1 is True)
+# Default 0 (False)
+amqp_exchange_durable = 0
+
+# AMQP exchange auto delete. Remove when no more queues are bound to it. (Set 0 or 1. 0 is False and 1 is True)
+# Default 0 (False)
+amqp_exchange_auto_delete = 0
+
+# AMQP exchange internal. Can only be published to by other exchanges. (Set 0 or 1. 0 is False and 1 is True)
+# Default 0 (False)
+amqp_exchange_internal = 0
 
 # AMQP queue name
 amqp_queue_name = bar
 
+# AMQP queue passive. Only check to see if the queue exists. (Set 0 or 1. 0 is False and 1 is True)
+# Default 0 (False)
+amqp_queue_passive = 0
+
+# AMQP queue durable. Survive reboots of the broker. (Set 0 or 1. 0 is False and 1 is True)
+# Default 0 (False)
+amqp_queue_durable = 0
+
+# AMQP queue exclusive.  Only allow access by the current connection. (Set 0 or 1. 0 is False and 1 is True)
+# Default 0 (False)
+amqp_queue_exclusive = 0
+
+# AMQP queue auto delete.  Delete after consumer cancels or disconnects. (Set 0 or 1. 0 is False and 1 is True)
+# Default 0 (False)
+amqp_queue_auto_delete = 0
+
 # AMQP routing key
+# Default No string (None)
 amqp_routing_key = 
 
 # Destination 

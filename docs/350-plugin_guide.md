@@ -1,3 +1,6 @@
+
+
+
 # Plugins guide
 
 This document is about "MetWork plugins" which are available in `mfserv`, `mfdata` and `mfbase`
@@ -207,8 +210,8 @@ bar=value2
 => you will get two environment variables in your *plugin env*:
 
 ```
-MFSERV_CURRENT_PLUGIN_CUSTOM_FOO=value1
-MFSERV_CURRENT_PLUGIN_CUSTOM_BAR=value2
+MFDATA_CURRENT_PLUGIN_CUSTOM_FOO=value1
+MFDATA_CURRENT_PLUGIN_CUSTOM_BAR=value2
 ```
 
 The naming schema if (of course) always the same:
@@ -221,6 +224,101 @@ The naming schema if (of course) always the same:
     **VERY IMPORTANT**: always read the environment to get your configuration values
     as these values can be overriden with other files by an administrator
     during deployment (see further).
+
+#### Configuring cron jobs
+
+In every plugin, you will find a `crontab` file dedicated to your plugin.
+
+This file can be used to define cron jobs specific to your plugin.
+
+They will be automatically injected into the `${MFMODULE_RUNTIME_USER}` crontab
+when installing the plugin and removed when uninstalling the plugin.
+
+**Don't play with the crontab command by yourself or other system configurations!**
+
+All you need is this `crontab` file in your plugin directory.
+
+If you are not familiar with the syntax of `crontab` files, please have a look
+at the internet as they are plenty of beginners guide about that.
+
+**BUT**, there is **ONE** thing specific to MetWork Framework usage:
+
+**You have to prefix all your cronjobs command with:**
+
+
+{% raw %}
+
+```
+{{MFDATA_HOME}}/bin/cronwrap.sh --lock --log-capture-to your_command.log -- plugin_wrapper {{MFDATA_CURRENT_PLUGIN_NAME}} --
+```
+
+It will:
+
+- replace automatically `{{MFDATA_HOME}} }}`, `{{MFDATA_CURRENT_PLUGIN_NAME}}`, `{{MFDATA_CURRENT_PLUGIN_DIR + " }}`, `{{MFDATA_CURRENT_PLUGIN_CUSTOM_*}}` variables (to avoid hardcoding things) ([full list of available variables](../850-reference/700-env/))
+- load the MetWork environment
+- define an execution timeout of 3600 seconds (you can change this with a `--timeout` option after `--lock` for example)
+- avoid multiple execution of the same command (thanks to the `--lock` option you can remove if you don't want this and if you know exactly what you are doing)
+- capture all logs (stdout/stderr) and redirect them to `${MFMODULE_RUNTIME_HOME}/log/your_command.log` (of course you can change this filename)
+- load the `plugin_env` of the current plugin (very useful if you installed some extra libraries in your plugin or if you want to use some custom env variables)
+- then execute your command!
+
+
+{% endraw %}
+
+
+This file will be injected into the `${MFMODULE_RUNTIME_USER}` crontab.
+
+??? question "How to debug?"
+    Use `crontab -l` as `${MFMODULE_RUNTIME_USER}` to see injected cronjobs
+    for all plugins and `mfdata` module.
+
+    If you don't have your lines, control output of `_make_and_install_crontab.sh`
+    command.
+
+    If you have your lines but if your cron don't work well, check your cron log file
+    as specified with `... --log-capture-to your_command.log ...` part of the line.
+
+??? tip "more options?"
+    There are plenty of other interesting options (`nice`, `ionice`...). Have a look
+    at `cronwrap.sh --help` output
+
+#### Configuring "extra-daemons"
+
+In every plugin, you can configure some *extra-daemons*. An *extra-daemon*
+is a custom daemon that will be launched automatically and managed by the MetWork
+module (number of processes, autorestart, memory limits, log rotation...) when
+your plugin is installed.
+
+You can configure several *extra-daemons* in a plugin.
+
+To add an extra-daemon to your plugin, add or uncomment a block like this in your plugin `config.ini`:
+
+```ini
+[extra_daemon_foo]
+_cmd_and_args = /your/foreground/command command_arg1 command_arg2
+numprocesses=1
+graceful_timeout = 30
+rlimit_as = 1000000000
+rlimit_nofile = 1000
+rlimit_stack = 10000000
+rlimit_fsize = 100000000
+log_split_stdout_stderr=AUTO
+log_split_multiple_workers=AUTO
+max_age=0
+```
+
+The `foo` part in the `[extra_daemon_foo]` group name is mainly just a name to identify
+your *extra-daemon* on logs (you can use what you want but the configuration group must starts with `[extra_daemon_`.
+
+Like with `crontab` (see above), you can use variables in this block. But you don't need to prefix your command as your command will be already executed in a wrapper to load your plugin environment.
+
+??? question "documentation of these parameters"
+    All parameters have the same meaning as their equivalents in the rest of the file (and are documented there)
+
+??? question "logs"
+    Logs of your extra-daemon will be catched and redirected to `${MFMODULE_RUNTIME_HOME}/log/extra_{your_plugin_name}_{your_extra_daemon_name}.log`.
+
+    Log rotation is automatic.
 
 #### Releasing
 
@@ -242,17 +340,17 @@ To install a released plugin manually, the *administrator* use:
 
 `plugins.install /path/to/the/dot/plugin/file.plugin`
 
-as `mfserv/mfdata/mfbase` user (or in corresponding MetWork env for custom installations).
+as `mfdata` user (or in corresponding MetWork env for custom installations).
 
 After that, the `.plugin` is no longer useful.
 
 ##### Automatically with the provisioning feature
 
 To automatically install a released plugin with the provisioning feature, just put the
-`.plugin` file in `/etc/metwork.config.d/mfserv/plugins/` directory (change `mfserv` by `mfdata` or `mfbase` depending on the module).
+`.plugin` file in `/etc/metwork.config.d/mfdata/plugins/` directory.
 
 Then, restart the corresponding module by restarting the corresponding service with
-your favorite system services manager or with `/etc/rc.d/init.d/metwork restart mfserv` (as root user) (change `mfserv` by `mfdata` or `mfbase` depending on the module).
+your favorite system services manager or with `/etc/rc.d/init.d/metwork restart mfdata` (as root user).
 
 #### Configuring a plugin
 
@@ -260,7 +358,7 @@ When a plugin is installed, some configuration options can be changed by OPs (af
 
 ##### Manually
 
-These keys are available in `${MFMODULE_RUNTIME_HOME}/config/plugins/{plugin_name}.ini`. So for example in `~mfserv/config/config.ini` (for a standard `MFSERV` module). By default, all keys
+These keys are available in `${MFMODULE_RUNTIME_HOME}/config/plugins/{plugin_name}.ini`. So for example in `~mfdata/config/config.ini` (for a standard `MFDATA` module). By default, all keys
 are commented, so standard values (defined by the developer) are used. If you want (as an OP)
 to override these default values, uncomment the corresponding key in `${MFMODULE_RUNTIME_HOME}/config/plugins/{plugin_name}.ini` and change its value.
 
@@ -268,7 +366,7 @@ Note: this file itself can be overriden by the provisioning feature (see further
 
 ##### Automatically with the provisioning feature
 
-If you create a file in `/etc/metwork.config.d/mfserv/plugins/{plugin_name}.ini` (change `mfserv` by `mfdata` or `mfbase` depending on the module) with a configuration part you want to override:
+If you create a file in `/etc/metwork.config.d/mfdata/plugins/{plugin_name}.ini` with a configuration part you want to override:
 
 For example:
 
@@ -299,7 +397,7 @@ plugins.uninstall {plugin_name}
 
 !!! note
     The uninstallation process (with or without the `--clean` option) can't delete
-    the `/etc/metwork.config.d/mfserv/plugins/{plugin_name}.ini` configuration
+    the `/etc/metwork.config.d/mfdata/plugins/{plugin_name}.ini` configuration
     override root file (as this file belongs to the root account).
 
 ### Updating a plugin
@@ -348,7 +446,7 @@ plugins.install --new-name bar /path/foo.plugin
 ```
 
 !!! warning
-    It can't work if the plugin hardcodes its name in its code. Developers should use `MFSERV_CURRENT_PLUGIN_NAME` or `MFDATA_CURRENT_PLUGIN_NAME` env var to avoid that.
+    It can't work if the plugin hardcodes its name in its code. Developers should use `MFDATA_CURRENT_PLUGIN_NAME` env var to avoid that.
 
 
 
@@ -385,4 +483,3 @@ And you will get a fresh new `.plugin` file.
 
 
 {{ "cat docs/_plugin_ref_management_commands.md"|shell() }}
-

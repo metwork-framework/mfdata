@@ -4,6 +4,9 @@
 ## [Unreleased]
 
 ### New Features
+- add some new config options to amqp_listener plugin (see issue #317) (#345)
+- load the pythonX_scientific_core layer by default in plugins (if the layer is installed) (#331)
+- support multiple switch instances (and doc)
 - add psycopg2 usability (by loading of optional layer python3_scientific_core@mfext)
 - remove directory_observer (now in a dedicated repository)
 - remove acquisition (now in a specific repository)
@@ -32,6 +35,8 @@
 
 
 ### Bug Fixes
+- self._consumer.on_message is not set after exception (#338)
+- remove old parameters about AMQP/MQTT from the module configuration file (#336)
 - typo in .releaseignore file
 - fix syslog nginx conf
 - fix bug in amqp topic mode
