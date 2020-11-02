@@ -50,11 +50,13 @@ def make_switch_confs(plugin):
                         section.strip() == "switch_rules@%s:python" % switch:
                     if ":" not in key:
                         key_prefix = plugin_dir + ":"
-                if '/' not in value:
-                    res.append("%s%s = %s/%s" %
-                               (key_prefix, key, plugin_name, value))
-                else:
-                    res.append("%s%s = %s" % (key_prefix, key, value))
+                tmpres = []
+                for v in value.split(','):
+                    if '/' not in value:
+                        tmpres.append("%s/%s" % (plugin_name, v.strip()))
+                    else:
+                        tmpres.append(v.strip())
+                res.append("%s%s = %s" % (key_prefix, key, ", ".join(tmpres)))
         confs[switch] = "\n".join(res)
     return confs
 
