@@ -9,6 +9,7 @@
 ### Bug Fixes
 - self._consumer.on_message is not set after exception (bp #338) (#340)
 - remove old parameters about AMQP/MQTT from the module configuration file (bp #336) (#337)
+- fix multiple steps targets with switch plugin (bp #352) (#353)
 
 
 
