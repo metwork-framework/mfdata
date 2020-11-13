@@ -35,6 +35,7 @@
 
 
 ### Bug Fixes
+- fix missing file in listener template (#360)
 - fix multiple steps targets with switch plugin (#352)
 - self._consumer.on_message is not set after exception (#338)
 - remove old parameters about AMQP/MQTT from the module configuration file (#336)
