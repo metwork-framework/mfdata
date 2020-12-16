@@ -284,6 +284,31 @@ pipeline:
 
 
 
+  trigger_plugins_buildimage_centos7:
+    image: metwork/drone-downstream-specific-image:latest
+    repositories:
+      - metwork-framework/docker-mfdataplugins-centos7-buildimage@${DRONE_BRANCH}
+    secrets: [ downstream_token, downstream_server ]
+    when:
+      status: [ success ]
+      event: push
+      branch: [ master, integration, experimental*, release_* ]
+      matrix:
+        OS_VERSION: centos6
+  trigger_plugins_buildimage_centos8:
+    image: metwork/drone-downstream-specific-image:latest
+    repositories:
+      - metwork-framework/docker-mfdataplugins-centos8-buildimage@${DRONE_BRANCH}
+    secrets: [ downstream_token, downstream_server ]
+    when:
+      status: [ success ]
+      event: push
+      branch: [ master, integration, experimental*, release_* ]
+      matrix:
+        OS_VERSION: centos6
+
+
+
 matrix:
   OS_VERSION:
     - centos6
