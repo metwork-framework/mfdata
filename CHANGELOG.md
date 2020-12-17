@@ -1,46 +1,29 @@
 # release_1.0 CHANGELOG
 
-
-
 ## v1.0.3 (2020-11-13)
 
-### New Features
-
-
 ### Bug Fixes
+
 - fix missing file in listener template (bp #360) (#361)
-
-
-
-
 
 ## v1.0.2 (2020-11-03)
 
-### New Features
-
-
 ### Bug Fixes
+
 - self._consumer.on_message is not set after exception (bp #338) (#340)
 - remove old parameters about AMQP/MQTT from the module configuration file (bp #336) (#337)
 - fix multiple steps targets with switch plugin (bp #352) (#353)
 
-
-
-
-
 ## v1.0.1 (2020-09-26)
 
 ### New Features
+
 - load the pythonX_scientific_core layer by default in plugins (if the layer is installed) (bp #331) (#332)
-
-
-
-
-
 
 ## v1.0.0 (2020-09-19)
 
 ### New Features
+
 - allow "-" and "." in http receiver
 - introduce acquisition decorators for gunzip and bunzip2
 - change the behavior of hardlinks methods to provide atomicity
@@ -50,7 +33,6 @@
 - adaptation to removal of layer misc@mfext
 - log refactoring
 - improve debug logs for switch plugin
-- use safe_eval from mfutil to evaluate conditions in switch plugin
 - remove absolute log paths from log_proxy usages (LOGPROXY_LOG_DIRECTORY env variable is used by default)
 - allow empty nginx uploads
 - add httpsend plugin template
@@ -68,8 +50,8 @@
 - add psycopg2 usability (by loading of optional layer python3_scientific_core@mfext)
 - support multiple switch instances (and doc)
 
-
 ### Bug Fixes
+
 - fix issues with hardlinking when incoming files come with another uid
 - fix default value for step_name
 - fix failure_policy_move_keep_tags configuration key
@@ -79,8 +61,5 @@
 - fix bug in amqp topic mode
 - fix syslog nginx conf
 - typo in .releaseignore file
-
-
-
 
 
