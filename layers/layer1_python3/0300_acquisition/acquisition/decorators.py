@@ -39,7 +39,6 @@ def _uncompress(method, strict, xaf, logger=None):
         else:
             return xaf
     new_xaf = xaf.copy_tags_on(tmp_filepath)
-    xaf.delete()
     return new_xaf
 
 
@@ -58,7 +57,6 @@ def _remove_first_line(xaf, logger=None):
                      xaf.filepath, tmp_filepath)
         return False
     new_xaf = xaf.copy_tags_on(tmp_filepath)
-    xaf.delete()
     return new_xaf
 
 
@@ -68,7 +66,9 @@ def __wrapper(func, tfunc, self, xaf, **kwargs):
         new_xaf = tfunc(xaf, self, **kwargs)
         if new_xaf is None:
             return False
-        return func(self, new_xaf, **kwargs)
+        res = func(self, new_xaf, **kwargs)
+        new_xaf.delete_or_nothing()
+        return res
     elif isinstance(xaf, list):
         if len(xaf) == 0:
             raise Exception("empty xafs list")
@@ -76,7 +76,9 @@ def __wrapper(func, tfunc, self, xaf, **kwargs):
             raise Exception("xafs[0] is not a XattrFile")
         # We probably decorate a batch_process() method
         new_xafs = [tfunc(x, self, **kwargs) for x in xaf]
-        return func(self, new_xafs, **kwargs)
+        res = func(self, new_xafs, **kwargs)
+        [x.delete_or_nothing() for x in new_xafs]
+        return res
 
 
 def ungzip(func):  # noqa: D402
