@@ -1,5 +1,11 @@
 # release_0.9 CHANGELOG
 
+## [Unreleased]
+
+### Bug Fixes
+
+- fix decorators with failure policy (#378)
+
 ## v0.9.11 (2020-03-05)
 
 - No interesting change
