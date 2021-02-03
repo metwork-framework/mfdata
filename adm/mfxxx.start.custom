@@ -4,9 +4,25 @@
     _check_circus_conf || RES=1
 {% endblock %}
 
+{% block custom_before_plugins %}
+    # For create directory and change unix rights
+    before_start_step.switch.main
+    wait_redis.py || RES=1
+{% endblock %}
+
 {% block custom %}
-
-# For create directory and change unix rights
-before_start_step.switch.main
-
+    _circus_schedule_start_watcher.sh directory_observer || RES=1
+    if test "${RES}" = "0"; then
+        _circus_wait_watcher_started.sh directory_observer || RES=1
+    fi
+    if test "${MFDATA_NGINX_FLAG:-}" = "1"; then
+        _circus_schedule_start_watcher.sh nginx || RES=1
+        if test "${RES}" = "0"; then
+            _circus_wait_watcher_started.sh nginx || RES=1
+        fi
+    fi
+    if test "${MFDATA_AUTORESTART_FLAG}" = "1"; then    
+        _circus_schedule_start_watcher.sh conf_monitor || RES=1
+        _circus_wait_watcher_started.sh conf_monitor || RES=1
+    fi
 {% endblock %}

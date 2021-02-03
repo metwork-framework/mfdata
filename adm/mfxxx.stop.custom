@@ -1,33 +1,17 @@
 {% extends "mfxxx.stop" %}
 
 {% block custom %}
-
-function circus_status() {
-    timeout 10s _circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} status $1 2>&1
-}
-
-_circus.status >/dev/null 2>&1
-if test $? -eq 0; then
-    _circus_schedule_stop_watcher.sh conf_monitor
-    _circus_schedule_stop_watcher.sh directory_observer
-    _circus_schedule_stop_watcher.sh plugin:autorestart
-    _circus_wait_watcher_stopped.sh conf_monitor
-    _circus_wait_watcher_stopped.sh directory_observer
-    _circus_wait_watcher_stopped.sh plugin:autorestart
-    STEPS=$(timeout 10s _circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status 2>/dev/null |grep "^step\..*: active" |awk -F ':' '{print $1;}')
-    EXTRA_DAEMONS=$(timeout 10s _circusctl --endpoint ${MFDATA_CIRCUS_ENDPOINT} --timeout=10 status 2>/dev/null |grep "^extra_daemon.*: active" |awk -F ':' '{print $1;}')
-    for STEP in ${STEPS}; do
-        _circus_schedule_stop_watcher.sh "${STEP}"
-    done
-    for EXTRA_DAEMON in ${EXTRA_DAEMONS}; do
-        _circus_schedule_stop_watcher.sh "${EXTRA_DAEMON}"
-    done
-    for STEP in ${STEPS}; do
-        _circus_wait_watcher_stopped.sh "${STEP}"
-    done
-    for EXTRA_DAEMON in ${EXTRA_DAEMONS}; do
-        _circus_wait_watcher_stopped.sh "${EXTRA_DAEMON}"
-    done
+if test "${MFDATA_NGINX_FLAG:-}" = "1"; then
+    _circus_schedule_stop_watcher.sh nginx
 fi
+_circus_schedule_stop_watcher.sh conf_monitor directory_observer plugin:autorestart
+_circus_wait_watcher_stopped.sh conf_monitor directory_observer plugin:autorestart
+if test "${MFDATA_NGINX_FLAG:-}" = "1"; then
+    _circus_wait_watcher_stopped.sh nginx
+fi
+{% endblock %}
 
+{% block custom_after_plugins %}
+_circus_schedule_stop_watcher.sh redis
+_circus_wait_watcher_stopped.sh redis
 {% endblock %}
