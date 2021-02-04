@@ -13,5 +13,6 @@
 - self._consumer.on_message is not set after exception (#338)
 - fix multiple steps targets with switch plugin (#352)
 - fix missing file in listener template (#360)
+- fix some stop/start issues (#380)
 
 
