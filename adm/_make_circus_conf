@@ -22,6 +22,10 @@ def get_conf(plugin):
             reinject_step.set_watched_directories("{MFDATA_CURRENT_STEP_DIR}")
             reinject_step.set_numprocesses(1)
             reinject_step.set_max_age(0)
+            failure_move = ""
+            if step.failure_policy == "move":
+                failure_move = "--failure-policy-move-dest-dir=%s" % \
+                    step.failure_policy_move_dest_dir
             reinject_step.set_cmd_and_args(
                 f"reinject_step "
                 f"--dest-dir={plugin.name}/{step.name} "
@@ -29,6 +33,7 @@ def get_conf(plugin):
                 f"--retry-max-wait={step.retry_max_wait} "
                 f"--retry-total={step.retry_total} "
                 f"--retry-backoff={step.retry_backoff} "
+                f"--failure-policy={step.failure_policy} {failure_move}"
                 "{STANDARD_STEP_ARGUMENTS}")
             steps_to_add.append(reinject_step)
             step.set_failure_policy("move")
