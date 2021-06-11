@@ -25,10 +25,10 @@ class SftpSendStep(AcquisitionStep):
         if self.sftp_username == "FIXME" or self.sftp_username == "null" \
                 or self.sftp_username == "":
             raise Exception("you have to set a valid sftp_username value")
-        if self.sftp_password == "FIXME" or self.sftp_password == "null" \
-                or self.sftp_password == "":
-            raise Exception("you have to set a valid sftp_password value")
         self.sftp_key_file = self.get_custom_config_value("sftp_key_file")
+        if self.sftp_password == "" and self.sftp_key_file == "":
+            raise Exception("you have to set a valid authentication method"
+                            " value (sftp_password or sftp_key_file)")
         self.sftp_key_file_passphrase = self.get_custom_config_value(
             "sftp_key_file_passphrase")
         self.sftp_directory = self.get_custom_config_value("sftp_directory",

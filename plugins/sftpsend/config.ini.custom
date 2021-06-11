@@ -14,13 +14,13 @@ sftp_hostname=FIXME
 # SFTP username
 sftp_username=FIXME
 
-# SFTP password
-sftp_password=FIXME
+# SFTP password (an empty value means using key file)
+sftp_password=
 
-# SFTP ssh key file
+# SFTP ssh key file (priority is given to key file before password)
 sftp_key_file=
 
-# SFTP ssh key file passphrase
+# SFTP ssh key file passphrase (optional)
 sftp_key_file_passphrase=
 
 # SFTP directory (in which upload files)
