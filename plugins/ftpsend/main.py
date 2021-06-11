@@ -27,7 +27,7 @@ class FtpSendStep(AcquisitionStep):
             raise Exception("you have to set a valid ftp_username value")
         if self.ftp_password == "FIXME" or self.ftp_password == "null" \
                 or self.ftp_password == "":
-            raise Exception("you have to set a valid ftp_username value")
+            raise Exception("you have to set a valid ftp_password value")
         self.ftp_directory = self.get_custom_config_value("ftp_directory",
                                                           default=".")
         self.ftp_basename = self.get_custom_config_value(
