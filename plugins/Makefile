@@ -1,6 +1,6 @@
 include ../adm/root.mk
 
-PLUGINS=ungzip unbzip2 switch move guess_file_type delete copy archive fork httpsend ftpsend mqttlistener amqplistener
+PLUGINS=ungzip unbzip2 switch move guess_file_type delete copy archive fork httpsend sftpsend ftpsend mqttlistener amqplistener
 
 all:: $(MFDATA_HOME)/share/plugins/.done
 
