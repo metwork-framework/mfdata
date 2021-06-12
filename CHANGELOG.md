@@ -1,5 +1,12 @@
 # release_1.0 CHANGELOG
 
+## [Unreleased]
+
+### Bug Fixes
+
+- configure step failure policy for reinject steps (backport #394) (#395)
+- fix typo in error messsage (backport #399) (#400)
+
 ## v1.0.6 (2021-04-28)
 
 - No interesting change
