@@ -2,9 +2,14 @@
 
 ## [Unreleased]
 
+### New Features
+
+- add sftpsend plugin (backport #398) (#402)
+
 ### Bug Fixes
 
 - configure step failure policy for reinject steps (backport #394) (#396)
+- fix typo in error messsage (backport #399) (#401)
 
 ## v1.1.0 (2021-05-01)
 
