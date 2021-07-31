@@ -1,5 +1,11 @@
 # release_1.1 CHANGELOG
 
+## v1.1.2 (2021-07-30)
+
+### Bug Fixes
+
+- fix nginx startup fix with send_nginx_logs=1 (#406)
+
 ## v1.1.1 (2021-06-14)
 
 ### New Features
