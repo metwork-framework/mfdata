@@ -15,10 +15,6 @@ echo -e "gpgcheck=0\n\enabled=1\n\metadata_expire=0\n" >>/etc/yum.repos.d/metwor
     yum -y localinstall ./rpms/metwork-mfdata*.rpm
     yum -y install make
 
-    yum -y install vsftpd ftp
-    service vsftpd start
-    echo -e "mfdata\nmfdata" | passwd mfdata
-
     su --command="mfdata.init" - mfdata
     su --command="mfdata.start" - mfdata
     su --command="mfdata.status" - mfdata
