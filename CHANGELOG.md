@@ -10,5 +10,6 @@
 
 - configure step failure policy for reinject steps (#394)
 - fix typo in error messsage (#399)
+- fix http upload feature (#413)
 
 
