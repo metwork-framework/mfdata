@@ -1,5 +1,11 @@
 # release_1.0 CHANGELOG
 
+## v1.0.8 (2021-10-28)
+
+### Bug Fixes
+
+- fix http upload feature (backport #413) (#414)
+
 ## v1.0.7 (2021-06-12)
 
 ### Bug Fixes
