@@ -2,8 +2,8 @@ local upload = require("resty.upload")
 local mfutil = require("mfutil")
 local data_in_dir = os.getenv("MFDATA_DATA_IN_DIR")
 
-local switch_directories = os.getenv("MFDATA_INTERNAL_PLUGINS_SWITCH_DIRECTORIES")
-local default_directory = string.match(switch_directories, "([^;]+)")
+local switch_directories = os.getenv("MFDATA_INTERNAL_PLUGINS_WATCHED_DIRECTORIES")
+local default_directory = string.match(switch_directories, "([^,]+)")
 
 local function exit_with_ngx_error(code, message)
     ngx.status = code
