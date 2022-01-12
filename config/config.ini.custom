@@ -119,7 +119,7 @@ guess_file_type_numprocesses={{MFHARDWARE_NUMBER_OF_CPU_CORES_DIVIDED_BY_2}}
 guess_file_type_debug=0
 
 # Coma separated list of directory names to watch
-# (under ${MFDATA_RUNTIME_HOME}/var/in/)
+# (under ${MFDATA_DATA_IN_DIR}, default ${MFMODULE_RUNTIME_HOME}/var/in/)
 #
 # These directories will be watched by the guess_file_type plugin
 # (if [internal_plugins]/install_guess_file_type=1)
