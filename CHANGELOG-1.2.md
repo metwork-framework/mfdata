@@ -1,5 +1,11 @@
 # release_1.2 CHANGELOG
 
+## v1.2.1 (2022-01-11)
+
+### Bug Fixes
+
+- fix important typo about monitoring feature of mfdata (backport #424) (#425)
+
 ## v1.2.0 (2021-11-18)
 
 ### New Features
