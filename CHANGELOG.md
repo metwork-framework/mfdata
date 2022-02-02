@@ -1,5 +1,11 @@
 # release_1.2 CHANGELOG
 
+## [Unreleased]
+
+### Bug Fixes
+
+- #426 (backport #427) (#428)
+
 ## v1.2.1 (2022-01-11)
 
 ### Bug Fixes
