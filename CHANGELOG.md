@@ -11,5 +11,6 @@
 - fix important typo about monitoring feature of mfdata (#424)
 - fix the variable used by watched_directories in comment (#422)
 - #426
+- fix bzip2 plugin routing rule (#429)
 
 
