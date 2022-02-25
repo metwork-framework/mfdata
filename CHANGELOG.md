@@ -1,5 +1,11 @@
 # release_1.2 CHANGELOG
 
+## v1.2.3 (2022-02-24)
+
+### Bug Fixes
+
+- fix bzip2 plugin routing rule (backport #429) (#430)
+
 ## v1.2.2 (2022-02-02)
 
 ### Bug Fixes
