@@ -12,5 +12,6 @@
 - fix the variable used by watched_directories in comment (#422)
 - #426
 - fix bzip2 plugin routing rule (#429)
+- fix #420 switch_no_match_policy not taken into account (#431)
 
 
