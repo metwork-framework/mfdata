@@ -1,5 +1,11 @@
 # release_1.2 CHANGELOG
 
+## v1.2.4 (2022-03-10)
+
+### Bug Fixes
+
+- fix #420 switch_no_match_policy not taken into account (backport #431) (#432)
+
 ## v1.2.3 (2022-02-24)
 
 ### Bug Fixes
