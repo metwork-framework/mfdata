@@ -67,7 +67,7 @@ if INSTALL_GUESS_FILE_TYPE:
         f.write("debug=%s\n" % GUESS_FILE_TYPE_DEBUG)
         f.write("\n")
         f.write("[custom]\n")
-        f.write("move_dest_dir = switch/main\n")
+        f.write("dest_dir = switch/main\n")
 
 try:
     os.unlink(f"{MFMODULE_RUNTIME_HOME}/config/plugins/"
