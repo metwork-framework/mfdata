@@ -12,7 +12,6 @@ echo -e "baseurl=http://metwork-framework.org/pub/metwork/continuous_integration
 echo -e "gpgcheck=0\n\enabled=1\n\metadata_expire=0\n" >>/etc/yum.repos.d/metwork.repo
 
 
-
     yum -y localinstall ./rpms/metwork-mfdata*.rpm
     yum -y install make
     su --command="mfdata.init" - mfdata
@@ -20,5 +19,4 @@ echo -e "gpgcheck=0\n\enabled=1\n\metadata_expire=0\n" >>/etc/yum.repos.d/metwor
     su --command="mfdata.status" - mfdata
     if test -d "integration_tests"; then chown -R mfdata integration_tests; cd integration_tests; su --command="cd `pwd`; ./run_integration_tests.sh" - mfdata; cd ..; fi
     su --command="mfdata.stop" - mfdata
-
 
