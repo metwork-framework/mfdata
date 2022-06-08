@@ -1,2 +1,2 @@
-certifi==2019.3.9
+certifi==2021.10.8
 paho-mqtt==1.5.0

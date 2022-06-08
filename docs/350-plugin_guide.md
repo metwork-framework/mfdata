@@ -138,7 +138,7 @@ After that, use `make` in the plugin directory to rebuild the `virtualenv`.
     requirements with exact versions. In this example, something like:
     ```
     asgiref==3.2.9
-    certifi==2019.3.9
+    certifi==2021.10.8
     Django==3.0.7
     lazy-import==0.2.2
     sqlparse==0.3.1

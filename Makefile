@@ -4,7 +4,7 @@ MFMODULE_LOWERCASE=mfdata
 -include adm/root.mk
 -include $(MFEXT_HOME)/share/main_root.mk
 
-DIRS=config bin opt/python2/lib/python$(PYTHON2_SHORT_VERSION)/site-packages opt/python3/lib/python$(PYTHON3_SHORT_VERSION)/site-packages share
+DIRS=config bin opt/python3/lib/python$(PYTHON3_SHORT_VERSION)/site-packages share
 
 all:: directories
 	cd adm && $(MAKE)
