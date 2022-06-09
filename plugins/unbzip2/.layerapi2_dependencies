@@ -5,5 +5,4 @@ root@mfdata
 -python3_ia@mfext
 -python3_vim@mfext
 -scientific_core@mfext
--python3_scientific_core@mfext
 -python3_scientific@mfext

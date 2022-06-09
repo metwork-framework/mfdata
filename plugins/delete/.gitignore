@@ -6,5 +6,4 @@ templates
 .autorestart_includes
 .autorestart_excludes
 python3_virtualenv_sources/src
-python2_virtualenv_sources/src
 local

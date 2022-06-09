@@ -54,12 +54,6 @@ python3@mfext
 python3_scientific@mfext
 ```
 
-Let's assume now, you want to build your plugin relies on Python2 instead of Python3, the `.layerapi2_dependencies` file will look like this:
-```cfg
-python2@mfdata
-python2_scientific@mfext
-```
-
 .. index:: layerapi2, layerapi2_extra_env, .layerapi2_extra_env
 ## The `.layerapi2_extra_env` file
 
