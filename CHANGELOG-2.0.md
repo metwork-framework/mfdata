@@ -1,5 +1,11 @@
 # release_2.0 CHANGELOG
 
+## v2.0.1 (2022-07-12)
+
+### Bug Fixes
+
+- fix build of plugins amqplistener and mqttlistener (#440)
+
 ## v2.0.0 (2022-04-12)
 
 ### New Features
