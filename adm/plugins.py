@@ -7,7 +7,7 @@ from mfplugin.utils import NON_REQUIRED_STRING, \
     BadPlugin, NON_REQUIRED_INTEGER
 
 MFMODULE_RUNTIME_HOME = os.environ.get('MFMODULE_RUNTIME_HOME', None)
-IN_DIR = os.path.join(MFMODULE_RUNTIME_HOME, "var", "in")
+IN_DIR = os.environ["MFDATA_DATA_IN_DIR"]
 
 
 MFDATA_SCHEMA_OVERRIDE = {
