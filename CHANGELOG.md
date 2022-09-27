@@ -1,5 +1,11 @@
 # release_2.0 CHANGELOG
 
+## [Unreleased]
+
+### Bug Fixes
+
+- remove hardcoded MFDATA_DATA_IN_DIR (backport #443) (#444)
+
 ## v2.0.1 (2022-07-12)
 
 ### Bug Fixes
