@@ -4,7 +4,10 @@
 _check_circus_conf || RES=1
 redis_status.sh || RES=1
 circus_status_watcher.sh directory_observer || RES=1
-circus_status_watcher.sh conf_monitor || RES=1
+if test "${MFDATA_AUTORESTART_FLAG}" = "1"; then    
+    circus_status_watcher.sh conf_monitor || RES=1
+    circus_status_watcher.sh plugin:autorestart || RES=1
+fi
 if test "${MFDATA_NGINX_FLAG:-}" = "1"; then
     circus_status_watcher.sh nginx || RES=1
     if test "${RES}" = "0"; then
