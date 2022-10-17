@@ -1,5 +1,11 @@
 # release_2.0 CHANGELOG
 
+## [Unreleased]
+
+### Bug Fixes
+
+- fix mfdata.status when MFDATA_AUTORESTART_FLAG is set to 0 (backport #445) (#446)
+
 ## v2.0.2 (2022-09-27)
 
 ### Bug Fixes
