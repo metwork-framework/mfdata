@@ -107,6 +107,12 @@ switch_debug=0
 # keep   => we keep the file in trash
 switch_no_match_policy=delete
 
+# Keep original basename in trash
+# (applicable only if switch_no_match_policy=keep)
+# 1 => yes
+# 0 (default) => no
+switch_no_match_keep_original_basename=0
+
 # Number of worker processes for the guess_file_type plugin
 # {{MFHARDWARE_...}} values are automatically computed
 # (see corresponding env variables)
