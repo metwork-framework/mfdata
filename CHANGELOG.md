@@ -5,6 +5,7 @@
 ### New Features
 
 - remove all references to python2 and fix details (#439)
+- keep original file name in trash directory (backport #449) (#450)
 
 ### Bug Fixes
 
