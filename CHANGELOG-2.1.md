@@ -1,5 +1,11 @@
 # release_2.1 CHANGELOG
 
+## v2.1.2 (2023-01-09)
+
+### Bug Fixes
+
+- fix possibility to change plugin release (backport #454) (#455)
+
 ## v2.1.1 (2023-01-02)
 
 - No interesting change
