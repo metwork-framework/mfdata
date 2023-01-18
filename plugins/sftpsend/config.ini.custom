@@ -23,6 +23,22 @@ sftp_key_file=
 # SFTP ssh key file passphrase (optional)
 sftp_key_file_passphrase=
 
+# SSH key pair disabled algorithm(s) (optional)
+# If the targetted server uses an old OpenSSH version, it does not provide its
+# server signature algorithms (server-sig-algs)
+# Only in that case, by default, your provided key must use algorithm
+# rsa-sha2-512, because the prefered algorithm list order is
+# 'rsa-sha2-512', 'rsa-sha2-256', 'ssh-rsa'.
+# So if you use a key with algorithm rsa-sha2-256,
+# you must disable rsa-sha2-512
+# If you use a key with algorithm ssh-rsa,
+# you must disable rsa-sha2-512 AND rsa-sha2-256
+# Activate debug mode to see the format of your key, the
+# prefered algo list, the server signature algorithms... in the plugin's logs
+# List below the disabled algorithms separated by a comma
+# (ex: rsa-sha2-512,rsa-sha2-256)
+sftp_key_disabled_algorithms=
+
 # SFTP directory (in which upload files)
 sftp_directory=.
 

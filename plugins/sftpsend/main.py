@@ -14,11 +14,11 @@ class SftpSendStep(AcquisitionStep):
         self._session_dt = None
         self._logger = self._get_logger()
         self.sftp_hostname = self.get_custom_config_value("sftp_hostname",
-                                                         default="FIXME")
+                                                          default="FIXME")
         self.sftp_username = self.get_custom_config_value("sftp_username",
-                                                         default="FIXME")
+                                                          default="FIXME")
         self.sftp_password = self.get_custom_config_value("sftp_password",
-                                                         default="FIXME")
+                                                          default="FIXME")
         if self.sftp_hostname == "FIXME" or self.sftp_hostname == "null" \
                 or self.sftp_hostname == "":
             raise Exception("you have to set a valid sftp_hostname value")
@@ -31,8 +31,10 @@ class SftpSendStep(AcquisitionStep):
                             " value (sftp_password or sftp_key_file)")
         self.sftp_key_file_passphrase = self.get_custom_config_value(
             "sftp_key_file_passphrase")
+        self.sftp_key_disabled_algorithms = self.get_custom_config_value(
+            "sftp_key_disabled_algorithms")
         self.sftp_directory = self.get_custom_config_value("sftp_directory",
-                                                          default=".")
+                                                           default=".")
         self.sftp_basename = self.get_custom_config_value(
             "sftp_basename", default="{ORIGINAL_BASENAME}")
         self.sftp_timeout = self.get_custom_config_value(
@@ -50,7 +52,7 @@ class SftpSendStep(AcquisitionStep):
         if self._session is None:
             try:
                 self._logger.debug("connecting...")
-            
+
                 ssh = paramiko.SSHClient()
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 if self.sftp_key_file:
@@ -63,16 +65,28 @@ class SftpSendStep(AcquisitionStep):
                         # without passphrase
                         key = paramiko.RSAKey.from_private_key_file(
                             self.sftp_key_file)
+                    # add disabled_algorithms option
+                    disabled_algo_list = []
+                    if self.sftp_key_disabled_algorithms:
+                        disabled_algo_list = \
+                            [alg.strip() for alg in
+                             self.sftp_key_disabled_algorithms.split(",")]
+                        self._logger.debug("disabled algorithm(s): "
+                                           f"{disabled_algo_list}")
+
+                    # connect with pub key
                     ssh.connect(self.sftp_hostname,
                                 username=self.sftp_username,
-                                pkey=key, timeout=self.sftp_connect_timeout)
+                                pkey=key, timeout=self.sftp_connect_timeout,
+                                disabled_algorithms=dict(
+                                    pubkeys=disabled_algo_list))
                 else:
                     # connect with sftp password
                     ssh.connect(self.sftp_hostname,
                                 username=self.sftp_username,
                                 password=self.sftp_password,
                                 timeout=self.sftp_connect_timeout)
-                
+
                 # create sftp session
                 self._session = ssh.open_sftp()
 
