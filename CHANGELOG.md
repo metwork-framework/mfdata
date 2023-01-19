@@ -9,5 +9,6 @@
 ### Bug Fixes
 
 - fix possibility to change plugin release
+- template sftp send - Authentication (publickey) failed. (fix #457) (#458)
 
 
