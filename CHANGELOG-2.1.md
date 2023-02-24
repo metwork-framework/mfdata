@@ -1,5 +1,11 @@
 # release_2.1 CHANGELOG
 
+## v2.1.3 (2023-01-24)
+
+### Bug Fixes
+
+- template sftp send - Authentication (publickey) failed. (fix #457) (backport #458) (#459)
+
 ## v2.1.2 (2023-01-09)
 
 ### Bug Fixes
