@@ -5,6 +5,7 @@
 ### New Features
 
 - keep original file name in trash directory (#449)
+- add sonarqube check (#468)
 
 ### Bug Fixes
 
