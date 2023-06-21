@@ -6,6 +6,7 @@
 
 - keep original file name in trash directory (#449)
 - add sonarqube check (#468)
+- revert: remove sonarqube ci (we will use automatic analysis) (#469)
 
 ### Bug Fixes
 
