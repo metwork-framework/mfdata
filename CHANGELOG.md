@@ -1,5 +1,11 @@
 # release_2.1 CHANGELOG
 
+## [Unreleased]
+
+### New Features
+
+- fix link to rpms repository in installation guide (#474)
+
 ## v2.1.4 (2023-04-07)
 
 ### Bug Fixes
