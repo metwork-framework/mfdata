@@ -19,7 +19,7 @@ config.ini: config.ini.custom templates/config.ini
 .releaseignore: ../../adm/templates/plugins/_common/.releaseignore
 	cp -f $< $@
 	echo "config.ini.custom" >>$@
-	echo "templates" >>$@
+	echo "templates/" >>$@
 
 .gitignore:
 	echo "config.ini" >$@
