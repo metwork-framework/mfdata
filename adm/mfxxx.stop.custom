@@ -1,21 +1,19 @@
 {% extends "mfxxx.stop" %}
 
 {% block custom %}
-if test "${MFDATA_NGINX_FLAG:-}" = "1"; then
-    _circus_schedule_stop_watcher.sh nginx
-fi
 _circus_schedule_stop_watcher.sh conf_monitor directory_observer plugin:autorestart
 _circus_wait_watcher_stopped.sh directory_observer
 if test "${MFDATA_AUTORESTART_FLAG}" = "1"; then
     _circus_wait_watcher_stopped.sh conf_monitor  || RES=1
     _circus_wait_watcher_stopped.sh plugin:autorestart || RES=1
 fi
-if test "${MFDATA_NGINX_FLAG:-}" = "1"; then
-    _circus_wait_watcher_stopped.sh nginx
-fi
 {% endblock %}
 
 {% block custom_after_plugins %}
+if test "${MFDATA_NGINX_FLAG:-}" = "1"; then
+    _circus_schedule_stop_watcher.sh nginx
+    _circus_wait_watcher_stopped.sh nginx
+fi
 _circus_schedule_stop_watcher.sh redis
 _circus_wait_watcher_stopped.sh redis
 {% endblock %}
