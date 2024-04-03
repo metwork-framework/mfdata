@@ -1,5 +1,11 @@
 # release_2.2 CHANGELOG
 
+## [Unreleased]
+
+### Bug Fixes
+
+- stop plugins before nginx stop (#481)
+
 ## v2.2.0 (2023-11-28)
 
 ### New Features
