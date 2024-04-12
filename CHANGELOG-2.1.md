@@ -1,5 +1,15 @@
 # release_2.1 CHANGELOG
 
+## v2.1.5 (2023-11-28)
+
+### New Features
+
+- fix link to rpms repository in installation guide (#474)
+
+### Bug Fixes
+
+- remove useless folder templates in installed plugins (backport #476) (#477)
+
 ## v2.1.4 (2023-04-07)
 
 ### Bug Fixes
