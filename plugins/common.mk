@@ -27,6 +27,7 @@ config.ini: config.ini.custom templates/config.ini
 	echo "config.ini" >$@
 	echo "templates" >>$@
 	echo ".layerapi2_label" >>$@
+	echo ".layerapi2_dependencies" >>$@
 	echo ".releaseignore" >>$@
 	echo ".plugin_format_version" >>$@
 	echo ".autorestart_includes" >>$@
@@ -45,9 +46,7 @@ clean::
 	rm -f _common
 	rm -f config.ini
 	rm -f .layerapi2_label
-	rm -f .layerapi2_dependencies
 	rm -f .releaseignore
-	rm -f .gitignore
 	rm -f .plugin_format_version
 	rm -f .autorestart_includes
 	rm -f .autorestart_excludes
