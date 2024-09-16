@@ -20,6 +20,10 @@ sftp_password=
 # SFTP ssh key file (priority is given to key file before password)
 sftp_key_file=
 
+# SFTP ssh key algorithm (rsa, ecdsa)
+# default: rsa
+sftp_key_algorithm=rsa
+
 # SFTP ssh key file passphrase (optional)
 sftp_key_file_passphrase=
 
