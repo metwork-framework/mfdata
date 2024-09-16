@@ -7,4 +7,3 @@ templates
 .autorestart_excludes
 python3_virtualenv_sources/src
 local
-
