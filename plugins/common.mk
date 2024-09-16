@@ -47,7 +47,6 @@ clean::
 	rm -f config.ini
 	rm -f .layerapi2_label
 	rm -f .releaseignore
-	rm -f .gitignore
 	rm -f .plugin_format_version
 	rm -f .autorestart_includes
 	rm -f .autorestart_excludes
