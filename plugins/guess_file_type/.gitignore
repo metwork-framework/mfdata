@@ -1,6 +1,7 @@
 config.ini
 templates
 .layerapi2_label
+.layerapi2_dependencies
 .releaseignore
 .plugin_format_version
 .autorestart_includes
