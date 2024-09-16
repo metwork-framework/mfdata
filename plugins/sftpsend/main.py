@@ -21,18 +21,19 @@ class SftpSendStep(AcquisitionStep):
                                                           default="FIXME")
         if self.sftp_hostname == "FIXME" or self.sftp_hostname == "null" \
                 or self.sftp_hostname == "":
-            raise Exception("you have to set a valid sftp_hostname value")
+            raise ValueError("you have to set a valid sftp_hostname value")
         if self.sftp_username == "FIXME" or self.sftp_username == "null" \
                 or self.sftp_username == "":
-            raise Exception("you have to set a valid sftp_username value")
+            raise ValueError("you have to set a valid sftp_username value")
         self.sftp_key_file = self.get_custom_config_value("sftp_key_file")
         if self.sftp_password == "" and self.sftp_key_file == "":
-            raise Exception("you have to set a valid authentication method"
-                            " value (sftp_password or sftp_key_file)")
+            raise ValueError("you have to set a valid authentication method"
+                             " value (sftp_password or sftp_key_file)")
         self.sftp_key_algorithm = self.get_custom_config_value(
             "sftp_key_algorithm", default="rsa")
-        if self.sftp_key_algorithm not in ["rsa", "ecdsa"]:
-            raise Exception("you have to set an algorithm among: rsa, ecdsa")
+        if self.sftp_key_algorithm not in ["rsa", "ecdsa", "dsa", "ed25519"]:
+            raise ValueError("you have to set an algorithm among: "
+                             "rsa, ecdsa, dsa, ed25519")
         self.sftp_key_file_passphrase = self.get_custom_config_value(
             "sftp_key_file_passphrase")
         self.sftp_key_disabled_algorithms = self.get_custom_config_value(
@@ -63,7 +64,9 @@ class SftpSendStep(AcquisitionStep):
                     # handle algorithm format
                     algorithm_classes = {
                         "rsa": paramiko.RSAKey,
-                        "ecdsa": paramiko.ECDSAKey
+                        "ecdsa": paramiko.ECDSAKey,
+                        "dsa": paramiko.DSSKey,
+                        "ed25519": paramiko.Ed25519Key
                     }
                     algorithm = algorithm_classes[self.sftp_key_algorithm]
                     # connect with SSH private key file
