@@ -7,7 +7,10 @@ templates/config.ini: ../../adm/templates/plugins/_common/config.ini
 	@if ! test -d templates; then mkdir -p templates; fi
 	cat $< |sed 's/cookiecutter\.//g' >$@
 
-config.ini: config.ini.custom templates/config.ini
+_common: templates/config.ini
+	@if ! test -d _common; then ln -s templates _common; fi
+
+config.ini: config.ini.custom templates/config.ini _common
 	export one_line_summary="$(SUMMARY)" ; export PLUGIN_NAME="$(PLUGIN_NAME)" ; cat $< |envtpl --reduce-multi-blank-lines --search-paths=.,.. >$@ || ( rm -f $@ ; exit 1 )
 
 .layerapi2_label:
@@ -20,6 +23,7 @@ config.ini: config.ini.custom templates/config.ini
 	cp -f $< $@
 	echo "config.ini.custom" >>$@
 	echo "templates/" >>$@
+	echo "_common/" >>$@
 
 .gitignore:
 	echo "config.ini" >$@
@@ -40,9 +44,12 @@ config.ini: config.ini.custom templates/config.ini
 
 clean::
 	rm -Rf templates
+	rm -f _common
 	rm -f config.ini
 	rm -f .layerapi2_label
+	rm -f .layerapi2_dependencies
 	rm -f .releaseignore
+	rm -f .gitignore
 	rm -f .plugin_format_version
 	rm -f .autorestart_includes
 	rm -f .autorestart_excludes
