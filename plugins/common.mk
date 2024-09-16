@@ -10,6 +10,7 @@ templates/config.ini: ../../adm/templates/plugins/_common/config.ini
 config.ini: config.ini.custom templates/config.ini
 	export one_line_summary="$(SUMMARY)" ; export PLUGIN_NAME="$(PLUGIN_NAME)" ; cat $< | sed 's/_common/templates/' | envtpl --reduce-multi-blank-lines --search-paths=.,.. >$@ || ( rm -f $@ ; exit 1 )
 
+
 .layerapi2_label:
 	echo "plugin_$(PLUGIN_NAME)@mfdata" >$@
 
@@ -20,6 +21,7 @@ config.ini: config.ini.custom templates/config.ini
 	cp -f $< $@
 	echo "config.ini.custom" >>$@
 	echo "templates/" >>$@
+	echo "_common/" >>$@
 
 .gitignore:
 	echo "config.ini" >$@
@@ -40,6 +42,7 @@ config.ini: config.ini.custom templates/config.ini
 
 clean::
 	rm -Rf templates
+	rm -f _common
 	rm -f config.ini
 	rm -f .layerapi2_label
 	rm -f .layerapi2_dependencies
