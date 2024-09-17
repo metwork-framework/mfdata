@@ -21,13 +21,11 @@ config.ini: config.ini.custom templates/config.ini
 	cp -f $< $@
 	echo "config.ini.custom" >>$@
 	echo "templates/" >>$@
-	echo "_common/" >>$@
 
 .gitignore:
 	echo "config.ini" >$@
 	echo "templates" >>$@
 	echo ".layerapi2_label" >>$@
-	echo ".layerapi2_dependencies" >>$@
 	echo ".releaseignore" >>$@
 	echo ".plugin_format_version" >>$@
 	echo ".autorestart_includes" >>$@
@@ -43,7 +41,6 @@ config.ini: config.ini.custom templates/config.ini
 
 clean::
 	rm -Rf templates
-	rm -f _common
 	rm -f config.ini
 	rm -f .layerapi2_label
 	rm -f .releaseignore
