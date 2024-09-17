@@ -11,6 +11,9 @@ check_no_tags_left_in_redis
 plugins.uninstall --clean foobar4 >/dev/null 2>&1
 plugins.uninstall --clean foobar5 >/dev/null 2>&1
 
+rm -f "${MFMODULE_RUNTIME_HOME}/config/plugins/foobar4.ini"
+rm -f "${MFMODULE_RUNTIME_HOME}/config/plugins/foobar5.ini"
+
 DEST_DIR="${MFMODULE_RUNTIME_HOME}/var/in/dir_move"
 rm -R "${DEST_DIR}" >/dev/null 2>&1
 mkdir -p "${DEST_DIR}"
