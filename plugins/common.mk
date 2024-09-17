@@ -7,6 +7,9 @@ templates/config.ini: ../../adm/templates/plugins/_common/config.ini
 	@if ! test -d templates; then mkdir -p templates; fi
 	cat $< |sed 's/cookiecutter\.//g' >$@
 
+config.ini.custom:
+	@cp ../../adm/templates/plugins/$(PLUGIN_NAME)/{{cookiecutter.name}}/config.ini $@
+
 config.ini: config.ini.custom templates/config.ini
 	export one_line_summary="$(SUMMARY)" ; export PLUGIN_NAME="$(PLUGIN_NAME)" ; cat $< | sed 's/_common/templates/' | envtpl --reduce-multi-blank-lines --search-paths=.,.. >$@ || ( rm -f $@ ; exit 1 )
 
