@@ -1,3 +1,5 @@
+*.py
+crontab
 config.ini
 templates
 .layerapi2_label

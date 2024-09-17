@@ -1,7 +1,7 @@
 PWD=$(shell pwd)
 PLUGIN_NAME=$(shell basename $(PWD))
 
-precustom:: config.ini .layerapi2_label .layerapi2_dependencies .releaseignore .plugin_format_version .gitignore .autorestart_includes .autorestart_excludes main.py
+precustom:: config.ini .layerapi2_label .layerapi2_dependencies .releaseignore .plugin_format_version .gitignore .autorestart_includes .autorestart_excludes codes.py
 
 templates/config.ini: ../../adm/templates/plugins/_common/config.ini
 	@if ! test -d templates; then mkdir -p templates; fi
@@ -10,8 +10,9 @@ templates/config.ini: ../../adm/templates/plugins/_common/config.ini
 config.ini: config.ini.custom templates/config.ini
 	export one_line_summary="$(SUMMARY)" ; export PLUGIN_NAME="$(PLUGIN_NAME)" ; cat $< | sed 's/_common/templates/' | envtpl --reduce-multi-blank-lines --search-paths=.,.. >$@ || ( rm -f $@ ; exit 1 )
 
-main.py:
-	@if test -f ../../adm/templates/plugins/$(PLUGIN_NAME)/{{cookiecutter.name}}/main.py; then cp ../../adm/templates/plugins/$(PLUGIN_NAME)/{{cookiecutter.name}}/main.py $@; fi
+codes.py:
+	@cp ../../adm/templates/plugins/$(PLUGIN_NAME)/{{cookiecutter.name}}/*.py . 2>/dev/null || true
+	if test -d ../../adm/templates/plugins/$(PLUGIN_NAME)/{{cookiecutter.name}}/bin; then mkdir -p bin; cp ../../adm/templates/plugins/$(PLUGIN_NAME)/{{cookiecutter.name}}/bin/*.py bin || true; fi
 
 .layerapi2_label:
 	echo "plugin_$(PLUGIN_NAME)@mfdata" >$@

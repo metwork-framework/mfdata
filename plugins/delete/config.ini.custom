@@ -1,6 +1,1 @@
-{% extends "templates/config.ini" %}
-
-{% set CMD_AND_ARGS_CMD = "delete_step" %}               
-
-{% block custom %}
-{% endblock %}
+/home/baptiste/mfdata/src/adm/templates/plugins/delete/{{cookiecutter.name}}/config.ini

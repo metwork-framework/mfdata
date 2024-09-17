@@ -1,0 +1,6 @@
+{% if MFDATA_CURRENT_PLUGIN_CUSTOM_LIFETIME|int >= 0 %}
+# keep files {{MFDATA_CURRENT_PLUGIN_CUSTOM_LIFETIME}} days
+0 3 * * * {{MFDATA_HOME}}/bin/cronwrap.sh --lock --low --log-capture-to /dev/null -- "find {{MFDATA_CURRENT_PLUGIN_CUSTOM_DEST_DIR}} -type f -mtime +{{MFDATA_CURRENT_PLUGIN_CUSTOM_LIFETIME}} -exec rm -f {} \;"
+# remove empty directories in archive directory
+0 4 * * * {{MFDATA_HOME}}/bin/cronwrap.sh --lock --low --log-capture-to /dev/null -- "find {{MFDATA_CURRENT_PLUGIN_CUSTOM_DEST_DIR}} -type d -exec rmdir {} \;"
+{% endif %}

@@ -1,3 +1,4 @@
+*.py
 config.ini
 templates
 .layerapi2_label
