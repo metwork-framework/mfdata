@@ -28,7 +28,6 @@ main.py:
 	echo "config.ini" >$@
 	echo "templates" >>$@
 	echo ".layerapi2_label" >>$@
-	echo ".layerapi2_dependencies" >>$@
 	echo ".releaseignore" >>$@
 	echo ".plugin_format_version" >>$@
 	echo ".autorestart_includes" >>$@
