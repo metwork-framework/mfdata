@@ -1,6 +1,0 @@
-{% extends "templates/config.ini" %}
-
-{% set CMD_AND_ARGS_CMD = "delete_step" %}               
-
-{% block custom %}
-{% endblock %}

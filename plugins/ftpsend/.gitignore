@@ -1,5 +1,6 @@
 config.ini
-main.py
+config.ini.custom
+*.py
 templates
 .layerapi2_label
 .releaseignore

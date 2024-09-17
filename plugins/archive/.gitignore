@@ -1,4 +1,7 @@
+*.py
+crontab
 config.ini
+config.ini.custom
 templates
 .layerapi2_label
 .releaseignore
