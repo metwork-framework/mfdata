@@ -6,6 +6,7 @@
 
 - add iniscripts, make and crontab as dependencies (#483)
 - add template for plugin ftpsend (#494)
+- add all mfdata plugins as templates (#500)
 
 ### Bug Fixes
 
