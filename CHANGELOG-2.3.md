@@ -1,11 +1,5 @@
 # release_2.3 CHANGELOG
 
-## v2.3.3 (2025-10-18)
-
-### New Features
-
-- add check_delay in circus arbiter config setting (backport #512) (#513)
-
 ## v2.3.2 (2025-07-16)
 
 - No interesting change
