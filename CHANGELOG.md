@@ -1,6 +1,6 @@
 # release_2.3 CHANGELOG
 
-## v2.3.3 (2025-10-18)
+## [Unreleased]
 
 ### New Features
 
