@@ -54,4 +54,6 @@ mv /opt/metwork-mfdata-${TARGET_DIR}/*.rpm rpms
 
  
 
+make clean
+
 echo "bypass=false" >> github_output
